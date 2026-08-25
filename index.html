@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 1.11</title>
+<title>Fanta Agente 1.12</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -679,6 +679,62 @@ input[type=file]{display:none}
   }
 }
 
+
+.runnerup-backdrop{
+  position:fixed;inset:0;z-index:1300;
+  display:none;align-items:center;justify-content:center;
+  padding:18px;background:rgba(0,0,0,.72)
+}
+.runnerup-modal{
+  width:min(460px,100%);
+  background:#151d22;
+  border:1px solid #3a4650;
+  border-radius:14px;
+  box-shadow:0 24px 80px rgba(0,0,0,.55);
+  overflow:hidden
+}
+.runnerup-head{
+  padding:16px 18px;
+  border-bottom:1px solid var(--line)
+}
+.runnerup-body{padding:18px}
+.runnerup-player{
+  font-size:16px;font-weight:950;margin-bottom:14px
+}
+.runnerup-grid{
+  display:grid;grid-template-columns:1fr 130px;gap:10px
+}
+.runnerup-grid select,
+.runnerup-grid input{
+  width:100%;height:44px;
+  border:1px solid var(--line);
+  background:#0f1519;color:var(--text);
+  border-radius:9px;padding:0 11px;
+  font-size:14px;font-weight:850
+}
+.runnerup-grid input{
+  text-align:center;
+  font-size:18px;
+  font-weight:950
+}
+.runnerup-actions{
+  display:flex;gap:8px;justify-content:flex-end;
+  margin-top:16px
+}
+.runnerup-note{
+  margin-top:10px;
+  font-size:10px;
+  color:var(--muted);
+  line-height:1.4
+}
+@media(max-width:620px){
+  .runnerup-backdrop{align-items:flex-end;padding:10px}
+  .runnerup-modal{border-radius:14px 14px 8px 8px}
+  .runnerup-grid{grid-template-columns:1fr}
+  .runnerup-actions{display:grid;grid-template-columns:1fr 1fr}
+  .runnerup-actions button{min-height:46px}
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -1034,6 +1090,50 @@ input[type=file]{display:none}
   </div>
 </div>
 
+
+
+<div id="runnerUpBackdrop" class="runnerup-backdrop">
+  <div class="runnerup-modal">
+    <div class="runnerup-head">
+      <div class="panel-title">Ultimo rilancio</div>
+      <div class="muted" style="font-size:11px;margin-top:4px">
+        Facoltativo · utile per il profilo degli avversari
+      </div>
+    </div>
+
+    <div class="runnerup-body">
+      <div id="runnerUpPlayerLabel" class="runnerup-player">—</div>
+
+      <div class="runnerup-grid">
+        <div class="field">
+          <label>Ultimo avversario rimasto</label>
+          <select id="runnerUpManager"></select>
+        </div>
+
+        <div class="field">
+          <label>Ultimo rilancio perso</label>
+          <input id="runnerUpBid"
+                 type="text"
+                 inputmode="numeric"
+                 pattern="[0-9]*"
+                 autocomplete="off"
+                 enterkeyhint="done"
+                 oninput="sanitizeNumericInput(this)"
+                 placeholder="es. 50">
+        </div>
+      </div>
+
+      <div class="runnerup-note">
+        Esempio: Svilar assegnato a 51, MaxPasta aveva rilanciato fino a 50.
+      </div>
+
+      <div class="runnerup-actions">
+        <button class="secondary-btn" onclick="skipRunnerUp()">Salta</button>
+        <button class="primary-btn" onclick="saveRunnerUp()">Salva</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id="simpleModalBackdrop" class="fa-modal-backdrop" onclick="closeSimpleModal(event)">
   <div class="fa-modal" onclick="event.stopPropagation()">
@@ -3825,6 +3925,98 @@ function updateLiveAnalysis(){
   )
 }
 
+
+let pendingRunnerUpPurchaseId=null;
+
+function openRunnerUpOverlay(purchaseId){
+  const purchase=history.find(p=>p.id===purchaseId);
+  if(!purchase)return;
+
+  pendingRunnerUpPurchaseId=purchaseId;
+
+  const backdrop=document.getElementById("runnerUpBackdrop");
+  const managerSelect=document.getElementById("runnerUpManager");
+  const bidInput=document.getElementById("runnerUpBid");
+  const playerLabel=document.getElementById("runnerUpPlayerLabel");
+
+  playerLabel.textContent=`${purchase.playerName||purchase.playerSnapshot?.name||"Giocatore"} · assegnato a ${purchase.price} cr`;
+
+  const winnerManagerId=purchase.managerId;
+
+  const opts=[
+    `<option value="">— Seleziona —</option>`,
+    ...teams
+      .filter(t=>t.managerId!==winnerManagerId)
+      .map(t=>{
+        const manager=managerById(t.managerId);
+        const label=manager?.displayName
+          ? `${manager.displayName} · ${t.name}`
+          : t.name;
+        return `<option value="${t.managerId}">${label}</option>`
+      })
+  ];
+
+  managerSelect.innerHTML=opts.join("");
+  bidInput.value="";
+
+  backdrop.style.display="flex";
+
+  setTimeout(()=>{
+    managerSelect.focus()
+  },50)
+}
+
+function skipRunnerUp(){
+  pendingRunnerUpPurchaseId=null;
+  const backdrop=document.getElementById("runnerUpBackdrop");
+  if(backdrop)backdrop.style.display="none"
+}
+
+function saveRunnerUp(){
+  const purchase=history.find(p=>p.id===pendingRunnerUpPurchaseId);
+  if(!purchase){
+    skipRunnerUp();
+    return
+  }
+
+  const managerId=document.getElementById("runnerUpManager")?.value||"";
+  const bidRaw=document.getElementById("runnerUpBid")?.value||"";
+  const bid=Number(bidRaw);
+
+  if(!managerId){
+    alert("Seleziona l'ultimo avversario rimasto oppure premi Salta.");
+    return
+  }
+
+  if(!Number.isFinite(bid) || bid<1){
+    alert("Inserisci l'ultimo rilancio perso.");
+    return
+  }
+
+  if(bid>=Number(purchase.price)){
+    alert("L'ultimo rilancio perso deve essere inferiore al prezzo di assegnazione.");
+    return
+  }
+
+  const team=teams.find(t=>t.managerId===managerId);
+  const manager=managerById(managerId);
+
+  purchase.runnerUp={
+    managerId,
+    managerName:manager?.displayName||"",
+    teamName:team?.name||"",
+    lastBid:bid,
+    recordedAt:new Date().toISOString()
+  };
+
+  save();
+  render();
+
+  pendingRunnerUpPurchaseId=null;
+  document.getElementById("runnerUpBackdrop").style.display="none"
+}
+
+
 function registerPurchase(){
   const p=getPlayer(selectedKey),
         teamId=Number(document.getElementById("teamSelect").value),
@@ -3909,6 +4101,7 @@ function registerPurchase(){
   };
 
   history.push(record);
+  setTimeout(()=>openRunnerUpOverlay(record.id),0);
 
   // Un nuovo acquisto apre un nuovo ramo dello storico: il redo precedente non è più valido.
   redoHistory=[];
