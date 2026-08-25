@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fanta Agente</title>
+
+  <!-- Libreria per leggere i file .xlsx direttamente nel browser -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #f3f5f7;
+      --card: #ffffff;
+      --text: #1d2329;
+      --muted: #68727d;
+      --line: #dde2e7;
+      --green: #147a46;
+      --green-dark: #0d5f35;
+      --red: #b42318;
+      --orange: #b35b00;
+      --blue: #1e5ba8;
+      --shadow: 0 5px 18px rgba(0,0,0,.07);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 28px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    .version {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 130px;
+    }
+
+    .field.grow { flex: 1; }
+
+    label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #4e5963;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 11px;
+      border: 1px solid #cfd6dc;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid rgba(20,122,70,.18);
+      border-color: var(--green);
+    }
+
+    button, .file-label {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button.primary, .file-label.primary {
+      background: var(--green);
+      color: white;
+    }
+
+    button.primary:hover, .file-label.primary:hover {
+      background: var(--green-dark);
+    }
+
+    button.secondary, .file-label.secondary {
+      background: #e8ecef;
+      color: var(--text);
+    }
+
+    button.danger {
+      background: #fee4e2;
+      color: var(--red);
+    }
+
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    input[type=file] { display: none; }
+
+    .status {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #f6f8fa;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status.ok {
+      background: #edf8f1;
+      color: var(--green-dark);
+      border-color: #b7dfc8;
+    }
+
+    .status.warn {
+      background: #fff7e8;
+      color: #8a4b00;
+      border-color: #f0d7a4;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(90px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .kpi {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 11px;
+      background: #fafbfc;
+    }
+
+    .kpi .value {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .kpi .label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+
+    .search-wrap {
+      position: relative;
+    }
+
+    .search-results {
+      position: absolute;
+      top: calc(100% + 5px);
+      left: 0;
+      right: 0;
+      z-index: 20;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: 0 12px 28px rgba(0,0,0,.14);
+      max-height: 320px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .result {
+      padding: 10px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #eef1f3;
+    }
+
+    .result:last-child { border-bottom: 0; }
+    .result:hover { background: #f3f7f5; }
+
+    .result-name {
+      font-weight: 800;
+    }
+
+    .result-meta {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .player-card {
+      display: none;
+      margin-top: 14px;
+      border: 1px solid #cfe2d7;
+      background: #f4fbf7;
+      border-radius: 11px;
+      padding: 14px;
+    }
+
+    .player-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .player-title strong {
+      font-size: 19px;
+    }
+
+    .badge {
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 12px;
+      font-weight: 800;
+      background: #e8ecef;
+    }
+
+    .role-P { background: #fff3bf; }
+    .role-D { background: #dff5e5; }
+    .role-C { background: #dcecff; }
+    .role-A { background: #ffe0dd; }
+
+    .player-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(80px,1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .stat {
+      background: white;
+      border: 1px solid #e0e8e3;
+      border-radius: 8px;
+      padding: 9px;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 3px;
+      font-size: 16px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+
+    th {
+      background: #22282e;
+      color: white;
+      font-size: 12px;
+      padding: 10px 8px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    td {
+      border-bottom: 1px solid #e5e9ec;
+      padding: 9px 8px;
+      text-align: center;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    td:first-child, th:first-child {
+      text-align: left;
+      position: sticky;
+      left: 0;
+    }
+
+    th:first-child { z-index: 3; }
+    td:first-child {
+      background: white;
+      z-index: 2;
+    }
+
+    tr.my-team td {
+      background: #edf8f1;
+      font-weight: 700;
+    }
+
+    tr.my-team td:first-child { background: #edf8f1; }
+
+    .small {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .history-item {
+      padding: 9px 0;
+      border-bottom: 1px solid #edf0f2;
+      font-size: 14px;
+    }
+
+    .history-item:last-child { border-bottom: 0; }
+
+    .empty {
+      color: var(--muted);
+      font-style: italic;
+      padding: 8px 0;
+    }
+
+    .sold {
+      color: var(--red);
+      font-weight: 800;
+    }
+
+    .help {
+      color: var(--muted);
+      font-size: 12px;
+      margin: 8px 0 0;
+      line-height: 1.45;
+    }
+
+    .sep {
+      border: 0;
+      border-top: 1px solid var(--line);
+      margin: 18px 0;
+    }
+
+    @media (max-width: 950px) {
+      body { padding: 14px; }
+      .grid { grid-template-columns: 1fr; }
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+      .player-stats { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="topbar">
+    <div>
+      <h1>⚽ Fanta Agente</h1>
+      <p class="subtitle">Database giocatori + gestione asta Classic</p>
+    </div>
+    <div class="version">v0.2</div>
+  </div>
+
+  <div class="grid">
+
+    <div>
+      <div class="card">
+        <h2>1. Database giocatori</h2>
+
+        <div class="row">
+          <label class="file-label primary">
+            📥 Importa / aggiorna listone Excel
+            <input type="file" id="excelFile" accept=".xlsx,.xls">
+          </label>
+
+          <label class="file-label secondary">
+            📊 Importa VMA
+            <input type="file" id="vmaFile" accept=".xlsx,.xls,.csv,.json">
+          </label>
+
+          <button class="danger" onclick="clearPlayerDatabase()">Cancella database</button>
+        </div>
+
+        <p class="help">
+          Per il listone usa il tuo file Fantacalcio: Fanta Agente legge il foglio <strong>Tutti</strong>
+          e usa le colonne Id, R, Nome, Squadra, Qt.A, Qt.I, Diff. e FVM.
+          Gli acquisti già registrati non vengono cancellati quando aggiorni il listone.
+        </p>
+
+        <div id="dbStatus" class="status">Nessun listone caricato.</div>
+
+        <div class="kpis">
+          <div class="kpi"><div class="value" id="countAll">0</div><div class="label">Totale</div></div>
+          <div class="kpi"><div class="value" id="countP">0</div><div class="label">Portieri</div></div>
+          <div class="kpi"><div class="value" id="countD">0</div><div class="label">Difensori</div></div>
+          <div class="kpi"><div class="value" id="countC">0</div><div class="label">Centrocampisti</div></div>
+          <div class="kpi"><div class="value" id="countA">0</div><div class="label">Attaccanti</div></div>
+        </div>
+
+        <hr class="sep">
+
+        <h2 style="font-size:16px;">VMA</h2>
+        <p class="help">
+          Il VMA resta separato dal listone ufficiale. Se in seguito avremo un file o un export con
+          <strong>Nome + VMA</strong> (oppure Id + VMA), puoi importarlo qui e verrà associato ai giocatori.
+          Il VMA non modifica ruolo, squadra o quotazione ufficiale.
+        </p>
+        <div id="vmaStatus" class="status">Nessun VMA importato.</div>
+      </div>
+
+      <div class="card">
+        <h2>2. Registra acquisto</h2>
+
+        <div class="field grow search-wrap">
+          <label>Cerca giocatore disponibile</label>
+          <input id="playerSearch" type="text" autocomplete="off"
+                 placeholder="Scrivi almeno 2 lettere, es. Dimarco">
+          <div id="searchResults" class="search-results"></div>
+        </div>
+
+        <div id="selectedPlayerCard" class="player-card">
+          <div class="player-title">
+            <div>
+              <strong id="selectedName">—</strong>
+              <div class="small" id="selectedTeam">—</div>
+            </div>
+            <span id="selectedRole" class="badge">—</span>
+          </div>
+
+          <div class="player-stats">
+            <div class="stat"><span>Quotazione</span><strong id="selectedQt">—</strong></div>
+            <div class="stat"><span>FVM</span><strong id="selectedFvm">—</strong></div>
+            <div class="stat"><span>VMA</span><strong id="selectedVma">—</strong></div>
+            <div class="stat"><span>Id</span><strong id="selectedId">—</strong></div>
+          </div>
+
+          <div class="row" style="margin-top:14px;">
+            <div class="field grow">
+              <label>Squadra acquirente</label>
+              <select id="teamSelect"></select>
+            </div>
+
+            <div class="field">
+              <label>Prezzo</label>
+              <input type="number" id="playerPrice" min="1" step="1" placeholder="1">
+            </div>
+
+            <button id="registerBtn" class="primary" onclick="registerPurchase()">
+              Registra acquisto
+            </button>
+          </div>
+        </div>
+
+        <div id="purchaseHint" class="status warn" style="margin-top:14px;">
+          Prima importa il listone Excel.
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>Ultimi acquisti</h2>
+        <div id="history"></div>
+
+        <div class="row" style="margin-top:15px;">
+          <button class="secondary" onclick="undoLastPurchase()">↩ Annulla ultimo</button>
+          <button class="danger" onclick="resetAuction()">Reset asta</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Giocatore selezionato: VMA manuale</h2>
+        <p class="help">
+          Utile se conosci il VMA di un singolo giocatore ma non hai ancora un file completo.
+        </p>
+        <div class="row">
+          <div class="field grow">
+            <label>VMA</label>
+            <input id="manualVma" type="number" min="0" step="0.01" placeholder="Es. 29,70">
+          </div>
+          <button class="secondary" onclick="saveManualVma()">Salva VMA</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card">
+    <h2>3. Situazione squadre</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+        <tr>
+          <th>Squadra</th>
+          <th>Crediti</th>
+          <th>Spesi</th>
+          <th>P</th>
+          <th>Spesa P</th>
+          <th>D</th>
+          <th>Spesa D</th>
+          <th>C</th>
+          <th>Spesa C</th>
+          <th>A</th>
+          <th>Spesa A</th>
+        </tr>
+        </thead>
+        <tbody id="teamTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const INITIAL_BUDGET = 500;
+
+const DEFAULT_TEAMS = [
+  "Arcamadò",
+  "Stoke Azzo",
+  "Dooger team",
+  "Hertha Berlinguer",
+  "Jumala FC",
+  "Giannimorandisegnama FC",
+  "Celtic Glasgow",
+  "Athleticul",
+  "SS Lekka Milano"
+];
+
+let teams = [];
+let players = [];
+let purchaseHistory = [];
+let selectedPlayerId = null;
+
+/* ---------------------------
+   Utility
+---------------------------- */
+
+function normalizeText(value) {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function parseNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
+  if (typeof value === "number") return value;
+  const cleaned = String(value).trim().replace(/\./g, "").replace(",", ".");
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : null;
+}
+
+function safeText(value) {
+  return value === null || value === undefined ? "" : String(value).trim();
+}
+
+function formatNumber(value, decimals = 0) {
+  if (value === null || value === undefined || value === "") return "—";
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "—";
+  return n.toLocaleString("it-IT", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+}
+
+function roleName(role) {
+  return ({P:"Portiere", D:"Difensore", C:"Centrocampista", A:"Attaccante"})[role] || role;
+}
+
+function createTeams() {
+  teams = DEFAULT_TEAMS.map((name, index) => ({
+    id: index,
+    name,
+    initialBudget: INITIAL_BUDGET,
+    credits: INITIAL_BUDGET,
+    spent: { P:0, D:0, C:0, A:0 },
+    slots: { P:0, D:0, C:0, A:0 },
+    players: []
+  }));
+}
+
+function getPlayerById(id) {
+  return players.find(p => String(p.id) === String(id));
+}
+
+function isPlayerSold(id) {
+  return purchaseHistory.some(x => String(x.playerId) === String(id));
+}
+
+/* ---------------------------
+   Salvataggio
+---------------------------- */
+
+function saveData() {
+  localStorage.setItem("fantaTeams_v02", JSON.stringify(teams));
+  localStorage.setItem("fantaPlayers_v02", JSON.stringify(players));
+  localStorage.setItem("fantaHistory_v02", JSON.stringify(purchaseHistory));
+}
+
+function loadData() {
+  const t = localStorage.getItem("fantaTeams_v02");
+  const p = localStorage.getItem("fantaPlayers_v02");
+  const h = localStorage.getItem("fantaHistory_v02");
+
+  teams = t ? JSON.parse(t) : [];
+  players = p ? JSON.parse(p) : [];
+  purchaseHistory = h ? JSON.parse(h) : [];
+
+  if (!teams.length) createTeams();
+}
+
+/* ---------------------------
+   Import listone Excel
+---------------------------- */
+
+document.getElementById("excelFile").addEventListener("change", handleExcelImport);
+
+async function handleExcelImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data, { type:"array" });
+
+    if (!workbook.SheetNames.includes("Tutti")) {
+      alert('Nel file non trovo il foglio "Tutti".');
+      return;
+    }
+
+    const sheet = workbook.Sheets["Tutti"];
+
+    // Riga 1 = titolo, riga 2 = intestazioni
+    const rows = XLSX.utils.sheet_to_json(sheet, {
+      range: 1,
+      defval: null
+    });
+
+    const oldPlayers = [...players];
+
+    const parsed = rows
+      .filter(r => r["Id"] !== null && r["Nome"] && r["R"])
+      .map(r => {
+        const oldById = oldPlayers.find(x => String(x.id) === String(r["Id"]));
+        return {
+          id: r["Id"],
+          role: safeText(r["R"]).toUpperCase(),
+          name: safeText(r["Nome"]),
+          club: safeText(r["Squadra"]),
+          qtA: parseNumber(r["Qt.A"]),
+          qtI: parseNumber(r["Qt.I"]),
+          diff: parseNumber(r["Diff."]),
+          fvm: parseNumber(r["FVM"]),
+          vma: oldById?.vma ?? null
+        };
+      })
+      .filter(p => ["P","D","C","A"].includes(p.role));
+
+    if (!parsed.length) {
+      alert("Non sono riuscito a leggere giocatori validi dal foglio Tutti.");
+      return;
+    }
+
+    players = parsed;
+    selectedPlayerId = null;
+    document.getElementById("playerSearch").value = "";
+    hideSearchResults();
+    hideSelectedPlayer();
+
+    saveData();
+    render();
+
+    const now = new Date().toLocaleString("it-IT");
+    localStorage.setItem("fantaDbLastUpdate_v02", now);
+
+    document.getElementById("dbStatus").className = "status ok";
+    document.getElementById("dbStatus").innerHTML =
+      `<strong>${players.length} giocatori caricati.</strong> Aggiornamento: ${now}.`;
+
+  } catch (err) {
+    console.error(err);
+    alert("Errore durante la lettura dell'Excel. Controlla che sia un normale file .xlsx.");
+  } finally {
+    event.target.value = "";
+  }
+}
+
+/* ---------------------------
+   Import VMA
+---------------------------- */
+
+document.getElementById("vmaFile").addEventListener("change", handleVmaImport);
+
+async function handleVmaImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (!players.length) {
+    alert("Prima importa il listone ufficiale.");
+    event.target.value = "";
+    return;
+  }
+
+  try {
+    let rows = [];
+    const ext = file.name.split(".").pop().toLowerCase();
+
+    if (ext === "json") {
+      const txt = await file.text();
+      const json = JSON.parse(txt);
+      rows = Array.isArray(json) ? json : (json.players || json.data || []);
+    } else {
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data, { type:"array" });
+      const firstSheet = wb.Sheets[wb.SheetNames[0]];
+      rows = XLSX.utils.sheet_to_json(firstSheet, { defval:null });
+    }
+
+    let matched = 0;
+
+    rows.forEach(row => {
+      const id = row["Id"] ?? row["ID"] ?? row["id"];
+      const name =
+        row["Nome"] ??
+        row["Giocatore"] ??
+        row["Player"] ??
+        row["Calciatore"] ??
+        row["nome"];
+
+      const vmaRaw =
+        row["VMA"] ??
+        row["PMA"] ??
+        row["Prezzo Medio"] ??
+        row["Prezzo medio"] ??
+        row["Media"] ??
+        row["vma"];
+
+      const vma = parseNumber(vmaRaw);
+      if (vma === null) return;
+
+      let player = null;
+
+      if (id !== null && id !== undefined && id !== "") {
+        player = players.find(p => String(p.id) === String(id));
+      }
+
+      if (!player && name) {
+        const n = normalizeText(name);
+        player = players.find(p => normalizeText(p.name) === n);
+      }
+
+      if (player) {
+        player.vma = vma;
+        matched++;
+      }
+    });
+
+    saveData();
+    render();
+
+    document.getElementById("vmaStatus").className =
+      matched ? "status ok" : "status warn";
+
+    document.getElementById("vmaStatus").innerHTML =
+      matched
+        ? `<strong>${matched} VMA associati.</strong> I dati ufficiali del listone non sono stati modificati.`
+        : `Nessun giocatore associato. Il file dovrebbe contenere almeno una colonna <strong>Nome</strong> e una colonna <strong>VMA</strong>.`;
+
+  } catch (err) {
+    console.error(err);
+    alert("Non sono riuscito a leggere il file VMA.");
+  } finally {
+    event.target.value = "";
+  }
+}
+
+/* ---------------------------
+   Ricerca giocatori
+---------------------------- */
+
+const searchInput = document.getElementById("playerSearch");
+const searchResults = document.getElementById("searchResults");
+
+searchInput.addEventListener("input", () => {
+  const q = normalizeText(searchInput.value);
+
+  if (q.length < 2 || !players.length) {
+    hideSearchResults();
+    return;
+  }
+
+  const results = players
+    .filter(p => !isPlayerSold(p.id))
+    .filter(p =>
+      normalizeText(p.name).includes(q) ||
+      normalizeText(p.club).includes(q)
+    )
+    .sort((a,b) => {
+      const an = normalizeText(a.name);
+      const bn = normalizeText(b.name);
+      const aStarts = an.startsWith(q) ? 0 : 1;
+      const bStarts = bn.startsWith(q) ? 0 : 1;
+      return aStarts - bStarts || a.name.localeCompare(b.name);
+    })
+    .slice(0, 20);
+
+  renderSearchResults(results);
+});
+
+searchInput.addEventListener("focus", () => {
+  if (normalizeText(searchInput.value).length >= 2) {
+    searchInput.dispatchEvent(new Event("input"));
+  }
+});
+
+document.addEventListener("click", e => {
+  if (!e.target.closest(".search-wrap")) hideSearchResults();
+});
+
+function renderSearchResults(results) {
+  searchResults.innerHTML = "";
+
+  if (!results.length) {
+    searchResults.innerHTML = `<div class="result"><span class="small">Nessun giocatore disponibile trovato.</span></div>`;
+    searchResults.style.display = "block";
+    return;
+  }
+
+  results.forEach(p => {
+    const el = document.createElement("div");
+    el.className = "result";
+    el.innerHTML = `
+      <div class="result-name">${p.name}</div>
+      <div class="result-meta">
+        ${p.club} · ${roleName(p.role)} · Qt. ${formatNumber(p.qtA)}
+        ${p.vma !== null ? ` · VMA ${formatNumber(p.vma, 2)}` : ""}
+      </div>
+    `;
+    el.onclick = () => selectPlayer(p.id);
+    searchResults.appendChild(el);
+  });
+
+  searchResults.style.display = "block";
+}
+
+function hideSearchResults() {
+  searchResults.style.display = "none";
+}
+
+function selectPlayer(id) {
+  const p = getPlayerById(id);
+  if (!p) return;
+
+  selectedPlayerId = p.id;
+  searchInput.value = p.name;
+  hideSearchResults();
+
+  document.getElementById("selectedName").textContent = p.name;
+  document.getElementById("selectedTeam").textContent = p.club;
+  document.getElementById("selectedRole").textContent = p.role;
+  document.getElementById("selectedRole").className = `badge role-${p.role}`;
+  document.getElementById("selectedQt").textContent = formatNumber(p.qtA);
+  document.getElementById("selectedFvm").textContent = formatNumber(p.fvm);
+  document.getElementById("selectedVma").textContent =
+    p.vma === null ? "—" : formatNumber(p.vma, 2);
+  document.getElementById("selectedId").textContent = p.id;
+  document.getElementById("manualVma").value =
+    p.vma === null ? "" : p.vma;
+
+  document.getElementById("selectedPlayerCard").style.display = "block";
+  document.getElementById("purchaseHint").style.display = "none";
+  document.getElementById("playerPrice").focus();
+}
+
+function hideSelectedPlayer() {
+  selectedPlayerId = null;
+  document.getElementById("selectedPlayerCard").style.display = "none";
+  document.getElementById("manualVma").value = "";
+
+  const hint = document.getElementById("purchaseHint");
+  hint.style.display = "block";
+  hint.textContent = players.length
+    ? "Cerca e seleziona un giocatore disponibile."
+    : "Prima importa il listone Excel.";
+}
+
+/* ---------------------------
+   Acquisti
+---------------------------- */
+
+function registerPurchase() {
+  if (selectedPlayerId === null) {
+    alert("Seleziona prima un giocatore.");
+    return;
+  }
+
+  if (isPlayerSold(selectedPlayerId)) {
+    alert("Questo giocatore risulta già acquistato.");
+    return;
+  }
+
+  const player = getPlayerById(selectedPlayerId);
+  const teamId = Number(document.getElementById("teamSelect").value);
+  const price = Number(document.getElementById("playerPrice").value);
+  const team = teams.find(t => t.id === teamId);
+
+  if (!player || !team) return;
+
+  if (!Number.isInteger(price) || price < 1) {
+    alert("Inserisci un prezzo valido in crediti interi.");
+    return;
+  }
+
+  if (price > team.credits) {
+    alert(`${team.name} ha solo ${team.credits} crediti.`);
+    return;
+  }
+
+  const purchase = {
+    playerId: player.id,
+    playerName: player.name,
+    playerRole: player.role,
+    playerClub: player.club,
+    teamId: team.id,
+    teamName: team.name,
+    price,
+    vmaAtPurchase: player.vma,
+    timestamp: new Date().toISOString()
+  };
+
+  team.credits -= price;
+  team.spent[player.role] += price;
+  team.slots[player.role] += 1;
+  team.players.push(player.id);
+
+  purchaseHistory.push(purchase);
+
+  saveData();
+
+  searchInput.value = "";
+  document.getElementById("playerPrice").value = "";
+  hideSelectedPlayer();
+
+  render();
+
+  searchInput.focus();
+}
+
+function undoLastPurchase() {
+  if (!purchaseHistory.length) {
+    alert("Non ci sono acquisti da annullare.");
+    return;
+  }
+
+  const last = purchaseHistory.pop();
+  const team = teams.find(t => t.id === last.teamId);
+
+  if (team) {
+    team.credits += last.price;
+    team.spent[last.playerRole] -= last.price;
+    team.slots[last.playerRole] -= 1;
+    team.players = team.players.filter(
+      id => String(id) !== String(last.playerId)
+    );
+  }
+
+  saveData();
+  render();
+}
+
+function resetAuction() {
+  if (!confirm("Vuoi cancellare tutti gli acquisti dell'asta? Il database giocatori e i VMA resteranno salvati.")) {
+    return;
+  }
+
+  createTeams();
+  purchaseHistory = [];
+  selectedPlayerId = null;
+
+  saveData();
+  populateTeamSelect();
+  hideSelectedPlayer();
+  render();
+}
+
+/* ---------------------------
+   VMA manuale
+---------------------------- */
+
+function saveManualVma() {
+  if (selectedPlayerId === null) {
+    alert("Seleziona prima un giocatore.");
+    return;
+  }
+
+  const value = parseNumber(document.getElementById("manualVma").value);
+  if (value === null || value < 0) {
+    alert("Inserisci un VMA valido.");
+    return;
+  }
+
+  const player = getPlayerById(selectedPlayerId);
+  player.vma = value;
+
+  saveData();
+  selectPlayer(player.id);
+  renderDbStatus();
+}
+
+/* ---------------------------
+   Database
+---------------------------- */
+
+function clearPlayerDatabase() {
+  if (!confirm("Vuoi cancellare il database giocatori? Gli acquisti già registrati resteranno nello storico.")) {
+    return;
+  }
+
+  players = [];
+  selectedPlayerId = null;
+  localStorage.removeItem("fantaDbLastUpdate_v02");
+  saveData();
+  hideSelectedPlayer();
+  render();
+}
+
+function renderDbStatus() {
+  const status = document.getElementById("dbStatus");
+
+  if (!players.length) {
+    status.className = "status";
+    status.textContent = "Nessun listone caricato.";
+    return;
+  }
+
+  const lastUpdate = localStorage.getItem("fantaDbLastUpdate_v02");
+
+  status.className = "status ok";
+  status.innerHTML =
+    `<strong>${players.length} giocatori caricati.</strong>` +
+    (lastUpdate ? ` Ultimo aggiornamento: ${lastUpdate}.` : "");
+}
+
+function renderCounts() {
+  document.getElementById("countAll").textContent = players.length;
+  document.getElementById("countP").textContent = players.filter(p => p.role === "P").length;
+  document.getElementById("countD").textContent = players.filter(p => p.role === "D").length;
+  document.getElementById("countC").textContent = players.filter(p => p.role === "C").length;
+  document.getElementById("countA").textContent = players.filter(p => p.role === "A").length;
+
+  const withVma = players.filter(p => p.vma !== null && p.vma !== undefined).length;
+  const vmaStatus = document.getElementById("vmaStatus");
+
+  if (withVma) {
+    vmaStatus.className = "status ok";
+    vmaStatus.innerHTML = `<strong>${withVma} giocatori con VMA salvato.</strong>`;
+  } else {
+    vmaStatus.className = "status";
+    vmaStatus.textContent = "Nessun VMA importato.";
+  }
+}
+
+/* ---------------------------
+   Squadre / storico
+---------------------------- */
+
+function populateTeamSelect() {
+  const select = document.getElementById("teamSelect");
+  select.innerHTML = "";
+
+  teams.forEach(team => {
+    const option = document.createElement("option");
+    option.value = team.id;
+    option.textContent = team.name;
+    select.appendChild(option);
+  });
+}
+
+function roleSpendText(team, role) {
+  const credits = team.spent[role];
+  const pct = (credits / INITIAL_BUDGET) * 100;
+  return `${credits} · ${pct.toLocaleString("it-IT", {maximumFractionDigits:1})}%`;
+}
+
+function renderTeamTable() {
+  const tbody = document.getElementById("teamTable");
+  tbody.innerHTML = "";
+
+  teams.forEach(team => {
+    const tr = document.createElement("tr");
+    if (team.name === "Arcamadò") tr.classList.add("my-team");
+
+    tr.innerHTML = `
+      <td>${team.name}</td>
+      <td><strong>${team.credits}</strong></td>
+      <td>${INITIAL_BUDGET - team.credits}</td>
+      <td>${team.slots.P}</td>
+      <td>${roleSpendText(team,"P")}</td>
+      <td>${team.slots.D}</td>
+      <td>${roleSpendText(team,"D")}</td>
+      <td>${team.slots.C}</td>
+      <td>${roleSpendText(team,"C")}</td>
+      <td>${team.slots.A}</td>
+      <td>${roleSpendText(team,"A")}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
+
+function renderHistory() {
+  const box = document.getElementById("history");
+  box.innerHTML = "";
+
+  if (!purchaseHistory.length) {
+    box.innerHTML = `<div class="empty">Nessun acquisto registrato.</div>`;
+    return;
+  }
+
+  [...purchaseHistory].reverse().slice(0,20).forEach(x => {
+    const div = document.createElement("div");
+    div.className = "history-item";
+
+    const vmaText =
+      x.vmaAtPurchase !== null && x.vmaAtPurchase !== undefined
+        ? ` · VMA ${formatNumber(x.vmaAtPurchase,2)}`
+        : "";
+
+    div.innerHTML = `
+      <strong>${x.playerName}</strong>
+      <span class="badge role-${x.playerRole}" style="padding:2px 6px;">${x.playerRole}</span>
+      → ${x.teamName}
+      per <strong>${x.price}</strong>
+      <span class="small">${vmaText}</span>
+    `;
+    box.appendChild(div);
+  });
+}
+
+function render() {
+  renderDbStatus();
+  renderCounts();
+  renderTeamTable();
+  renderHistory();
+
+  const hint = document.getElementById("purchaseHint");
+
+  if (!players.length) {
+    hint.style.display = "block";
+    hint.className = "status warn";
+    hint.textContent = "Prima importa il listone Excel.";
+  } else if (selectedPlayerId === null) {
+    hint.style.display = "block";
+    hint.className = "status ok";
+    hint.textContent =
+      `${players.length - purchaseHistory.length} giocatori circa ancora disponibili. Cerca un nome per registrare il prossimo acquisto.`;
+  }
+}
+
+/* ---------------------------
+   Avvio
+---------------------------- */
+
+loadData();
+populateTeamSelect();
+hideSelectedPlayer();
+render();
+</script>
+</body>
+</html>
