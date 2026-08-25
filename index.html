@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 1.19</title>
+<title>Fanta Agente 2.6</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -1744,6 +1744,1978 @@ html, body{
   }
 }
 
+
+/* ==================================================================
+   FANTA AGENTE 2.0 — MOBILE APP REDESIGN
+   Inspired by modern sports/scouting apps: dark, spacious, high contrast
+   ================================================================== */
+
+.mobile-bottom-nav{display:none}
+
+@media(max-width:700px){
+  :root{
+    --m-bg:#050607;
+    --m-surface:#101316;
+    --m-surface-2:#171b20;
+    --m-surface-3:#1d2228;
+    --m-border:#242a31;
+    --m-text:#f6f7f9;
+    --m-muted:#7f8998;
+    --m-blue:#4f7df3;
+    --m-cyan:#59c9ff;
+    --m-yellow:#a97924;
+    --m-green:#3e7428;
+    --m-red:#7b202b;
+  }
+
+  html,body{
+    background:#000 !important;
+    color:var(--m-text);
+    overscroll-behavior-y:auto;
+  }
+
+  body{
+    padding-bottom:92px !important;
+    background:
+      radial-gradient(circle at 50% -10%,rgba(79,125,243,.10),transparent 32%),
+      #000 !important;
+  }
+
+  /* ---------------- Header ---------------- */
+  .topbar{
+    position:static !important;
+    height:auto !important;
+    padding:18px 18px 10px !important;
+    background:#000 !important;
+    border:0 !important;
+    box-shadow:none !important;
+    align-items:center
+  }
+
+  .brand{
+    gap:10px !important;
+  }
+
+  .logo{
+    display:none !important;
+  }
+
+  .brand-title{
+    font-size:28px !important;
+    line-height:1 !important;
+    font-weight:950 !important;
+    letter-spacing:-.04em !important;
+    color:#fff !important;
+  }
+
+  .brand-sub{
+    display:block !important;
+    margin-top:7px !important;
+    color:#627083 !important;
+    font-size:11px !important;
+    font-weight:750 !important;
+  }
+
+  .top-stats{
+    gap:8px !important;
+  }
+
+  .top-stats .pill{
+    display:none !important;
+  }
+
+  .top-stats .icon-btn{
+    width:42px !important;
+    height:42px !important;
+    border-radius:50% !important;
+    border:1px solid #2b3037 !important;
+    background:#111419 !important;
+    color:white !important;
+    font-size:19px !important;
+  }
+
+  /* Desktop top tabs disappear on phone: bottom nav replaces them */
+  .app-tabs{
+    display:none !important;
+  }
+
+  /* ---------------- Main mobile canvas ---------------- */
+  .home-shell{
+    margin:0 !important;
+    padding:8px 14px 22px !important;
+    max-width:none !important;
+  }
+
+  #auctionView{
+    background:#000 !important;
+  }
+
+  #auctionView .main{
+    display:flex !important;
+    flex-direction:column !important;
+    gap:12px !important;
+    padding:8px 14px 0 !important;
+    margin:0 !important;
+  }
+
+  #auctionView .main > section.panel{
+    order:1;
+  }
+
+  #auctionView .main > aside.panel{
+    order:2;
+  }
+
+  #auctionView .panel,
+  .home-shell .panel{
+    background:transparent !important;
+    border:0 !important;
+    border-radius:0 !important;
+    box-shadow:none !important;
+    overflow:visible !important;
+  }
+
+  #auctionView .panel-body{
+    padding:0 !important;
+  }
+
+  #auctionView .panel-head{
+    display:none !important;
+  }
+
+  /* ---------------- Search ---------------- */
+  #auctionView .search-wrap{
+    margin:0 !important;
+    padding:0 !important;
+    background:transparent !important;
+    border:0 !important;
+    box-shadow:none !important;
+  }
+
+  #auctionView .search-toolbar{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:9px !important;
+    width:100% !important;
+  }
+
+  #auctionView #playerSearch{
+    grid-column:1/-1 !important;
+    grid-row:1 !important;
+    height:56px !important;
+    padding:0 17px 0 48px !important;
+    border-radius:15px !important;
+    border:1px solid #20252b !important;
+    background:
+      linear-gradient(90deg,transparent 0 0),
+      #0e1114 !important;
+    color:#fff !important;
+    font-size:17px !important;
+    font-weight:650 !important;
+    box-shadow:none !important;
+  }
+
+  #auctionView #playerSearch::placeholder{
+    color:#424955 !important;
+  }
+
+  #auctionView .search-toolbar::before{
+    content:"⌕";
+    position:absolute;
+    z-index:3;
+    margin:13px 0 0 16px;
+    color:#718096;
+    font-size:27px;
+    pointer-events:none
+  }
+
+  #auctionView .search-toolbar{
+    position:relative !important;
+  }
+
+  #auctionView #clubFilterButton,
+  #auctionView #playerListButton{
+    height:44px !important;
+    min-width:0 !important;
+    border-radius:13px !important;
+    border:1px solid #262b32 !important;
+    background:#15191d !important;
+    color:#dce1e7 !important;
+    font-size:12px !important;
+    font-weight:850 !important;
+  }
+
+  #auctionView #playerListButton:disabled{
+    opacity:.35 !important;
+  }
+
+  /* ---------------- Role buttons ---------------- */
+  #auctionView .role-tabs{
+    display:grid !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    gap:9px !important;
+    margin:12px 0 9px !important;
+  }
+
+  #auctionView .role-tab{
+    height:54px !important;
+    min-width:0 !important;
+    border:0 !important;
+    border-radius:13px !important;
+    font-size:0 !important;
+    box-shadow:none !important;
+    opacity:.70;
+  }
+
+  #auctionView .role-tab .role-short{
+    display:inline !important;
+    font-size:18px !important;
+    font-weight:950 !important;
+    color:#b6bdc8 !important;
+  }
+
+  #auctionView .role-tab .role-long{
+    display:none !important;
+  }
+
+  #auctionView .role-tab[data-role="P"]{
+    background:#5d4216 !important;
+  }
+  #auctionView .role-tab[data-role="D"]{
+    background:#274918 !important;
+  }
+  #auctionView .role-tab[data-role="C"]{
+    background:#274bba !important;
+  }
+  #auctionView .role-tab[data-role="A"]{
+    background:#651721 !important;
+  }
+
+  #auctionView .role-tab.active{
+    opacity:1 !important;
+    transform:none !important;
+    outline:2px solid rgba(255,255,255,.05) !important;
+  }
+
+  #auctionView .role-tab.active .role-short{
+    color:#fff !important;
+  }
+
+  /* ---------------- Search results ---------------- */
+  #auctionView .search-results{
+    position:absolute !important;
+    left:0 !important;
+    right:0 !important;
+    top:58px !important;
+    z-index:800 !important;
+    max-height:48vh !important;
+    margin-top:0 !important;
+    border-radius:14px !important;
+    border:1px solid #272d34 !important;
+    background:#111418 !important;
+    box-shadow:0 22px 48px rgba(0,0,0,.65) !important;
+    overflow:auto !important;
+  }
+
+  /* ---------------- Empty state ---------------- */
+  #auctionView .empty-state{
+    border:1px dashed #252a31 !important;
+    background:#0c0e10 !important;
+    border-radius:17px !important;
+    color:#67707c !important;
+    padding:24px 16px !important;
+    margin-top:12px !important;
+    font-size:13px !important;
+  }
+
+  /* ---------------- Player card ---------------- */
+  #auctionView .player-card{
+    margin-top:12px !important;
+    padding:0 !important;
+    border:0 !important;
+    background:transparent !important;
+    box-shadow:none !important;
+  }
+
+  #auctionView .player-top{
+    position:relative;
+    background:#101316 !important;
+    border:1px solid #22272d !important;
+    border-radius:18px !important;
+    padding:17px 18px !important;
+    align-items:center !important;
+    overflow:hidden
+  }
+
+  #auctionView .player-top::before{
+    content:"";
+    position:absolute;
+    inset:0 auto 0 0;
+    width:5px;
+    background:#4f7df3
+  }
+
+  #auctionView .player-name{
+    font-size:28px !important;
+    line-height:1.02 !important;
+    font-weight:950 !important;
+    letter-spacing:-.04em !important;
+    color:white !important;
+  }
+
+  #auctionView .player-club{
+    margin-top:8px !important;
+    color:#687487 !important;
+    font-size:13px !important;
+    font-weight:850 !important;
+    text-transform:uppercase !important;
+    letter-spacing:.035em !important;
+  }
+
+  #auctionView .role-badge{
+    width:44px !important;
+    min-width:44px !important;
+    height:44px !important;
+    border-radius:50% !important;
+    border:0 !important;
+    font-size:18px !important;
+    font-weight:950 !important;
+    background:#315fdf !important;
+    color:#fff !important;
+  }
+
+  /* Main numerical stats resemble scouting cards */
+  #auctionView .hero-stats{
+    display:grid !important;
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:8px !important;
+    margin:9px 0 0 !important;
+  }
+
+  #auctionView .hero{
+    min-height:78px !important;
+    padding:12px 7px !important;
+    background:#15191e !important;
+    border:0 !important;
+    border-radius:12px !important;
+    text-align:center !important;
+    box-shadow:none !important;
+  }
+
+  #auctionView .hero::before{
+    display:none !important;
+  }
+
+  #auctionView .hero-label{
+    order:2;
+    margin-top:5px !important;
+    color:#5e6877 !important;
+    font-size:9px !important;
+    font-weight:900 !important;
+    text-transform:uppercase !important;
+    line-height:1.2 !important;
+  }
+
+  #auctionView .hero-value{
+    color:#f4f6f8 !important;
+    font-size:24px !important;
+    line-height:1 !important;
+    font-weight:950 !important;
+    letter-spacing:-.03em !important;
+  }
+
+  /* Less relevant scores become restrained */
+  #auctionView .details{
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    gap:6px !important;
+    margin-top:7px !important;
+  }
+
+  #auctionView .detail{
+    min-height:60px !important;
+    padding:9px 4px !important;
+    background:#0e1114 !important;
+    border:1px solid #191d22 !important;
+    border-radius:10px !important;
+    text-align:center !important;
+  }
+
+  #auctionView .detail span{
+    color:#555f6d !important;
+    font-size:7px !important;
+    font-weight:900 !important;
+    text-transform:uppercase !important;
+  }
+
+  #auctionView .detail strong{
+    margin-top:5px !important;
+    color:#cfd5dc !important;
+    font-size:14px !important;
+  }
+
+  /* ---------------- Purchase card ---------------- */
+  #auctionView .purchase-row{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) 94px !important;
+    gap:9px !important;
+    margin-top:12px !important;
+    padding:15px !important;
+    background:#111419 !important;
+    border:1px solid #252a30 !important;
+    border-radius:18px !important;
+  }
+
+  #auctionView .purchase-row .field label{
+    display:block !important;
+    margin:0 0 7px !important;
+    color:#697482 !important;
+    font-size:9px !important;
+    font-weight:900 !important;
+    text-transform:uppercase !important;
+    letter-spacing:.06em !important;
+  }
+
+  #auctionView #teamSelect,
+  #auctionView #priceInput{
+    height:52px !important;
+    border:0 !important;
+    border-radius:12px !important;
+    background:#1b2026 !important;
+    color:#fff !important;
+    box-shadow:none !important;
+  }
+
+  #auctionView #teamSelect{
+    padding:0 12px !important;
+    font-size:15px !important;
+    font-weight:850 !important;
+  }
+
+  #auctionView #priceInput{
+    font-size:24px !important;
+    font-weight:950 !important;
+    text-align:center !important;
+  }
+
+  #auctionView .mobile-register-btn{
+    grid-column:1/-1 !important;
+    height:54px !important;
+    margin-top:2px !important;
+    border:0 !important;
+    border-radius:13px !important;
+    background:#fff !important;
+    color:#07090b !important;
+    font-size:15px !important;
+    font-weight:950 !important;
+    letter-spacing:.045em !important;
+    box-shadow:none !important;
+  }
+
+  /* ---------------- Analysis ---------------- */
+  #auctionView main > aside.panel{
+    margin-top:0 !important;
+  }
+
+  #auctionView .analysis-box{
+    padding:0 !important;
+  }
+
+  #auctionView .verdict{
+    margin:0 !important;
+    padding:18px !important;
+    background:#111419 !important;
+    border:1px solid #252a30 !important;
+    border-radius:18px !important;
+    box-shadow:none !important;
+  }
+
+  #auctionView .verdict-title{
+    color:#687482 !important;
+    font-size:9px !important;
+    font-weight:900 !important;
+    text-transform:uppercase !important;
+  }
+
+  #auctionView .verdict-main{
+    margin-top:6px !important;
+    color:#fff !important;
+    font-size:28px !important;
+    line-height:1 !important;
+    font-weight:950 !important;
+    letter-spacing:-.035em !important;
+  }
+
+  #auctionView #verdictSub{
+    margin-top:8px !important;
+    color:#727d8b !important;
+    font-size:12px !important;
+    line-height:1.35 !important;
+  }
+
+  #auctionView .live-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    gap:7px !important;
+    margin-top:8px !important;
+  }
+
+  #auctionView .metric{
+    min-height:68px !important;
+    padding:10px 4px !important;
+    border:0 !important;
+    border-radius:11px !important;
+    background:#15191e !important;
+    text-align:center !important;
+  }
+
+  #auctionView .metric span{
+    color:#586270 !important;
+    font-size:7px !important;
+    font-weight:900 !important;
+    text-transform:uppercase !important;
+  }
+
+  #auctionView .metric strong{
+    margin-top:6px !important;
+    color:white !important;
+    font-size:17px !important;
+    font-weight:950 !important;
+  }
+
+  /* Budget compact row */
+  #auctionView .my-budget-block{
+    margin-top:14px !important;
+    padding:0 !important;
+    border:0 !important;
+  }
+
+  #auctionView .my-budget-head{
+    margin:0 2px 8px !important;
+    color:#fff !important;
+    font-size:12px !important;
+  }
+
+  #auctionView .my-budget-head strong{
+    color:#7f8997 !important;
+    font-size:11px !important;
+  }
+
+  #auctionView .my-budget-grid{
+    display:flex !important;
+    gap:7px !important;
+    padding:0 0 4px !important;
+    overflow-x:auto !important;
+    scrollbar-width:none !important;
+  }
+
+  #auctionView .my-budget-grid::-webkit-scrollbar{display:none}
+
+  #auctionView .my-budget-card{
+    flex:0 0 145px !important;
+    min-width:145px !important;
+    min-height:72px !important;
+    padding:11px !important;
+    border:0 !important;
+    border-left:4px solid transparent !important;
+    border-radius:12px !important;
+    background:#111419 !important;
+    box-shadow:none !important;
+  }
+
+  #auctionView .my-budget-card.role-p{border-left-color:#a97924 !important}
+  #auctionView .my-budget-card.role-d{border-left-color:#4a812f !important}
+  #auctionView .my-budget-card.role-c{border-left-color:#4f7df3 !important}
+  #auctionView .my-budget-card.role-a{border-left-color:#9a2b3b !important}
+
+  #auctionView .my-budget-card span{
+    color:#66717f !important;
+    font-size:8px !important;
+  }
+
+  #auctionView .my-budget-card strong{
+    color:#fff !important;
+    font-size:14px !important;
+  }
+
+  /* ---------------- Competitors as a clean sports list ---------------- */
+  #auctionView .competitor-strip{
+    margin:14px 14px 0 !important;
+    padding:0 !important;
+    background:transparent !important;
+    border:0 !important;
+    border-radius:0 !important;
+    box-shadow:none !important;
+    overflow:visible !important;
+  }
+
+  #auctionView .competitor-head{
+    padding:0 2px 9px !important;
+    border:0 !important;
+    display:block !important;
+  }
+
+  #auctionView .competitor-head .panel-title{
+    font-size:21px !important;
+    font-weight:950 !important;
+    color:#fff !important;
+    letter-spacing:-.025em !important;
+  }
+
+  #auctionView .competitor-summary{
+    display:grid !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    gap:6px !important;
+    margin-top:8px !important;
+  }
+
+  #auctionView .comp-mini{
+    min-width:0 !important;
+    padding:9px 4px !important;
+    border:0 !important;
+    border-radius:10px !important;
+    background:#111419 !important;
+    text-align:center !important;
+  }
+
+  #auctionView .comp-mini span{
+    color:#596473 !important;
+    font-size:7px !important;
+  }
+
+  #auctionView .comp-mini strong{
+    color:#fff !important;
+    font-size:15px !important;
+  }
+
+  #auctionView .competitor-grid{
+    display:block !important;
+    padding:0 !important;
+    overflow:visible !important;
+  }
+
+  #auctionView .competitor-card{
+    width:100% !important;
+    min-width:0 !important;
+    margin:0 0 7px !important;
+    padding:13px 14px !important;
+    border:0 !important;
+    border-left:4px solid #3b424c !important;
+    border-radius:13px !important;
+    background:#111419 !important;
+    box-shadow:none !important;
+  }
+
+  #auctionView .competitor-card.strong{border-left-color:#d9475b !important}
+  #auctionView .competitor-card.medium{border-left-color:#d5a832 !important}
+  #auctionView .competitor-card.low{border-left-color:#4e9638 !important}
+
+  #auctionView .competitor-name{
+    color:#fff !important;
+    font-size:15px !important;
+    font-weight:900 !important;
+  }
+
+  #auctionView .competitor-meta{
+    margin-top:5px !important;
+    color:#687483 !important;
+    font-size:10px !important;
+  }
+
+  /* ---------------- Rosters ---------------- */
+  #auctionView .footerbar{
+    margin:16px 14px 0 !important;
+    padding:0 !important;
+    background:transparent !important;
+    border:0 !important;
+    border-radius:0 !important;
+    overflow:visible !important;
+    scroll-margin-top:12px
+  }
+
+  #auctionView .table-head{
+    padding:0 1px 10px !important;
+    border:0 !important;
+    display:block !important;
+  }
+
+  #auctionView .table-head > div:first-child .panel-title{
+    font-size:21px !important;
+    font-weight:950 !important;
+    color:#fff !important;
+  }
+
+  #auctionView .budget-standard{
+    margin-top:6px !important;
+    color:#6d7784 !important;
+    font-size:9px !important;
+  }
+
+  #auctionView .table-head > div:last-child{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:7px !important;
+    margin-top:10px !important;
+  }
+
+  #auctionView .table-head > div:last-child .secondary-btn{
+    min-width:0 !important;
+    width:100% !important;
+    height:40px !important;
+    padding:0 7px !important;
+    border:0 !important;
+    border-radius:11px !important;
+    background:#14181c !important;
+    color:#c7ced7 !important;
+    font-size:10px !important;
+  }
+
+  #auctionView .table-head > div:last-child .secondary-btn:first-child{
+    grid-column:1/-1 !important;
+  }
+
+  #auctionView .table-wrap{
+    border-radius:16px !important;
+    border:1px solid #22272d !important;
+    overflow:auto !important;
+    background:#0f1215 !important;
+  }
+
+  #auctionView table{
+    min-width:760px !important;
+    background:#0f1215 !important;
+  }
+
+  #auctionView th{
+    background:#171b20 !important;
+    color:#677382 !important;
+    font-size:9px !important;
+  }
+
+  #auctionView td{
+    background:#0f1215 !important;
+    border-color:#1d2228 !important;
+    color:#e7ebef !important;
+    font-size:13px !important;
+  }
+
+  #auctionView tr.me td{
+    background:#111c18 !important;
+  }
+
+  #auctionView .lastbar{
+    margin-top:8px !important;
+    border:0 !important;
+    border-radius:12px !important;
+    background:#0f1215 !important;
+  }
+
+  /* ---------------- Home / configuration ---------------- */
+  #homeView .panel{
+    margin-bottom:11px !important;
+    padding:0 !important;
+    background:#111419 !important;
+    border:1px solid #23282e !important;
+    border-radius:18px !important;
+    box-shadow:none !important;
+    overflow:hidden !important;
+  }
+
+  #homeView .panel-head{
+    padding:17px 17px 10px !important;
+    border:0 !important;
+  }
+
+  #homeView .panel-body{
+    padding:7px 17px 17px !important;
+  }
+
+  #homeView .panel-title{
+    color:#fff !important;
+    font-size:18px !important;
+    font-weight:950 !important;
+    letter-spacing:-.02em !important;
+  }
+
+  #homeView input,
+  #homeView select,
+  .settings-select{
+    height:48px !important;
+    border:0 !important;
+    border-radius:12px !important;
+    background:#1a1e23 !important;
+    color:#fff !important;
+  }
+
+  #homeView .secondary-btn{
+    border:0 !important;
+    border-radius:11px !important;
+    background:#1a1e23 !important;
+  }
+
+  #homeView .start-auction-btn{
+    height:52px !important;
+    border:0 !important;
+    border-radius:13px !important;
+    background:#fff !important;
+    color:#050607 !important;
+  }
+
+  /* ---------------- Overlays as bottom sheets ---------------- */
+  .runnerup-backdrop,
+  .fa-modal-backdrop,
+  .club-overlay,
+  .player-overlay{
+    align-items:flex-end !important;
+    padding:8px !important;
+    background:rgba(0,0,0,.78) !important;
+    backdrop-filter:blur(8px)
+  }
+
+  .runnerup-modal,
+  .fa-modal,
+  .club-picker,
+  .player-picker{
+    width:100% !important;
+    max-width:none !important;
+    max-height:90dvh !important;
+    border:1px solid #292f36 !important;
+    border-radius:22px 22px 12px 12px !important;
+    background:#15191e !important;
+    box-shadow:0 -18px 50px rgba(0,0,0,.55) !important;
+  }
+
+  .runnerup-head,
+  .fa-modal-head,
+  .club-picker-head,
+  .player-picker-head{
+    padding:18px !important;
+    border-color:#242a30 !important;
+  }
+
+  .runnerup-body,
+  .fa-modal-body{
+    padding:17px !important;
+  }
+
+  .runnerup-grid{
+    grid-template-columns:1fr !important;
+  }
+
+  /* ---------------- Fixed bottom navigation ---------------- */
+  .mobile-bottom-nav{
+    display:grid !important;
+    position:fixed;
+    z-index:1200;
+    left:10px;
+    right:10px;
+    bottom:max(8px,env(safe-area-inset-bottom));
+    grid-template-columns:repeat(5,1fr);
+    min-height:72px;
+    padding:7px 5px;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:25px;
+    background:rgba(25,29,34,.94);
+    backdrop-filter:blur(24px);
+    -webkit-backdrop-filter:blur(24px);
+    box-shadow:
+      0 18px 50px rgba(0,0,0,.48),
+      inset 0 1px 0 rgba(255,255,255,.08)
+  }
+
+  .mobile-nav-btn{
+    appearance:none;
+    border:0;
+    border-radius:18px;
+    background:transparent;
+    color:#626d7d;
+    min-width:0;
+    padding:7px 2px 5px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    font-size:9px;
+    font-weight:850;
+    line-height:1
+  }
+
+  .mobile-nav-icon{
+    font-size:21px;
+    line-height:1
+  }
+
+  .mobile-nav-btn.active{
+    background:#343941;
+    color:#7dcaff
+  }
+
+  /* Safe-area breathing room */
+  #auctionView .footerbar,
+  .home-shell{
+    padding-bottom:20px !important;
+  }
+}
+
+
+/* ==================================================================
+   FANTA AGENTE 2.1 — UNIVERSAL REDESIGN
+   Stesso linguaggio visivo anche su desktop
+   ================================================================== */
+
+:root{
+  --u-bg:#000000;
+  --u-surface:#101316;
+  --u-surface-2:#171b20;
+  --u-surface-3:#1d2228;
+  --u-border:#242a31;
+  --u-border-2:#30363e;
+  --u-text:#f6f7f9;
+  --u-muted:#7f8998;
+  --u-blue:#4f7df3;
+  --u-cyan:#59c9ff;
+  --u-yellow:#a97924;
+  --u-green:#3e7428;
+  --u-red:#7b202b;
+}
+
+html,body{
+  background:#000 !important;
+  color:var(--u-text) !important;
+}
+
+body{
+  background:
+    radial-gradient(circle at 20% -10%,rgba(79,125,243,.08),transparent 30%),
+    radial-gradient(circle at 80% -10%,rgba(89,201,255,.05),transparent 25%),
+    #000 !important;
+}
+
+/* Header */
+.topbar{
+  background:#000 !important;
+  border-bottom:1px solid #1f2429 !important;
+  box-shadow:none !important;
+}
+
+.logo{
+  background:linear-gradient(135deg,#4f7df3,#59c9ff) !important;
+  color:white !important;
+  box-shadow:none !important;
+}
+
+.brand-title{
+  color:white !important;
+  font-weight:950 !important;
+  letter-spacing:-.025em !important;
+}
+
+.brand-sub{
+  color:#697482 !important;
+}
+
+.pill,
+.season-pill{
+  background:#111419 !important;
+  border-color:#262b31 !important;
+  color:#d9dee5 !important;
+}
+
+/* Navigation */
+.app-tabs{
+  background:#000 !important;
+  border-bottom:1px solid #1e2328 !important;
+}
+
+.app-tab{
+  color:#667180 !important;
+  border:0 !important;
+  background:transparent !important;
+}
+
+.app-tab.active{
+  color:white !important;
+  background:#14181c !important;
+  box-shadow:none !important;
+  border-radius:11px 11px 0 0 !important;
+}
+
+/* Generic panels */
+.panel,
+.setting-card,
+.player-card,
+.competitor-card,
+.my-budget-card,
+.metric,
+.detail,
+.hero,
+.fa-modal,
+.runnerup-modal,
+.club-modal,
+.player-modal{
+  background:#101316 !important;
+  border:1px solid #242a31 !important;
+  box-shadow:none !important;
+}
+
+.panel{
+  border-radius:18px !important;
+}
+
+.panel-head{
+  border-bottom:1px solid #20252b !important;
+}
+
+.panel-title{
+  color:#fff !important;
+  font-weight:950 !important;
+  letter-spacing:-.02em !important;
+}
+
+.status,
+.muted{
+  color:#788391 !important;
+}
+
+/* Inputs */
+input,
+select{
+  background:#171b20 !important;
+  border:1px solid #262c33 !important;
+  color:white !important;
+  border-radius:12px !important;
+  box-shadow:none !important;
+}
+
+input:focus,
+select:focus{
+  border-color:#4f7df3 !important;
+  box-shadow:0 0 0 2px rgba(79,125,243,.14) !important;
+}
+
+/* Buttons */
+.primary-btn{
+  background:#fff !important;
+  color:#07090b !important;
+  border:0 !important;
+  border-radius:12px !important;
+  box-shadow:none !important;
+  font-weight:950 !important;
+}
+
+.primary-btn:hover{
+  background:#e9edf2 !important;
+  filter:none !important;
+}
+
+.secondary-btn,
+.icon-btn,
+.file-label{
+  background:#171b20 !important;
+  border:1px solid #282e35 !important;
+  color:#dce1e7 !important;
+  border-radius:11px !important;
+  box-shadow:none !important;
+}
+
+.secondary-btn:hover,
+.icon-btn:hover,
+.file-label:hover{
+  background:#1d2228 !important;
+  border-color:#39414a !important;
+}
+
+/* Role tabs */
+.role-tabs{
+  gap:9px !important;
+}
+
+.role-tab{
+  border:0 !important;
+  border-radius:12px !important;
+  min-height:44px;
+  font-weight:950 !important;
+  opacity:.76;
+  box-shadow:none !important;
+}
+
+.role-tab[data-role="P"]{background:#5d4216 !important}
+.role-tab[data-role="D"]{background:#274918 !important}
+.role-tab[data-role="C"]{background:#274bba !important}
+.role-tab[data-role="A"]{background:#651721 !important}
+
+.role-tab.active{
+  opacity:1 !important;
+  outline:2px solid rgba(255,255,255,.05) !important;
+}
+
+.role-tab[data-role="P"].active,
+.role-tab[data-role="D"].active,
+.role-tab[data-role="C"].active,
+.role-tab[data-role="A"].active{
+  box-shadow:none !important;
+}
+
+/* Search */
+.search-wrap{
+  background:transparent !important;
+}
+
+#playerSearch{
+  background:#0e1114 !important;
+  border-color:#20252b !important;
+  border-radius:14px !important;
+  color:white !important;
+}
+
+.search-results{
+  background:#111418 !important;
+  border-color:#272d34 !important;
+  border-radius:14px !important;
+  box-shadow:0 20px 50px rgba(0,0,0,.55) !important;
+}
+
+.search-result:hover{
+  background:#1a1f24 !important;
+}
+
+/* Player */
+.player-top{
+  background:#111419 !important;
+  border:1px solid #252a30 !important;
+  border-radius:16px !important;
+  padding:16px !important;
+}
+
+.player-name{
+  color:white !important;
+  font-weight:950 !important;
+  letter-spacing:-.025em !important;
+}
+
+.player-club{
+  color:#6e7988 !important;
+}
+
+.hero{
+  background:#171b20 !important;
+  border:0 !important;
+  border-radius:12px !important;
+}
+
+.hero::before{
+  display:none !important;
+}
+
+.hero-label{
+  color:#5d6876 !important;
+}
+
+.hero-value{
+  color:white !important;
+  font-weight:950 !important;
+}
+
+.detail{
+  background:#0f1215 !important;
+  border:1px solid #1d2227 !important;
+  border-radius:10px !important;
+}
+
+.detail span{
+  color:#596473 !important;
+}
+
+.detail strong{
+  color:#d6dbe1 !important;
+}
+
+/* Purchase area */
+.purchase-row{
+  background:#111419 !important;
+  border:1px solid #252a30 !important;
+  border-radius:16px !important;
+  padding:14px !important;
+}
+
+.purchase-row label{
+  color:#687483 !important;
+  text-transform:uppercase !important;
+  letter-spacing:.05em !important;
+  font-size:9px !important;
+  font-weight:900 !important;
+}
+
+/* Analysis */
+.analysis-box{
+  background:transparent !important;
+}
+
+.verdict{
+  background:#111419 !important;
+  border:1px solid #252a30 !important;
+  border-radius:16px !important;
+  box-shadow:none !important;
+}
+
+.verdict.good,
+.verdict.warn,
+.verdict.bad{
+  background:#111419 !important;
+}
+
+.verdict.good{border-left:4px solid #4e9638 !important}
+.verdict.warn{border-left:4px solid #d5a832 !important}
+.verdict.bad{border-left:4px solid #d9475b !important}
+
+.verdict-main{
+  color:#fff !important;
+  font-weight:950 !important;
+}
+
+.metric{
+  background:#171b20 !important;
+  border:0 !important;
+  border-radius:11px !important;
+}
+
+.metric span{
+  color:#596473 !important;
+}
+
+.metric strong{
+  color:white !important;
+}
+
+/* Budget cards */
+.my-budget-card{
+  background:#111419 !important;
+  border:0 !important;
+  border-left:4px solid #3c444e !important;
+  border-radius:12px !important;
+}
+
+.my-budget-card.role-p{border-left-color:#a97924 !important}
+.my-budget-card.role-d{border-left-color:#4a812f !important}
+.my-budget-card.role-c{border-left-color:#4f7df3 !important}
+.my-budget-card.role-a{border-left-color:#9a2b3b !important}
+
+/* Competitors */
+.competitor-strip{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+
+.competitor-card{
+  background:#111419 !important;
+  border:0 !important;
+  border-left:4px solid #3b424c !important;
+  border-radius:13px !important;
+  box-shadow:none !important;
+}
+
+.competitor-card.strong{border-left-color:#d9475b !important}
+.competitor-card.medium{border-left-color:#d5a832 !important}
+.competitor-card.low{border-left-color:#4e9638 !important}
+
+.competitor-name{
+  color:#fff !important;
+}
+
+.competitor-meta{
+  color:#697483 !important;
+}
+
+/* Roster table */
+.footerbar{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+
+.table-wrap{
+  border:1px solid #22272d !important;
+  border-radius:15px !important;
+  overflow:auto !important;
+  background:#0f1215 !important;
+}
+
+.roster-table,
+.roster-table td{
+  background:#0f1215 !important;
+}
+
+.roster-table th{
+  background:#171b20 !important;
+  color:#687483 !important;
+}
+
+.roster-table td{
+  border-color:#1d2228 !important;
+  color:#e6eaee !important;
+}
+
+.roster-table tr:hover td{
+  background:#15191e !important;
+}
+
+/* Home/configuration */
+#homeView .panel{
+  background:#111419 !important;
+  border:1px solid #242a31 !important;
+  border-radius:18px !important;
+}
+
+#homeView .panel-head{
+  background:transparent !important;
+}
+
+#homeView .panel-body{
+  background:transparent !important;
+}
+
+#homeView .start-auction-btn{
+  background:#fff !important;
+  color:#050607 !important;
+}
+
+/* Overlays */
+.runnerup-backdrop,
+.fa-modal-backdrop,
+.club-overlay,
+.player-overlay{
+  background:rgba(0,0,0,.76) !important;
+  backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+}
+
+.runnerup-modal,
+.fa-modal,
+.club-picker,
+.player-picker{
+  background:#15191e !important;
+  border:1px solid #292f36 !important;
+  box-shadow:0 25px 60px rgba(0,0,0,.55) !important;
+}
+
+/* Desktop spacing refinement */
+@media(min-width:701px){
+  .main{
+    gap:14px !important;
+  }
+
+  .panel-body{
+    padding:16px !important;
+  }
+
+  .panel-head{
+    padding:14px 16px !important;
+  }
+
+  .search-toolbar{
+    gap:9px !important;
+  }
+
+  #playerSearch{
+    height:46px !important;
+    font-size:15px !important;
+  }
+
+  .role-tab{
+    min-height:46px !important;
+  }
+
+  .player-name{
+    font-size:28px !important;
+  }
+
+  .hero{
+    min-height:92px !important;
+    padding:16px 12px !important;
+  }
+
+  .hero-value{
+    font-size:27px !important;
+  }
+
+  .purchase-row{
+    margin-top:14px !important;
+  }
+
+  .primary-btn{
+    min-height:42px !important;
+  }
+
+  .competitor-card{
+    padding:14px !important;
+  }
+}
+
+
+/* ==================================================================
+   FANTA AGENTE 2.2 — BLUE GREY FLAT
+   Flat shapes + cooler blue-grey atmosphere
+   ================================================================== */
+
+:root{
+  --bg:#10171d;
+  --panel:#161f26;
+  --panel-2:#1c2730;
+  --panel-3:#22303a;
+  --line:#2d3c47;
+  --line-2:#3a4c59;
+  --text:#f4f7fa;
+  --muted:#8fa0ad;
+
+  --blue:#4f7df3;
+  --cyan:#5fc7f7;
+
+  --role-p:#a97721;
+  --role-d:#4c7c30;
+  --role-c:#3f6fd9;
+  --role-a:#9a3242;
+}
+
+html,body{
+  background:#10171d !important;
+  color:var(--text) !important;
+}
+
+body{
+  background:
+    linear-gradient(180deg,#111a21 0%,#0f161c 100%) !important;
+}
+
+/* Header and nav */
+.topbar{
+  background:#131c23 !important;
+  border-bottom:1px solid #283640 !important;
+}
+
+.app-tabs{
+  background:#131c23 !important;
+  border-bottom:1px solid #283640 !important;
+}
+
+.app-tab{
+  color:#7e8e9b !important;
+}
+
+.app-tab.active{
+  background:#1a252d !important;
+  color:#fff !important;
+}
+
+/* Surfaces */
+.panel,
+.setting-card,
+.player-card,
+.competitor-card,
+.my-budget-card,
+.metric,
+.detail,
+.hero,
+.fa-modal,
+.runnerup-modal,
+.club-modal,
+.player-modal,
+#homeView .panel{
+  background:#182229 !important;
+  border:1px solid #2d3b45 !important;
+  box-shadow:none !important;
+}
+
+.player-top,
+.purchase-row,
+.verdict,
+.competitor-card,
+.my-budget-card,
+#homeView .panel{
+  background:#182229 !important;
+}
+
+.hero,
+.metric,
+.detail,
+input,
+select{
+  background:#1d2931 !important;
+  border-color:#31414c !important;
+}
+
+.search-results,
+.runnerup-modal,
+.fa-modal,
+.club-picker,
+.player-picker{
+  background:#172128 !important;
+  border-color:#33444f !important;
+}
+
+/* Flat buttons */
+.primary-btn{
+  background:#f3f5f7 !important;
+  color:#10161b !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+
+.secondary-btn,
+.icon-btn,
+.file-label{
+  background:#1c2730 !important;
+  border:1px solid #33434e !important;
+  color:#e5ebef !important;
+  box-shadow:none !important;
+}
+
+/* Role tabs: inactive much more subdued */
+.role-tab{
+  border:1px solid #34434e !important;
+  background:#202b33 !important;
+  opacity:.42 !important;
+  filter:saturate(.35) brightness(.88);
+  transform:none !important;
+  box-shadow:none !important;
+  transition:opacity .14s ease, filter .14s ease, border-color .14s ease, background .14s ease;
+}
+
+.role-tab .role-short,
+.role-tab .role-long{
+  color:#b8c1c8 !important;
+}
+
+.role-tab[data-role="P"]{
+  background:#59441f !important;
+}
+.role-tab[data-role="D"]{
+  background:#304823 !important;
+}
+.role-tab[data-role="C"]{
+  background:#263d76 !important;
+}
+.role-tab[data-role="A"]{
+  background:#54242b !important;
+}
+
+/* Selected role: full color, white label, stronger outline */
+.role-tab.active{
+  opacity:1 !important;
+  filter:saturate(1.15) brightness(1.08) !important;
+  border-color:rgba(255,255,255,.34) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.06) !important;
+}
+
+.role-tab.active .role-short,
+.role-tab.active .role-long{
+  color:#fff !important;
+}
+
+.role-tab[data-role="P"].active{
+  background:#9b6b1f !important;
+}
+.role-tab[data-role="D"].active{
+  background:#47762d !important;
+}
+.role-tab[data-role="C"].active{
+  background:#3f6fd9 !important;
+}
+.role-tab[data-role="A"].active{
+  background:#983345 !important;
+}
+
+/* Extra contrast on mobile */
+@media(max-width:700px){
+  .topbar{
+    background:#111920 !important;
+  }
+
+  .mobile-bottom-nav{
+    background:rgba(28,39,48,.96) !important;
+    border-color:#394a56 !important;
+  }
+
+  .mobile-nav-btn{
+    color:#738491 !important;
+  }
+
+  .mobile-nav-btn.active{
+    background:#30404c !important;
+    color:#8dd3f7 !important;
+  }
+
+  #auctionView .role-tab{
+    opacity:.34 !important;
+    filter:saturate(.28) brightness(.82) !important;
+  }
+
+  #auctionView .role-tab.active{
+    opacity:1 !important;
+    filter:saturate(1.18) brightness(1.10) !important;
+    border-color:rgba(255,255,255,.44) !important;
+  }
+
+  #auctionView .role-tab[data-role="P"].active{background:#9b6b1f !important}
+  #auctionView .role-tab[data-role="D"].active{background:#47762d !important}
+  #auctionView .role-tab[data-role="C"].active{background:#3f6fd9 !important}
+  #auctionView .role-tab[data-role="A"].active{background:#983345 !important}
+
+  #auctionView .search-toolbar,
+  #auctionView .search-wrap{
+    background:transparent !important;
+  }
+
+  #auctionView #playerSearch{
+    background:#182229 !important;
+    border-color:#32424e !important;
+  }
+
+  #auctionView .purchase-row,
+  #auctionView .verdict,
+  #auctionView .player-top{
+    background:#182229 !important;
+    border-color:#2f3f4a !important;
+  }
+}
+
+
+/* ==================================================================
+   FANTA AGENTE 2.3 — LIQUID GLASS WORKSPACE BAR
+   "Fanta Agente" / "Asta" as floating iOS-like glass bar
+   Desktop: top overlay
+   Mobile: bottom overlay
+   ================================================================== */
+
+/* Nasconde la vecchia bottom nav completa: da ora la nav workspace è la barra glass */
+.mobile-bottom-nav{
+  display:none !important;
+}
+
+/* Barra principale floating */
+.app-tabs{
+  position:fixed !important;
+  left:50% !important;
+  transform:translateX(-50%) !important;
+  top:74px !important;
+  bottom:auto !important;
+  z-index:1400 !important;
+
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:6px !important;
+  width:min(420px,calc(100vw - 32px)) !important;
+
+  padding:6px !important;
+  border-radius:24px !important;
+  background:rgba(36,48,58,.58) !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  box-shadow:
+    0 12px 32px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.10) !important;
+  backdrop-filter:blur(22px) saturate(1.25) !important;
+  -webkit-backdrop-filter:blur(22px) saturate(1.25) !important;
+}
+
+.app-tab{
+  appearance:none !important;
+  min-width:0 !important;
+  height:44px !important;
+  padding:0 16px !important;
+  border:0 !important;
+  border-radius:18px !important;
+  background:transparent !important;
+  color:#d6dee5 !important;
+  font-size:14px !important;
+  font-weight:850 !important;
+  letter-spacing:.01em !important;
+  transition:
+    background .15s ease,
+    color .15s ease,
+    transform .15s ease,
+    box-shadow .15s ease !important;
+}
+
+.app-tab:hover{
+  background:rgba(255,255,255,.06) !important;
+  color:#fff !important;
+}
+
+.app-tab.active{
+  background:rgba(255,255,255,.18) !important;
+  color:#ffffff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    0 2px 8px rgba(0,0,0,.08) !important;
+}
+
+/* Spazio per non far sovrapporre la barra ai contenuti */
+body{
+  padding-top:56px !important;
+}
+
+.home-shell{
+  padding-top:30px !important;
+}
+
+#auctionView .main{
+  padding-top:26px !important;
+}
+
+/* Desktop refinement */
+@media(min-width:701px){
+  .app-tabs{
+    top:84px !important;
+  }
+
+  body{
+    padding-top:68px !important;
+  }
+
+  .home-shell{
+    padding-top:38px !important;
+  }
+
+  #auctionView .main{
+    padding-top:34px !important;
+  }
+}
+
+/* Mobile: same glass bar goes to bottom */
+@media(max-width:700px){
+  .app-tabs{
+    top:auto !important;
+    bottom:max(10px,env(safe-area-inset-bottom)) !important;
+    left:12px !important;
+    right:12px !important;
+    transform:none !important;
+    width:auto !important;
+    border-radius:26px !important;
+    padding:7px !important;
+    background:rgba(29,39,48,.78) !important;
+    box-shadow:
+      0 18px 48px rgba(0,0,0,.34),
+      inset 0 1px 0 rgba(255,255,255,.10) !important;
+  }
+
+  .app-tab{
+    height:46px !important;
+    border-radius:19px !important;
+    font-size:14px !important;
+  }
+
+  body{
+    padding-top:0 !important;
+    padding-bottom:92px !important;
+  }
+
+  .home-shell{
+    padding-top:8px !important;
+    padding-bottom:16px !important;
+  }
+
+  #auctionView .main{
+    padding-top:8px !important;
+    padding-bottom:0 !important;
+  }
+}
+
+/* Fallback if backdrop-filter unsupported */
+@supports not ((backdrop-filter:blur(2px)) or (-webkit-backdrop-filter:blur(2px))){
+  .app-tabs{
+    background:rgba(37,49,60,.92) !important;
+  }
+}
+
+
+/* v2.4 fix: tab attivo nella liquid bar con angoli tutti arrotondati */
+.app-tabs .app-tab,
+.app-tabs .app-tab.active{
+  border-radius:18px !important;
+}
+
+@media(max-width:700px){
+  .app-tabs .app-tab,
+  .app-tabs .app-tab.active{
+    border-radius:19px !important;
+  }
+}
+
+
+/* v2.5: liquid bar realmente indipendente dall'header */
+.app-tabs{
+  top:104px !important;
+  background:rgba(30,42,51,.66) !important;
+  border:1px solid rgba(255,255,255,.14) !important;
+  box-shadow:
+    0 16px 38px rgba(0,0,0,.26),
+    0 2px 10px rgba(0,0,0,.14),
+    inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
+
+/* separazione netta tra header e floating nav */
+body{
+  padding-top:88px !important;
+}
+
+.home-shell{
+  padding-top:44px !important;
+}
+
+#auctionView .main{
+  padding-top:40px !important;
+}
+
+@media(min-width:701px){
+  .app-tabs{
+    top:112px !important;
+  }
+
+  body{
+    padding-top:96px !important;
+  }
+
+  .home-shell{
+    padding-top:50px !important;
+  }
+
+  #auctionView .main{
+    padding-top:46px !important;
+  }
+}
+
+@media(max-width:700px){
+  .app-tabs{
+    top:auto !important;
+    bottom:max(14px,env(safe-area-inset-bottom)) !important;
+  }
+
+  body{
+    padding-top:0 !important;
+    padding-bottom:96px !important;
+  }
+
+  .home-shell,
+  #auctionView .main{
+    padding-top:8px !important;
+  }
+}
+
+
+/* v2.6: rimuovi header informativo, lascia solo tool in alto a destra + overlay workspace */
+
+/* Topbar minimale */
+.topbar{
+  position:fixed !important;
+  top:0 !important;
+  left:0 !important;
+  right:0 !important;
+  z-index:1450 !important;
+  height:72px !important;
+  padding:12px 18px !important;
+  display:flex !important;
+  align-items:flex-start !important;
+  justify-content:flex-end !important;
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  pointer-events:none !important;
+}
+
+/* Nasconde completamente blocco titolo/info */
+.topbar .brand,
+.topbar .brand-title,
+.topbar .brand-sub,
+.topbar .pill,
+.topbar .season-pill{
+  display:none !important;
+}
+
+/* Lascia solo i tool a destra */
+.topbar .top-stats{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  gap:8px !important;
+  width:auto !important;
+  margin-left:auto !important;
+  pointer-events:auto !important;
+}
+
+.topbar .top-stats .pill,
+.topbar .top-stats .season-pill{
+  display:none !important;
+}
+
+.topbar .top-stats .icon-btn{
+  width:44px !important;
+  height:44px !important;
+  border-radius:50% !important;
+  background:rgba(28,39,48,.82) !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  color:#eef3f7 !important;
+  backdrop-filter:blur(18px) saturate(1.2) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(1.2) !important;
+  box-shadow:
+    0 10px 28px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+
+/* Overlay Fanta Agente / Asta più centrale e indipendente */
+.app-tabs{
+  top:22px !important;
+}
+
+@media(min-width:701px){
+  body{
+    padding-top:36px !important;
+  }
+
+  .home-shell{
+    padding-top:70px !important;
+  }
+
+  #auctionView .main{
+    padding-top:66px !important;
+  }
+
+  .app-tabs{
+    top:22px !important;
+    width:min(400px,calc(100vw - 120px)) !important;
+  }
+}
+
+@media(max-width:700px){
+  .topbar{
+    height:64px !important;
+    padding:10px 12px !important;
+  }
+
+  .topbar .top-stats .icon-btn{
+    width:42px !important;
+    height:42px !important;
+  }
+
+  body{
+    padding-top:0 !important;
+    padding-bottom:96px !important;
+  }
+
+  .home-shell,
+  #auctionView .main{
+    padding-top:8px !important;
+  }
+
+  /* Su mobile l'overlay resta in basso come richiesto nelle versioni precedenti */
+  .app-tabs{
+    top:auto !important;
+    bottom:max(14px,env(safe-area-inset-bottom)) !important;
+    left:12px !important;
+    right:12px !important;
+    width:auto !important;
+  }
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -1964,7 +3936,7 @@ html, body{
               <label>Prezzo</label>
               <input id="priceInput" min="1" step="1" placeholder="0" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" oninput="sanitizeNumericInput(this)">
             </div>
-            <button class="primary-btn mobile-register-btn" onclick="registerPurchase()">REGISTRA ASSEGNAZIONE</button>
+            <button class="primary-btn mobile-register-btn" onclick="registerPurchase()">ASSEGNA</button>
           </div>
         </div>
       </div>
@@ -3588,6 +5560,32 @@ async function importArchiveFile(file){
   render()
 }
 
+
+function mobileNavAuction(){
+  setWorkspace("auction");
+  requestAnimationFrame(()=>window.scrollTo({top:0,behavior:"smooth"}))
+}
+
+function mobileNavHome(){
+  setWorkspace("home");
+  requestAnimationFrame(()=>window.scrollTo({top:0,behavior:"smooth"}))
+}
+
+function mobileNavRosters(){
+  setWorkspace("auction");
+  requestAnimationFrame(()=>{
+    const target=document.querySelector("#auctionView .footerbar");
+    if(target)target.scrollIntoView({behavior:"smooth",block:"start"})
+  })
+}
+
+function updateMobileNavState(){
+  document.querySelectorAll(".mobile-nav-btn").forEach(btn=>btn.classList.remove("active"));
+  const isHome=workspace==="home";
+  const key=isHome?"home":"auction";
+  document.querySelector(`.mobile-nav-btn[data-mobile-nav="${key}"]`)?.classList.add("active")
+}
+
 function setWorkspace(view){
   if(view==="auction"){
     const league=getCurrentLeague();
@@ -3608,6 +5606,8 @@ function setWorkspace(view){
   if(ab)ab.classList.toggle("active",view==="auction");
 
   localStorage.setItem("fa_workspace_v2",view)
+
+  updateMobileNavState();
 }
 
 function createTeams(){
@@ -5331,5 +7331,29 @@ setWorkspace(initialWorkspace);
 autoLoadRemoteDatabase();
 checkRemoteBackup();
 </script>
+
+<nav class="mobile-bottom-nav" aria-label="Navigazione mobile">
+  <button class="mobile-nav-btn" data-mobile-nav="auction" onclick="mobileNavAuction()">
+    <span class="mobile-nav-icon">⚡</span>
+    <span>Asta</span>
+  </button>
+  <button class="mobile-nav-btn" data-mobile-nav="rose" onclick="mobileNavRosters()">
+    <span class="mobile-nav-icon">▦</span>
+    <span>Rose</span>
+  </button>
+  <button class="mobile-nav-btn" data-mobile-nav="history" onclick="openHistory()">
+    <span class="mobile-nav-icon">◷</span>
+    <span>Storico</span>
+  </button>
+  <button class="mobile-nav-btn" data-mobile-nav="home" onclick="mobileNavHome()">
+    <span class="mobile-nav-icon">⌂</span>
+    <span>Agente</span>
+  </button>
+  <button class="mobile-nav-btn" data-mobile-nav="settings" onclick="openSettings()">
+    <span class="mobile-nav-icon">⚙</span>
+    <span>Impost.</span>
+  </button>
+</nav>
+
 </body>
 </html>
