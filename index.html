@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 1.9</title>
+<title>Fanta Agente 1.10</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -669,6 +669,16 @@ input[type=file]{display:none}
   .fa-modal-actions{display:grid;grid-template-columns:1fr 1fr}
 }
 
+
+@media(max-width:760px){
+  #purchasePrice,#priceInput,#auctionPrice{
+    min-height:48px;
+    font-size:18px;
+    font-weight:900;
+    text-align:center
+  }
+}
+
 </style>
 </head>
 <body>
@@ -878,7 +888,7 @@ input[type=file]{display:none}
             </div>
             <div class="field">
               <label>Prezzo</label>
-              <input id="priceInput" type="number" min="1" step="1" placeholder="0">
+              <input id="priceInput" min="1" step="1" placeholder="0" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" oninput="sanitizeNumericInput(this)">
             </div>
             <button class="primary-btn" onclick="registerPurchase()">Registra</button>
           </div>
@@ -4041,6 +4051,12 @@ document.addEventListener("keydown",e=>{
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();restoreLastPurchase()}
   if(e.key==="Escape"){results.style.display="none";if(selectedKey)clearSelection()}
 });
+
+function sanitizeNumericInput(el){
+  if(!el)return;
+  const cleaned=String(el.value||"").replace(/\D+/g,"");
+  if(el.value!==cleaned)el.value=cleaned
+}
 load();render();
 const initialWorkspace=localStorage.getItem("fa_workspace_v2")||"home";
 setWorkspace(initialWorkspace);
