@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 1.8</title>
+<title>Fanta Agente 1.9</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -785,7 +785,8 @@ input[type=file]{display:none}
           <div class="archive-actions-bottom">
             <button class="secondary-btn" onclick="exportArchive()">⬇ Esporta archivio JSON</button>
             <button class="secondary-btn" onclick="exportOpponentProfilesCsv()">⬇ Esporta profili CSV</button>
-            <button class="secondary-btn" onclick="document.getElementById('archiveFile').click()">⬆ Importa archivio JSON</button>
+            <button class="secondary-btn" onclick="triggerRestoreArchive()">⬆ Ripristina JSON</button>
+            <button class="secondary-btn" onclick="triggerMergeArchive()">⊕ Unisci JSON</button>
           </div>
         </div>
       </section>
@@ -1088,13 +1089,17 @@ input[type=file]{display:none}
 
       <div id="archiveStatus" class="status"></div>
 
+      <div id="remoteBackupStatus" class="status" style="margin-top:8px">
+        Controllo backup GitHub…
+      </div>
+
       <div class="settings-actions">
         <button class="secondary-btn" onclick="exportArchive()">⬇ Esporta archivio JSON</button>
         <button class="secondary-btn" onclick="exportOpponentProfilesCsv()">⬇ Profili avversari CSV</button>
-        <label class="secondary-btn file-inline">
-          ⬆ Importa archivio
-          <input type="file" id="archiveFile" accept=".json,application/json">
-        </label>
+        <button class="secondary-btn" onclick="triggerRestoreArchive()">⬆ Ripristina JSON</button>
+        <button class="secondary-btn" onclick="triggerMergeArchive()">⊕ Unisci JSON</button>
+        <input type="file" id="archiveFile" accept=".json,application/json" style="display:none">
+        <input type="file" id="mergeArchiveFile" accept=".json,application/json" style="display:none">
       </div>
     </div>
 
@@ -1102,9 +1107,11 @@ input[type=file]{display:none}
     <div class="setting-card">
       <div class="panel-title">Database</div>
       <p class="status">
-        Fanta Agente prova automaticamente a caricare <strong>database.xlsx</strong>
-        dalla stessa cartella di index.html. L'import manuale resta disponibile come fallback.
+        Il database viene cercato automaticamente nella cartella <strong>database</strong>
+        in base alla stagione attiva, ad esempio <strong>database/2026-27.xlsx</strong>.
+        L'import manuale resta disponibile come fallback.
       </p>
+      <div id="dbRemoteStatus" class="status" style="margin-bottom:8px"></div>
       <label class="file-label">
         📥 Importa / aggiorna manualmente
         <input type="file" id="databaseFile" accept=".xlsx,.xls">
@@ -1998,7 +2005,8 @@ function switchSeason(id){
   loadLeagueIntoRuntime(season.id,leagueId);
   save();
   clearSelection();
-  render()
+  render();
+  autoLoadRemoteDatabase(true)
 }
 
 function switchLeague(id){
@@ -2640,7 +2648,209 @@ function load(){
 function getPlayer(k){return players.find(p=>p.key===k)}
 function sold(k){return history.some(x=>x.playerKey===k)}
 
-const REMOTE_DATABASE_URL="./database.xlsx";
+const REMOTE_BACKUP_URL="./backup/latest.json";
+
+function seasonDatabaseFilename(){
+  const season=getCurrentSeason();
+  const label=(season?.label||"").trim();
+  const match=label.match(/(20\d{2})\s*\/\s*(\d{2,4})/);
+
+  if(match){
+    const y1=match[1];
+    const y2=match[2].length===4 ? match[2].slice(-2) : match[2];
+    return `${y1}-${y2}.xlsx`
+  }
+
+  return label
+    ? `${label.replace(/[^a-zA-Z0-9_-]+/g,"-")}.xlsx`
+    : "database.xlsx"
+}
+
+function remoteDatabaseUrl(){
+  return `./database/${seasonDatabaseFilename()}`
+}
+
+function setRemoteDbStatus(text){
+  const el=document.getElementById("dbRemoteStatus");
+  if(el)el.textContent=text
+}
+
+function setRemoteBackupStatus(text){
+  const el=document.getElementById("remoteBackupStatus");
+  if(el)el.textContent=text
+}
+
+function triggerRestoreArchive(){
+  document.getElementById("archiveFile")?.click()
+}
+
+function triggerMergeArchive(){
+  document.getElementById("mergeArchiveFile")?.click()
+}
+
+function purchaseMergeKey(p){
+  return p.id || [
+    p.seasonId||"",
+    p.leagueId||"",
+    p.sequence??"",
+    p.playerKey||p.playerSnapshot?.key||"",
+    p.managerId||"",
+    p.price??"",
+    p.timestamp||""
+  ].join("|")
+}
+
+function mergeArchives(baseArchive,incomingArchive){
+  const base=ensureArchiveShape(deepCopy(baseArchive));
+  const incoming=ensureArchiveShape(deepCopy(incomingArchive));
+
+  const managerRemap=new Map();
+
+  incoming.managers.forEach(im=>{
+    const canonical=canonicalManagerName(im.displayName);
+    let existing=base.managers.find(bm=>{
+      const bCanonical=canonicalManagerName(bm.displayName);
+      return norm(bm.displayName)===norm(im.displayName) ||
+             (canonical && bCanonical===canonical)
+    });
+
+    if(!existing){
+      let newId=im.id;
+      if(base.managers.some(m=>m.id===newId)){
+        newId=`m_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,6)}`
+      }
+      existing={...deepCopy(im),id:newId};
+      base.managers.push(existing)
+    }else{
+      if(!existing.defaultTeamName && im.defaultTeamName){
+        existing.defaultTeamName=im.defaultTeamName
+      }
+      if(im.isMe)existing.isMe=true
+    }
+
+    managerRemap.set(im.id,existing.id)
+  });
+
+  incoming.seasons.forEach(is=>{
+    let bs=base.seasons.find(s=>norm(s.label)===norm(is.label));
+
+    if(!bs){
+      bs=deepCopy(is);
+
+      if(base.seasons.some(s=>s.id===bs.id)){
+        bs.id=`s_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,5)}`
+      }
+
+      bs.leagues.forEach(l=>{
+        (l.participants||[]).forEach(p=>{
+          p.managerId=managerRemap.get(p.managerId)||p.managerId
+        });
+        (l.purchases||[]).forEach(p=>{
+          p.managerId=managerRemap.get(p.managerId)||p.managerId
+        });
+        (l.redo||[]).forEach(p=>{
+          p.managerId=managerRemap.get(p.managerId)||p.managerId
+        })
+      });
+
+      base.seasons.push(bs);
+      return
+    }
+
+    is.leagues.forEach(il=>{
+      let bl=bs.leagues.find(l=>norm(l.label)===norm(il.label));
+
+      if(!bl){
+        bl=deepCopy(il);
+
+        if(bs.leagues.some(l=>l.id===bl.id)){
+          bl.id=`l_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,5)}`
+        }
+
+        (bl.participants||[]).forEach(p=>{
+          p.managerId=managerRemap.get(p.managerId)||p.managerId
+        });
+        (bl.purchases||[]).forEach(p=>{
+          p.managerId=managerRemap.get(p.managerId)||p.managerId
+        });
+        (bl.redo||[]).forEach(p=>{
+          p.managerId=managerRemap.get(p.managerId)||p.managerId
+        });
+
+        bs.leagues.push(bl);
+        return
+      }
+
+      const existingParticipantIds=new Set(
+        (bl.participants||[]).map(p=>p.managerId)
+      );
+
+      (il.participants||[]).forEach(p=>{
+        const mappedId=managerRemap.get(p.managerId)||p.managerId;
+        if(!existingParticipantIds.has(mappedId)){
+          bl.participants.push({...deepCopy(p),managerId:mappedId});
+          existingParticipantIds.add(mappedId)
+        }
+      });
+
+      const seenPurchases=new Set(
+        (bl.purchases||[]).map(p=>purchaseMergeKey(p))
+      );
+
+      (il.purchases||[]).forEach(p=>{
+        const cp=deepCopy(p);
+        cp.managerId=managerRemap.get(cp.managerId)||cp.managerId;
+        const key=purchaseMergeKey(cp);
+
+        if(!seenPurchases.has(key)){
+          bl.purchases.push(cp);
+          seenPurchases.add(key)
+        }
+      });
+
+      if(!bl.database?.players?.length && il.database?.players?.length){
+        bl.database=deepCopy(il.database)
+      }
+    })
+  });
+
+  return ensureArchiveShape(base)
+}
+
+async function checkRemoteBackup(){
+  try{
+    const response=await fetch(
+      `${REMOTE_BACKUP_URL}?t=${Date.now()}`,
+      {cache:"no-store"}
+    );
+
+    if(response.status===404){
+      setRemoteBackupStatus("Backup GitHub: nessun latest.json presente.")
+      return null
+    }
+
+    if(!response.ok){
+      throw new Error(`HTTP ${response.status}`)
+    }
+
+    const remote=ensureArchiveShape(await response.json());
+    const purchases=remote.seasons
+      .flatMap(s=>s.leagues||[])
+      .reduce((sum,l)=>sum+(l.purchases?.length||0),0);
+
+    setRemoteBackupStatus(
+      `Backup GitHub trovato · ${purchases} acquisti. Non viene caricato automaticamente.`
+    );
+
+    return remote
+  }catch(err){
+    console.info("Backup GitHub non disponibile:",err);
+    setRemoteBackupStatus(
+      "Backup GitHub non disponibile. I dati locali restano invariati."
+    );
+    return null
+  }
+}
 
 function parseFantaLabArrayBuffer(data){
   const wb=XLSX.read(data,{type:"array"});
@@ -2722,6 +2932,7 @@ function applyDatabaseToCurrentSeason(parsedPlayers,filename,sourceLabel=""){
 }
 
 async function autoLoadRemoteDatabase(silent=false){
+  setRemoteDbStatus(`Cerco ${remoteDatabaseUrl()}…`);
   /*
     Funziona su GitHub Pages perché index.html e database.xlsx sono serviti
     dallo stesso dominio/cartella. Se il file non esiste o la pagina viene
@@ -2729,7 +2940,7 @@ async function autoLoadRemoteDatabase(silent=false){
   */
   try{
     const response=await fetch(
-      `${REMOTE_DATABASE_URL}?t=${Date.now()}`,
+      `${remoteDatabaseUrl()}?t=${Date.now()}`,
       {cache:"no-store"}
     );
 
@@ -2739,26 +2950,28 @@ async function autoLoadRemoteDatabase(silent=false){
 
     const data=await response.arrayBuffer();
     const parsed=parseFantaLabArrayBuffer(data);
+    setRemoteDbStatus(`Database GitHub trovato: ${seasonDatabaseFilename()} · ${parsed.length} giocatori`);
 
     applyDatabaseToCurrentSeason(
       parsed,
-      "database.xlsx",
+      seasonDatabaseFilename(),
       "GitHub Pages"
     );
 
     const s=document.getElementById("dbStatus");
     if(s){
-      s.textContent=`${parsed.length} giocatori caricati automaticamente · database.xlsx · GitHub Pages`
+      s.textContent=`${parsed.length} giocatori caricati automaticamente · ${seasonDatabaseFilename()} · GitHub Pages`
     }
 
     return true
   }catch(err){
     console.info("Database remoto non caricato:",err);
+    setRemoteDbStatus(`Database GitHub non trovato: ${seasonDatabaseFilename()}`);
 
     if(!silent){
       const s=document.getElementById("dbStatus");
       if(s && !players.length){
-        s.textContent="database.xlsx non trovato online. Puoi usare l'import manuale."
+        s.textContent=`${seasonDatabaseFilename()} non trovato online. Puoi usare l'import manuale.`
       }
     }
 
@@ -2794,14 +3007,55 @@ document.getElementById("archiveFile").addEventListener("change",async e=>{
   if(!file)return;
 
   try{
-    if(!confirm("Importare questo archivio sostituirà l'archivio Fanta Agente presente in questo browser. Continuare?")){
-      return
-    }
-    await importArchiveFile(file);
-    alert("Archivio Fanta Agente importato correttamente.")
+    const text=await file.text();
+    const incoming=ensureArchiveShape(JSON.parse(text));
+
+    const ok=confirm(
+      "RIPRISTINO COMPLETO\n\n" +
+      "Il JSON selezionato sostituirà l'archivio presente in questo browser.\n" +
+      "Se vuoi mantenere entrambi usa invece Unisci JSON.\n\nContinuare?"
+    );
+
+    if(!ok)return;
+
+    archive=incoming;
+    currentSeasonId=archive.currentSeasonId;
+    currentLeagueId=archive.currentLeagueId;
+
+    save();
+    loadLeagueIntoRuntime(currentSeasonId,currentLeagueId);
+    render();
+    setWorkspace("home");
+
+    alert("Archivio ripristinato correttamente.")
   }catch(err){
     console.error(err);
-    alert("Non riesco a importare questo archivio. Verifica che sia un file JSON esportato da Fanta Agente.")
+    alert("Il file selezionato non è un archivio Fanta Agente valido.")
+  }finally{
+    e.target.value=""
+  }
+});
+
+
+document.getElementById("mergeArchiveFile").addEventListener("change",async e=>{
+  const file=e.target.files[0];
+  if(!file)return;
+
+  try{
+    const text=await file.text();
+    const incoming=ensureArchiveShape(JSON.parse(text));
+
+    archive=mergeArchives(archive,incoming);
+
+    save();
+    loadLeagueIntoRuntime(currentSeasonId,currentLeagueId);
+    render();
+    setWorkspace("home");
+
+    alert("Archivi uniti correttamente. I dati locali non sono stati cancellati.")
+  }catch(err){
+    console.error(err);
+    alert("Non riesco a unire questo file JSON.")
   }finally{
     e.target.value=""
   }
@@ -3791,6 +4045,7 @@ load();render();
 const initialWorkspace=localStorage.getItem("fa_workspace_v2")||"home";
 setWorkspace(initialWorkspace);
 autoLoadRemoteDatabase();
+checkRemoteBackup();
 </script>
 </body>
 </html>
