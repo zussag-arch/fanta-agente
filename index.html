@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 1.10</title>
+<title>Fanta Agente 1.11</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -680,6 +680,15 @@ input[type=file]{display:none}
 }
 
 </style>
+
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#10171c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fanta Agente">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+
 </head>
 <body>
 <div class="app">
@@ -4057,6 +4066,19 @@ function sanitizeNumericInput(el){
   const cleaned=String(el.value||"").replace(/\D+/g,"");
   if(el.value!==cleaned)el.value=cleaned
 }
+
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("./sw.js")
+      .then(reg=>{
+        console.info("Fanta Agente PWA pronta:",reg.scope)
+      })
+      .catch(err=>{
+        console.info("Service worker non registrato:",err)
+      })
+  })
+}
+
 load();render();
 const initialWorkspace=localStorage.getItem("fa_workspace_v2")||"home";
 setWorkspace(initialWorkspace);
