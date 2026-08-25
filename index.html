@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 1.12</title>
+<title>Fanta Agente 1.14</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -735,6 +735,388 @@ input[type=file]{display:none}
   .runnerup-actions button{min-height:46px}
 }
 
+
+.role-short{display:none}
+
+/* ---------- iPhone / mobile auction mode ---------- */
+@media(max-width:700px){
+  html{scroll-padding-top:118px}
+
+  /* Header più leggero e sempre disponibile */
+  .topbar{
+    position:sticky;
+    top:0;
+    z-index:900;
+    height:54px;
+    padding:0 10px;
+    box-shadow:0 4px 18px rgba(0,0,0,.22)
+  }
+  .brand{gap:8px}
+  .logo{
+    width:34px;height:34px;border-radius:9px;
+    font-size:13px
+  }
+  .brand-title{font-size:14px}
+  .brand-sub{display:none}
+  .top-stats{gap:6px}
+  .top-stats .pill{display:none}
+  .top-stats .season-pill{
+    display:flex;
+    height:32px;
+    padding:0 9px;
+    font-size:10px
+  }
+  .top-stats .icon-btn{
+    width:34px;height:34px
+  }
+
+  /* Navigazione principale sticky sotto l'header */
+  .app-tabs{
+    position:sticky;
+    top:54px;
+    z-index:880;
+    padding:6px 10px 0;
+    background:#10161a;
+    border-bottom:1px solid var(--line)
+  }
+  .app-tab{
+    height:36px;
+    border-radius:9px 9px 0 0;
+    font-size:11px
+  }
+
+  /* ASTA: meno cornici, più superficie utile */
+  #auctionView .main{
+    padding:8px 8px 0;
+    gap:8px
+  }
+  #auctionView .main > .panel{
+    border-radius:11px
+  }
+  #auctionView .main > section.panel > .panel-head{
+    display:none
+  }
+  #auctionView .main > section.panel > .panel-body{
+    padding:9px
+  }
+
+  /* Ricerca sempre a portata di pollice finché si è nel pannello giocatore */
+  #auctionView .search-wrap{
+    position:sticky;
+    top:96px;
+    z-index:700;
+    margin:-9px -9px 0;
+    padding:9px;
+    background:#171f24;
+    border-bottom:1px solid var(--line);
+    box-shadow:0 8px 18px rgba(0,0,0,.22)
+  }
+
+  /* Ruoli in un'unica riga, abbreviati */
+  #auctionView .role-tabs{
+    grid-template-columns:repeat(4,1fr);
+    gap:6px;
+    margin-bottom:7px
+  }
+  #auctionView .role-tab{
+    min-width:0;
+    height:36px;
+    padding:0;
+    font-size:14px
+  }
+  .role-long{display:none}
+  .role-short{display:inline;font-weight:950}
+
+  /* Cerca prima, filtri sotto */
+  #auctionView .search-toolbar{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px
+  }
+  #auctionView #playerSearch{
+    grid-column:1/-1;
+    grid-row:1;
+    min-width:0;
+    height:48px;
+    font-size:16px;
+    border-radius:11px;
+    padding:0 13px
+  }
+  #auctionView #clubFilterButton,
+  #auctionView #playerListButton{
+    grid-row:2;
+    min-width:0;
+    width:100%;
+    height:38px;
+    font-size:11px;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis
+  }
+  #auctionView .search-results{
+    top:100%;
+    max-height:44vh;
+    border-radius:0 0 12px 12px
+  }
+
+  /* Scheda giocatore compatta */
+  #auctionView .empty-state{
+    margin-top:10px;
+    padding:16px 10px
+  }
+  #auctionView .player-card{
+    margin-top:10px
+  }
+  #auctionView .player-top{
+    align-items:center
+  }
+  #auctionView .player-name{
+    font-size:24px;
+    line-height:1.05
+  }
+  #auctionView .player-club{
+    margin-top:4px;
+    font-size:11px
+  }
+  #auctionView .role-badge{
+    min-width:38px;
+    height:38px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:16px
+  }
+
+  /* I tre dati principali devono stare tutti sopra la piega */
+  #auctionView .hero-stats{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:6px;
+    margin:11px 0 8px
+  }
+  #auctionView .hero{
+    min-width:0;
+    padding:9px 6px;
+    text-align:center
+  }
+  #auctionView .hero-label{
+    font-size:8px;
+    line-height:1.2
+  }
+  #auctionView .hero-value{
+    font-size:19px;
+    margin-top:3px
+  }
+
+  /* Indicatori secondari compatti */
+  #auctionView .details{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:5px;
+    margin-top:7px
+  }
+  #auctionView .detail{
+    min-width:0;
+    padding:8px 4px;
+    text-align:center
+  }
+  #auctionView .detail span{
+    font-size:7px
+  }
+  #auctionView .detail strong{
+    font-size:14px;
+    margin-top:3px
+  }
+
+  /* Inserimento acquisto: il vero centro operativo */
+  #auctionView .purchase-row{
+    margin-top:11px;
+    padding-top:11px;
+    grid-template-columns:minmax(0,1fr) 92px;
+    gap:7px;
+    align-items:end
+  }
+  #auctionView .purchase-row .field label{
+    margin-bottom:4px;
+    font-size:9px
+  }
+  #auctionView #teamSelect{
+    height:50px;
+    font-size:15px;
+    font-weight:850
+  }
+  #auctionView #priceInput{
+    height:50px;
+    min-height:50px;
+    font-size:22px;
+    font-weight:950;
+    text-align:center
+  }
+  #auctionView .mobile-register-btn{
+    grid-column:1/-1;
+    width:100%;
+    height:52px;
+    border-radius:12px;
+    font-size:14px;
+    letter-spacing:.025em;
+    box-shadow:0 6px 18px rgba(0,0,0,.22)
+  }
+
+  /* Analisi: compatta, ma senza perdere il tetto strategico */
+  #auctionView main > aside.panel{
+    border-radius:11px
+  }
+  #auctionView main > aside.panel .panel-head{
+    padding:10px 12px
+  }
+  #auctionView .analysis-box{
+    padding:10px
+  }
+  #auctionView .verdict{
+    padding:11px;
+    margin-bottom:8px
+  }
+  #auctionView .verdict-title{font-size:9px}
+  #auctionView .verdict-main{
+    font-size:22px;
+    margin-top:3px
+  }
+  #auctionView #verdictSub{
+    font-size:11px !important;
+    line-height:1.35
+  }
+  #auctionView .live-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:5px
+  }
+  #auctionView .metric{
+    min-width:0;
+    padding:8px 5px;
+    text-align:center
+  }
+  #auctionView .metric span{
+    font-size:7px;
+    line-height:1.15
+  }
+  #auctionView .metric strong{
+    font-size:15px;
+    margin-top:3px
+  }
+
+  /* Budget a scorrimento orizzontale invece di 4 blocchi verticali */
+  #auctionView .my-budget-block{
+    margin-top:9px;
+    padding-top:8px
+  }
+  #auctionView .my-budget-head{
+    margin-bottom:6px;
+    font-size:10px
+  }
+  #auctionView .my-budget-grid{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;
+    padding-bottom:3px
+  }
+  #auctionView .my-budget-card{
+    flex:0 0 150px;
+    min-width:150px;
+    scroll-snap-align:start;
+    padding:8px
+  }
+
+  /* Concorrenti: cards orizzontali, niente pagina infinita */
+  #auctionView .competitor-strip{
+    margin:8px 8px 0;
+    border-radius:11px
+  }
+  #auctionView .competitor-head{
+    padding:10px;
+    align-items:flex-start;
+    gap:8px
+  }
+  #auctionView .competitor-summary{
+    gap:4px;
+    flex-wrap:nowrap
+  }
+  #auctionView .comp-mini{
+    padding:6px 7px
+  }
+  #auctionView .comp-mini span{font-size:7px}
+  #auctionView .comp-mini strong{font-size:13px}
+  #auctionView .competitor-grid{
+    display:flex;
+    overflow-x:auto;
+    gap:7px;
+    padding:0 10px 10px;
+    scroll-snap-type:x mandatory
+  }
+  #auctionView .competitor-card{
+    flex:0 0 82%;
+    min-width:82%;
+    scroll-snap-align:start
+  }
+
+  /* Rose resta consultabile ma chiaramente secondaria */
+  #auctionView .footerbar{
+    margin:8px;
+    border-radius:11px;
+    overflow-x:auto
+  }
+  #auctionView .table-head{
+    padding:10px;
+    min-width:620px
+  }
+  #auctionView .roster-table{
+    min-width:760px
+  }
+
+  /* Bottom-sheet più comodi */
+  .club-overlay,
+  .player-overlay{
+    padding:8px;
+    align-items:flex-end
+  }
+  .club-modal,
+  .player-modal{
+    max-height:88vh;
+    border-radius:16px 16px 8px 8px
+  }
+  .club-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+    padding:10px
+  }
+  .player-picker-grid{
+    padding:10px
+  }
+}
+
+
+html.runnerup-open,
+body.runnerup-open{
+  overflow:hidden !important;
+  overscroll-behavior:none
+}
+@supports (-webkit-touch-callout:none){
+  .runnerup-backdrop{
+    position:fixed;
+    top:0;right:0;bottom:0;left:0;
+    width:100%;
+    height:100dvh;
+    min-height:-webkit-fill-available;
+    z-index:99999;
+    -webkit-transform:translateZ(0);
+    transform:translateZ(0)
+  }
+  .runnerup-modal{
+    max-height:calc(100dvh - 16px);
+    overflow:auto;
+    -webkit-overflow-scrolling:touch
+  }
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -879,10 +1261,10 @@ input[type=file]{display:none}
       <div class="panel-body">
         <div class="search-wrap">
           <div class="role-tabs" id="roleTabs">
-            <button class="role-tab active" data-role="P" onclick="setRoleTab('P')">PORTIERI</button>
-            <button class="role-tab" data-role="D" onclick="setRoleTab('D')">DIFENSORI</button>
-            <button class="role-tab" data-role="C" onclick="setRoleTab('C')">CENTROCAMPISTI</button>
-            <button class="role-tab" data-role="A" onclick="setRoleTab('A')">ATTACCANTI</button>
+            <button class="role-tab active" data-role="P" onclick="setRoleTab('P')"><span class="role-long">PORTIERI</span><span class="role-short">P</span></button>
+            <button class="role-tab" data-role="D" onclick="setRoleTab('D')"><span class="role-long">DIFENSORI</span><span class="role-short">D</span></button>
+            <button class="role-tab" data-role="C" onclick="setRoleTab('C')"><span class="role-long">CENTROCAMPISTI</span><span class="role-short">C</span></button>
+            <button class="role-tab" data-role="A" onclick="setRoleTab('A')"><span class="role-long">ATTACCANTI</span><span class="role-short">A</span></button>
           </div>
 
           <div class="search-toolbar">
@@ -955,7 +1337,7 @@ input[type=file]{display:none}
               <label>Prezzo</label>
               <input id="priceInput" min="1" step="1" placeholder="0" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" enterkeyhint="done" oninput="sanitizeNumericInput(this)">
             </div>
-            <button class="primary-btn" onclick="registerPurchase()">Registra</button>
+            <button class="primary-btn mobile-register-btn" onclick="registerPurchase()">REGISTRA ASSEGNAZIONE</button>
           </div>
         </div>
       </div>
@@ -3796,6 +4178,18 @@ function setVerdictState(state,title,subtitle){
   document.getElementById("verdictSub").textContent=subtitle
 }
 
+
+function mobileRevealPurchaseControls(){
+  if(!window.matchMedia("(max-width:700px)").matches)return;
+  requestAnimationFrame(()=>{
+    const card=document.getElementById("playerCard");
+    if(!card || getComputedStyle(card).display==="none")return;
+
+    const y=card.getBoundingClientRect().top + window.scrollY - 100;
+    window.scrollTo({top:Math.max(0,y),behavior:"smooth"})
+  })
+}
+
 function selectPlayer(k){
   const p=getPlayer(k);if(!p)return;selectedKey=k;results.style.display="none";search.value=p.name;
   document.getElementById("emptyState").style.display="none";
@@ -3820,6 +4214,8 @@ function selectPlayer(k){
   updateLiveAnalysis();
   updateCompetitiveAnalysis();
   document.getElementById("priceInput").focus()
+
+  mobileRevealPurchaseControls();
 }
 function clearSelection(){
   selectedKey=null;search.value="";
@@ -3960,16 +4356,30 @@ function openRunnerUpOverlay(purchaseId){
   bidInput.value="";
 
   backdrop.style.display="flex";
+  backdrop.setAttribute("aria-hidden","false");
+  document.documentElement.classList.add("runnerup-open");
+  document.body.classList.add("runnerup-open");
 
-  setTimeout(()=>{
-    managerSelect.focus()
-  },50)
+  // Non forziamo il focus del select su iPhone: Safari può chiudere/ignorare
+  // un overlay appena aperto se contemporaneamente prova ad aprire un controllo nativo.
+  if(!/iPhone|iPad|iPod/i.test(navigator.userAgent)){
+    setTimeout(()=>managerSelect.focus(),60)
+  }
+}
+
+function closeRunnerUpOverlay(){
+  const backdrop=document.getElementById("runnerUpBackdrop");
+  if(backdrop){
+    backdrop.style.display="none";
+    backdrop.setAttribute("aria-hidden","true")
+  }
+  document.documentElement.classList.remove("runnerup-open");
+  document.body.classList.remove("runnerup-open")
 }
 
 function skipRunnerUp(){
   pendingRunnerUpPurchaseId=null;
-  const backdrop=document.getElementById("runnerUpBackdrop");
-  if(backdrop)backdrop.style.display="none"
+  closeRunnerUpOverlay()
 }
 
 function saveRunnerUp(){
@@ -4013,7 +4423,7 @@ function saveRunnerUp(){
   render();
 
   pendingRunnerUpPurchaseId=null;
-  document.getElementById("runnerUpBackdrop").style.display="none"
+  closeRunnerUpOverlay()
 }
 
 
@@ -4101,7 +4511,6 @@ function registerPurchase(){
   };
 
   history.push(record);
-  setTimeout(()=>openRunnerUpOverlay(record.id),0);
 
   // Un nuovo acquisto apre un nuovo ramo dello storico: il redo precedente non è più valido.
   redoHistory=[];
@@ -4112,6 +4521,14 @@ function registerPurchase(){
   clearSelection();
   render();
   search.focus()
+
+  // Safari/iOS: apri l'overlay solo a transazione completata.
+  // requestAnimationFrame attende che il DOM aggiornato dal render sia stato dipinto.
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      openRunnerUpOverlay(record.id)
+    })
+  });
 }
 function undoLastPurchase(){
   if(!history.length){
