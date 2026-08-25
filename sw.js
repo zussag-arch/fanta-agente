@@ -1,4 +1,4 @@
-const CACHE_NAME="fanta-agente-v1.11";
+const CACHE_NAME="fanta-agente-v1.16";
 const APP_SHELL=[
   "./",
   "./index.html",
@@ -28,7 +28,7 @@ self.addEventListener("activate",event=>{
 
 async function networkFirst(request){
   try{
-    const response=await fetch(request);
+    const response=await fetch(request,{cache:"no-store"});
     if(response && response.ok){
       const cache=await caches.open(CACHE_NAME);
       cache.put(request,response.clone());
@@ -37,11 +37,7 @@ async function networkFirst(request){
   }catch(err){
     const cached=await caches.match(request);
     if(cached)return cached;
-
-    if(request.mode==="navigate"){
-      return caches.match("./index.html")
-    }
-
+    if(request.mode==="navigate")return caches.match("./index.html");
     throw err
   }
 }
@@ -49,22 +45,17 @@ async function networkFirst(request){
 async function staleWhileRevalidate(request){
   const cache=await caches.open(CACHE_NAME);
   const cached=await cache.match(request);
-
   const networkPromise=fetch(request)
     .then(response=>{
-      if(response && response.ok){
-        cache.put(request,response.clone())
-      }
+      if(response && response.ok)cache.put(request,response.clone());
       return response
     })
     .catch(()=>null);
-
   return cached || networkPromise
 }
 
 self.addEventListener("fetch",event=>{
   const request=event.request;
-
   if(request.method!=="GET")return;
 
   const url=new URL(request.url);
@@ -75,13 +66,10 @@ self.addEventListener("fetch",event=>{
     return
   }
 
-  if(
-    sameOrigin &&
-    (
-      url.pathname.includes("/database/") ||
-      url.pathname.includes("/backup/")
-    )
-  ){
+  if(sameOrigin && (
+    url.pathname.includes("/database/") ||
+    url.pathname.includes("/backup/")
+  )){
     event.respondWith(networkFirst(request));
     return
   }
@@ -91,7 +79,6 @@ self.addEventListener("fetch",event=>{
     return
   }
 
-  // CDN / risorse esterne: prova rete, poi cache runtime se disponibile.
   event.respondWith(
     caches.match(request).then(cached=>{
       const fetchPromise=fetch(request)
@@ -102,7 +89,6 @@ self.addEventListener("fetch",event=>{
           return response
         })
         .catch(()=>cached);
-
       return cached || fetchPromise
     })
   )

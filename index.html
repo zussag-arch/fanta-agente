@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 1.14</title>
+<title>Fanta Agente 1.16</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -1114,6 +1114,194 @@ body.runnerup-open{
     max-height:calc(100dvh - 16px);
     overflow:auto;
     -webkit-overflow-scrolling:touch
+  }
+}
+
+
+/* ===== Palette più viva ===== */
+:root{
+  --bg:#0b1115;
+  --panel:#121a20;
+  --panel-2:#18232b;
+  --line:#31424d;
+  --text:#f7fbff;
+  --muted:#9fb1bd;
+
+  --accent:#38bdf8;
+  --accent-strong:#0ea5e9;
+  --good:#22c55e;
+  --warn:#facc15;
+  --bad:#ef4444;
+
+  --role-p:#fbbf24;
+  --role-d:#4ade80;
+  --role-c:#3b82f6;
+  --role-a:#f43f5e;
+}
+
+body{
+  background:
+    radial-gradient(circle at top left,rgba(56,189,248,.08),transparent 28%),
+    radial-gradient(circle at top right,rgba(244,63,94,.05),transparent 24%),
+    var(--bg);
+  color:var(--text)
+}
+
+.panel,
+.setting-card,
+.player-card,
+.competitor-card,
+.my-budget-card,
+.metric,
+.detail,
+.hero{
+  background:linear-gradient(180deg,rgba(24,35,43,.98),rgba(18,26,32,.98));
+  border-color:var(--line)
+}
+
+.primary-btn{
+  background:linear-gradient(180deg,#38bdf8,#0ea5e9);
+  color:#03131c;
+  border-color:#38bdf8;
+  box-shadow:0 8px 22px rgba(14,165,233,.20)
+}
+.primary-btn:hover{
+  filter:brightness(1.08)
+}
+
+.secondary-btn,
+.icon-btn,
+.file-label{
+  background:#172129;
+  border-color:#3b4d59;
+  color:#e8f4fb
+}
+.secondary-btn:hover,
+.icon-btn:hover,
+.file-label:hover{
+  border-color:#38bdf8;
+  background:#1d2a33
+}
+
+.app-tab.active{
+  color:#fff;
+  border-color:#38bdf8;
+  box-shadow:inset 0 -2px 0 #38bdf8
+}
+
+.role-tab[data-role="P"].active,
+.role-badge.role-P{
+  background:rgba(251,191,36,.18);
+  color:#ffd966;
+  border-color:#fbbf24
+}
+.role-tab[data-role="D"].active,
+.role-badge.role-D{
+  background:rgba(74,222,128,.16);
+  color:#86efac;
+  border-color:#4ade80
+}
+.role-tab[data-role="C"].active,
+.role-badge.role-C{
+  background:rgba(59,130,246,.18);
+  color:#93c5fd;
+  border-color:#3b82f6
+}
+.role-tab[data-role="A"].active,
+.role-badge.role-A{
+  background:rgba(244,63,94,.18);
+  color:#fda4af;
+  border-color:#f43f5e
+}
+
+.verdict.good,
+.badge.good,
+.semaphore.green{
+  background:rgba(34,197,94,.16)!important;
+  border-color:#22c55e!important;
+  color:#86efac!important
+}
+.verdict.warn,
+.badge.warn,
+.semaphore.yellow{
+  background:rgba(250,204,21,.14)!important;
+  border-color:#facc15!important;
+  color:#fde68a!important
+}
+.verdict.bad,
+.badge.bad,
+.semaphore.red{
+  background:rgba(239,68,68,.16)!important;
+  border-color:#ef4444!important;
+  color:#fca5a5!important
+}
+
+.pill,
+.season-pill{
+  background:#17222a;
+  border-color:#3a4c58
+}
+
+input,
+select{
+  background:#0e171c!important;
+  border-color:#3b4e5b!important;
+  color:#f8fbfd!important
+}
+input:focus,
+select:focus{
+  outline:none;
+  border-color:#38bdf8!important;
+  box-shadow:0 0 0 2px rgba(56,189,248,.14)
+}
+
+.search-results,
+.club-modal,
+.player-modal,
+.runnerup-modal,
+.fa-modal{
+  background:#121b21;
+  border-color:#3a4d59
+}
+
+.competitor-card.strong{
+  border-color:#ef4444;
+  box-shadow:inset 3px 0 0 #ef4444
+}
+.competitor-card.medium{
+  border-color:#facc15;
+  box-shadow:inset 3px 0 0 #facc15
+}
+.competitor-card.low{
+  border-color:#22c55e;
+  box-shadow:inset 3px 0 0 #22c55e
+}
+
+a{
+  color:#7dd3fc
+}
+
+
+/* Runner-up: robustezza iOS/PWA */
+#runnerUpBackdrop{
+  pointer-events:auto;
+  touch-action:manipulation;
+}
+#runnerUpBackdrop[style*="display: flex"]{
+  visibility:visible !important;
+  opacity:1 !important;
+}
+@media(max-width:700px){
+  #runnerUpBackdrop{
+    inset:0 !important;
+    width:100vw !important;
+    height:100dvh !important;
+    z-index:2147483000 !important;
+  }
+  #runnerUpBackdrop .runnerup-modal{
+    width:100% !important;
+    max-width:none !important;
+    margin:0 !important;
   }
 }
 
@@ -4326,7 +4514,10 @@ let pendingRunnerUpPurchaseId=null;
 
 function openRunnerUpOverlay(purchaseId){
   const purchase=history.find(p=>p.id===purchaseId);
-  if(!purchase)return;
+  if(!purchase){
+    console.warn("Runner-up: acquisto non trovato",purchaseId);
+    return
+  }
 
   pendingRunnerUpPurchaseId=purchaseId;
 
@@ -4334,6 +4525,11 @@ function openRunnerUpOverlay(purchaseId){
   const managerSelect=document.getElementById("runnerUpManager");
   const bidInput=document.getElementById("runnerUpBid");
   const playerLabel=document.getElementById("runnerUpPlayerLabel");
+
+  if(!backdrop||!managerSelect||!bidInput||!playerLabel){
+    console.error("Runner-up: overlay DOM non disponibile");
+    return
+  }
 
   playerLabel.textContent=`${purchase.playerName||purchase.playerSnapshot?.name||"Giocatore"} · assegnato a ${purchase.price} cr`;
 
@@ -4515,20 +4711,20 @@ function registerPurchase(){
   // Un nuovo acquisto apre un nuovo ramo dello storico: il redo precedente non è più valido.
   redoHistory=[];
 
+  // Chiude esplicitamente la tastiera iOS prima di cambiare interfaccia.
+  if(document.activeElement && typeof document.activeElement.blur==="function"){
+    document.activeElement.blur()
+  }
+
   rebuildTeams();
   save();
   document.getElementById("priceInput").value="";
   clearSelection();
   render();
-  search.focus()
 
-  // Safari/iOS: apri l'overlay solo a transazione completata.
-  // requestAnimationFrame attende che il DOM aggiornato dal render sia stato dipinto.
-  requestAnimationFrame(()=>{
-    requestAnimationFrame(()=>{
-      openRunnerUpOverlay(record.id)
-    })
-  });
+  // Apertura sincrona nello stesso tap dell'assegnazione:
+  // più affidabile in Safari/PWA iOS rispetto a focus, timeout o RAF differiti.
+  openRunnerUpOverlay(record.id);
 }
 function undoLastPurchase(){
   if(!history.length){
@@ -4679,8 +4875,9 @@ function sanitizeNumericInput(el){
 
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   window.addEventListener("load",()=>{
-    navigator.serviceWorker.register("./sw.js")
+    navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"})
       .then(reg=>{
+        reg.update();
         console.info("Fanta Agente PWA pronta:",reg.scope)
       })
       .catch(err=>{
