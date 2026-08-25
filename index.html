@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 1.17</title>
+<title>Fanta Agente 1.18</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -1594,6 +1594,99 @@ select:focus{
     background:
       radial-gradient(circle at top right,rgba(139,92,246,.10),transparent 30%),
       linear-gradient(180deg,#17242d,#0f171d)
+  }
+}
+
+
+/* ===== v1.18 fix overflow mobile ===== */
+html, body{
+  max-width:100%;
+  overflow-x:hidden;
+}
+
+#auctionView,
+#auctionView .main,
+#auctionView .panel,
+#auctionView .panel-body,
+#auctionView .search-wrap,
+#auctionView .role-tabs,
+#auctionView .search-toolbar,
+#auctionView .player-card,
+#auctionView .purchase-row,
+#auctionView .competitor-strip,
+#auctionView .footerbar{
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+
+@media(max-width:700px){
+  #auctionView .role-tabs{
+    display:grid !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    gap:5px !important;
+    overflow:visible !important;
+  }
+
+  #auctionView .role-tab{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    padding:0 4px !important;
+    box-sizing:border-box !important;
+    overflow:hidden !important;
+    white-space:nowrap !important;
+    text-overflow:ellipsis !important;
+  }
+
+  #auctionView .role-long{
+    display:none !important;
+  }
+
+  #auctionView .role-short{
+    display:inline !important;
+  }
+
+  #auctionView .search-toolbar{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+  }
+
+  #auctionView #playerSearch,
+  #auctionView #clubFilterButton,
+  #auctionView #playerListButton,
+  #auctionView #teamSelect,
+  #auctionView #priceInput,
+  #auctionView .mobile-register-btn{
+    min-width:0 !important;
+    max-width:100% !important;
+    box-sizing:border-box !important;
+  }
+
+  #auctionView .purchase-row{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+  }
+
+  #auctionView .hero-stats,
+  #auctionView .details,
+  #auctionView .live-grid{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+  }
+
+  #auctionView .hero,
+  #auctionView .detail,
+  #auctionView .metric{
+    min-width:0 !important;
+    max-width:100% !important;
+    box-sizing:border-box !important;
   }
 }
 
