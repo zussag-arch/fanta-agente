@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.20</title>
+<title>Fanta Agente 2.22</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -4611,6 +4611,308 @@ body.modal-open .topbar{
 
   .footerbar .credit{
     font-size:11px !important;
+  }
+}
+
+
+/* ===== v2.21 iPhone compact competitors + roster ===== */
+@media(max-width:700px){
+
+  /* --- Concorrenti: card più basse e dense --- */
+  .competitor-card{
+    padding:10px 11px !important;
+    border-radius:12px !important;
+    margin-bottom:8px !important;
+  }
+
+  .competitor-top{
+    gap:8px !important;
+    align-items:center !important;
+  }
+
+  .competitor-name{
+    font-size:13px !important;
+    line-height:1.15 !important;
+  }
+
+  .comp-level{
+    font-size:9px !important;
+    padding:4px 7px !important;
+    border-radius:999px !important;
+    flex:0 0 auto !important;
+  }
+
+  .competitor-estimate{
+    margin:7px 0 6px !important;
+    padding:8px 10px !important;
+    border-radius:9px !important;
+  }
+
+  .competitor-estimate-label{
+    font-size:7px !important;
+    letter-spacing:.05em !important;
+  }
+
+  .competitor-estimate strong{
+    margin-top:2px !important;
+    font-size:20px !important;
+    line-height:1 !important;
+  }
+
+  .competitor-estimate small{
+    margin-top:3px !important;
+    font-size:8px !important;
+  }
+
+  .competitor-meta{
+    font-size:9px !important;
+    line-height:1.28 !important;
+  }
+
+  .competitor-live-meta{
+    margin-top:0 !important;
+  }
+
+  .competitor-history-meta{
+    margin-top:3px !important;
+    font-size:8px !important;
+  }
+
+  /* --- Rose: niente scroll orizzontale --- */
+  .footerbar,
+  .footerbar .table-wrap{
+    width:100% !important;
+    max-width:100% !important;
+    overflow-x:hidden !important;
+  }
+
+  .footerbar table{
+    width:100% !important;
+    min-width:0 !important;
+    table-layout:fixed !important;
+  }
+
+  .footerbar th,
+  .footerbar td{
+    box-sizing:border-box !important;
+    padding:7px 2px !important;
+    min-width:0 !important;
+  }
+
+  /* squadra */
+  .footerbar th:first-child,
+  .footerbar td:first-child{
+    width:28% !important;
+    padding-left:7px !important;
+    padding-right:3px !important;
+  }
+
+  /* crediti */
+  .footerbar th:nth-child(2),
+  .footerbar td:nth-child(2){
+    width:11% !important;
+  }
+
+  /* P D C A */
+  .footerbar th:nth-child(3),
+  .footerbar td:nth-child(3),
+  .footerbar th:nth-child(4),
+  .footerbar td:nth-child(4),
+  .footerbar th:nth-child(5),
+  .footerbar td:nth-child(5),
+  .footerbar th:nth-child(6),
+  .footerbar td:nth-child(6){
+    width:15.25% !important;
+  }
+
+  .footerbar th{
+    font-size:8px !important;
+    letter-spacing:.02em !important;
+  }
+
+  .footerbar .team-name{
+    font-size:9px !important;
+    line-height:1.05 !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+  }
+
+  .footerbar .credit{
+    font-size:10px !important;
+  }
+
+  .role-mobile{
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:1px !important;
+    padding:2px 0 !important;
+    line-height:1 !important;
+  }
+
+  .role-mobile strong{
+    font-size:8px !important;
+    line-height:1 !important;
+    white-space:nowrap !important;
+  }
+
+  .role-mobile span{
+    font-size:9px !important;
+    line-height:1 !important;
+  }
+
+  .footerbar tbody tr{
+    height:42px !important;
+  }
+
+  /* storico completo/azioni un po' più strette */
+  .footerbar .panel-head,
+  .footerbar .panel-body{
+    padding-left:10px !important;
+    padding-right:10px !important;
+  }
+}
+
+/* extra compact per iPhone stretti */
+@media(max-width:430px){
+  .footerbar th:first-child,
+  .footerbar td:first-child{
+    width:27% !important;
+  }
+
+  .footerbar th:nth-child(2),
+  .footerbar td:nth-child(2){
+    width:10% !important;
+  }
+
+  .footerbar th:nth-child(n+3),
+  .footerbar td:nth-child(n+3){
+    width:15.75% !important;
+  }
+
+  .footerbar .team-name{
+    font-size:8.5px !important;
+  }
+
+  .role-mobile strong{
+    font-size:7.5px !important;
+  }
+
+  .role-mobile span{
+    font-size:8.5px !important;
+  }
+}
+
+
+/* ===== v2.22 concorrenti iPhone in 2 colonne ===== */
+@media(max-width:700px){
+
+  /* contenitore concorrenti in due colonne */
+  #competitorsList,
+  .competitors-list,
+  .competitor-list,
+  .competitor-grid{
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:8px !important;
+    align-items:start !important;
+  }
+
+  .competitor-card{
+    width:100% !important;
+    min-width:0 !important;
+    margin:0 !important;
+    padding:8px !important;
+    border-radius:11px !important;
+    box-sizing:border-box !important;
+  }
+
+  .competitor-top{
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:flex-start !important;
+    gap:4px !important;
+  }
+
+  .competitor-name{
+    width:100% !important;
+    font-size:11px !important;
+    line-height:1.08 !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+  }
+
+  .comp-level{
+    font-size:7px !important;
+    padding:3px 5px !important;
+  }
+
+  .competitor-estimate{
+    margin:6px 0 5px !important;
+    padding:7px 8px !important;
+    border-radius:8px !important;
+  }
+
+  .competitor-estimate-label{
+    font-size:6px !important;
+    line-height:1.05 !important;
+  }
+
+  .competitor-estimate strong{
+    margin-top:3px !important;
+    font-size:18px !important;
+    line-height:.98 !important;
+    white-space:nowrap !important;
+  }
+
+  .competitor-estimate small{
+    margin-top:4px !important;
+    font-size:7px !important;
+  }
+
+  .competitor-meta{
+    font-size:7.5px !important;
+    line-height:1.2 !important;
+  }
+
+  .competitor-live-meta{
+    display:-webkit-box !important;
+    -webkit-line-clamp:2 !important;
+    -webkit-box-orient:vertical !important;
+    overflow:hidden !important;
+  }
+
+  .competitor-history-meta{
+    margin-top:3px !important;
+    display:-webkit-box !important;
+    -webkit-line-clamp:2 !important;
+    -webkit-box-orient:vertical !important;
+    overflow:hidden !important;
+    font-size:7px !important;
+  }
+}
+
+@media(max-width:390px){
+  #competitorsList,
+  .competitors-list,
+  .competitor-list,
+  .competitor-grid{
+    gap:6px !important;
+  }
+
+  .competitor-card{
+    padding:7px !important;
+  }
+
+  .competitor-name{
+    font-size:10px !important;
+  }
+
+  .competitor-estimate strong{
+    font-size:16px !important;
   }
 }
 
