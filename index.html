@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.25</title>
+<title>Fanta Agente 2.27</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -5252,6 +5252,123 @@ body.modal-open .topbar{
   }
 }
 
+
+/* ===== v2.26 settings as fourth sliding segment ===== */
+.app-tabs{
+  padding-right:7px !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+}
+
+.settings-tab-btn{
+  position:relative !important;
+  right:auto !important;
+  top:auto !important;
+  transform:none !important;
+  width:auto !important;
+  height:auto !important;
+  min-width:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:1px !important;
+  padding:0 6px !important;
+  border:0 !important;
+  border-radius:18px !important;
+  background:transparent !important;
+  color:inherit !important;
+  font-size:inherit !important;
+  cursor:pointer !important;
+  z-index:auto !important;
+}
+
+.settings-tab-icon{
+  display:block;
+  font-size:18px;
+  line-height:1;
+}
+
+.settings-tab-label{
+  display:block;
+  font-size:8px;
+  font-weight:950;
+  line-height:1;
+  letter-spacing:.02em;
+}
+
+.settings-tab-btn.active{
+  background:rgba(255,255,255,.24) !important;
+  color:#fff !important;
+}
+
+@media(min-width:701px){
+  .app-tabs{
+    width:min(780px,calc(100vw - 120px)) !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    padding:7px !important;
+  }
+
+  .settings-tab-btn{
+    height:48px !important;
+  }
+
+  .settings-tab-icon{
+    font-size:17px !important;
+  }
+
+  .settings-tab-label{
+    font-size:9px !important;
+  }
+}
+
+@media(max-width:700px){
+  .app-tabs{
+    position:fixed !important;
+    top:auto !important;
+    left:10px !important;
+    right:10px !important;
+    bottom:max(10px,env(safe-area-inset-bottom)) !important;
+    width:auto !important;
+    min-height:72px !important;
+    padding:7px !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    border-radius:24px !important;
+    z-index:900 !important;
+  }
+
+  .app-tab{
+    min-width:0 !important;
+    height:54px !important;
+    padding:0 5px !important;
+    font-size:10.5px !important;
+    line-height:1.03 !important;
+  }
+
+  #keepersTabBtn{
+    font-size:9.5px !important;
+  }
+
+  .settings-tab-btn{
+    height:54px !important;
+    padding:0 4px !important;
+  }
+
+  .settings-tab-icon{
+    font-size:19px !important;
+  }
+
+  .settings-tab-label{
+    font-size:7px !important;
+  }
+}
+
+
+/* ===== v2.27 Settings exits through another workspace tab ===== */
+.settings-tab-btn.active{
+  background:rgba(255,255,255,.24) !important;
+  color:#fff !important;
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -5284,7 +5401,7 @@ body.modal-open .topbar{
     <button id="homeTabBtn" class="app-tab active" onclick="setWorkspace('home')">FANTA AGENTE</button>
     <button id="auctionTabBtn" class="app-tab" onclick="setWorkspace('auction')">ASTA</button>
     <button id="keepersTabBtn" class="app-tab" onclick="setWorkspace('keepers')"><span>ABBINAMENTO</span><br><span>PORTIERI</span></button>
-    <button class="app-settings-btn" onclick="openSettings()" title="Impostazioni" id="topSettingsBtn" aria-label="Impostazioni">⚙</button>
+    <button id="topSettingsBtn" class="app-tab settings-tab-btn" onclick="openSettingsFromTab()" aria-label="Impostazioni"><span class="settings-tab-icon">⚙</span><span class="settings-tab-label">IMPOSTAZIONI</span></button>
   </nav>
 
   <section id="homeView" class="workspace-view">
@@ -7558,6 +7675,10 @@ function updateMobileNavState(){
 }
 
 function setWorkspace(view){
+  if(settingsIsOpen()){
+    closeSettingsForNavigation()
+  }
+
   if(view==="auction"){
     const league=getCurrentLeague();
     if(!league || league.participants.length!==league.teamCount){
@@ -7587,6 +7708,7 @@ function setWorkspace(view){
 
   if(view==="keepers")renderKeeperPairing();
   updateMobileNavState()
+
 }
 
 function createTeams(){
@@ -9613,18 +9735,72 @@ function render(){
 
 
 function hideTopSettingsButton(){
-  document.getElementById("topSettingsBtn")?.classList.add("settings-hidden")
+  setSettingsTabActive(true)
 }
 
 function showTopSettingsButton(){
-  document.getElementById("topSettingsBtn")?.classList.remove("settings-hidden")
+  const btn=document.getElementById("topSettingsBtn");
+  if(btn)btn.style.display="";
+  setSettingsTabActive(false)
+}
+
+
+let workspaceBeforeSettings="home";
+
+function setSettingsTabActive(active){
+  const settingsBtn=document.getElementById("topSettingsBtn");
+  if(!settingsBtn)return;
+
+  settingsBtn.classList.toggle("active",!!active);
+
+  if(active){
+    document.querySelectorAll(".app-tab").forEach(btn=>{
+      if(btn!==settingsBtn)btn.classList.remove("active")
+    })
+  }else{
+    document.querySelectorAll(".app-tab").forEach(btn=>{
+      if(btn===settingsBtn)return;
+
+      const target=
+        btn.id==="homeTabBtn"?"home":
+        btn.id==="auctionTabBtn"?"auction":
+        btn.id==="keepersTabBtn"?"keepers":
+        null;
+
+      if(target)btn.classList.toggle("active",target===workspace)
+    })
+  }
+}
+
+
+function settingsIsOpen(){
+  const backdrop=document.getElementById("settingsBackdrop");
+  return !!backdrop && getComputedStyle(backdrop).display!=="none"
+}
+
+function closeSettingsForNavigation(){
+  const backdrop=document.getElementById("settingsBackdrop");
+  if(backdrop)backdrop.style.display="none";
+
+  document.documentElement.classList.remove("modal-open");
+  document.body.classList.remove("modal-open");
+
+  const settingsBtn=document.getElementById("topSettingsBtn");
+  if(settingsBtn)settingsBtn.classList.remove("active")
+}
+
+function openSettingsFromTab(){
+  if(settingsIsOpen())return;
+
+  workspaceBeforeSettings=workspace||"home";
+  setSettingsTabActive(true);
+  openSettings()
 }
 
 function openSettings(){renderArchiveSettings();document.getElementById("settingsBackdrop").style.display="block"
   document.documentElement.classList.add("modal-open");
   document.body.classList.add("modal-open");
 
-  hideTopSettingsButton();
 }
 
 function closeSettingsFromBackdrop(event){
@@ -9634,13 +9810,8 @@ function closeSettingsFromBackdrop(event){
 }
 
 function closeSettings(){
-  const backdrop=document.getElementById("settingsBackdrop");
-  if(backdrop)backdrop.style.display="none";
-
-  document.documentElement.classList.remove("modal-open");
-  document.body.classList.remove("modal-open");
-
-  showTopSettingsButton();
+  closeSettingsForNavigation();
+  setSettingsTabActive(false)
 }
 function openHistory(){renderHistory();document.getElementById("historyModal").style.display="block"}
 function closeHistory(e){if(e&&e.target!==document.getElementById("historyModal"))return;document.getElementById("historyModal").style.display="none"}
