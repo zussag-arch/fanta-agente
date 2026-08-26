@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.18</title>
+<title>Fanta Agente 2.19</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -4494,6 +4494,17 @@ body.modal-open .topbar{
   font-size:11px;
 }
 
+
+.remote-history-status{
+  margin:8px 0 12px;
+  padding:9px 11px;
+  border-radius:9px;
+  background:#141d23;
+  color:#82939f;
+  font-size:10px;
+  line-height:1.4;
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -5181,7 +5192,7 @@ function mergeRemoteManagersIntoArchive(payload){
     }
   });
 
-  saveArchive()
+  save()
 }
 
 async function loadRemoteManagerHistory(){
@@ -5203,11 +5214,18 @@ async function loadRemoteManagerHistory(){
     mergeRemoteManagersIntoArchive(payload);
     window.faRemoteHistoryLoaded=true;
 
+    const status=document.getElementById("remoteHistoryStatus");
+    if(status)status.textContent=`Storico caricato · ${payload.managers.length} allenatori · backup/latest.json`;
+
     if(typeof renderGlobalManagerList==="function")renderGlobalManagerList()
   }catch(err){
     console.warn("Storico remoto non caricato:",err);
     remoteManagerHistory=null;
     window.faRemoteHistoryLoaded=false;
+
+    const status=document.getElementById("remoteHistoryStatus");
+    if(status)status.textContent=`Storico remoto non caricato: ${err.message}`;
+
     if(typeof renderGlobalManagerList==="function")renderGlobalManagerList()
   }
 }
@@ -7348,7 +7366,18 @@ document.getElementById("archiveFile").addEventListener("change",async e=>{
 
   try{
     const text=await file.text();
-    const incoming=ensureArchiveShape(JSON.parse(text));
+    const parsed=JSON.parse(text);
+
+    if(
+      !parsed ||
+      Number(parsed.schemaVersion)!==2 ||
+      !Array.isArray(parsed.managers) ||
+      !Array.isArray(parsed.seasons)
+    ){
+      throw new Error("Archivio schema 2 non valido")
+    }
+
+    const incoming=ensureArchiveShape(parsed);
 
     const ok=confirm(
       "RIPRISTINO COMPLETO\n\n" +
@@ -8039,18 +8068,24 @@ function mobileRevealPurchaseControls(){
 }
 
 
+function recommendedMyTeam(){
+  return teams.find(t=>isMyTeam(t))||null
+}
+
 function recommendedMissingSlots(){
-  if(!myTeam)return {P:0,D:0,C:0,A:0};
+  const team=recommendedMyTeam();
+  if(!team)return {P:0,D:0,C:0,A:0};
   return {
-    P:Math.max(0,ROSTER_SIZE.P-(myTeam.slots?.P||0)),
-    D:Math.max(0,ROSTER_SIZE.D-(myTeam.slots?.D||0)),
-    C:Math.max(0,ROSTER_SIZE.C-(myTeam.slots?.C||0)),
-    A:Math.max(0,ROSTER_SIZE.A-(myTeam.slots?.A||0))
+    P:Math.max(0,ROSTER_SIZE.P-(team.slots?.P||0)),
+    D:Math.max(0,ROSTER_SIZE.D-(team.slots?.D||0)),
+    C:Math.max(0,ROSTER_SIZE.C-(team.slots?.C||0)),
+    A:Math.max(0,ROSTER_SIZE.A-(team.slots?.A||0))
   }
 }
 
 function recommendedScore(player){
-  if(!player || sold(player.key) || !myTeam)return -Infinity;
+  const team=recommendedMyTeam();
+  if(!player || sold(player.key) || !team)return -Infinity;
 
   const missing=recommendedMissingSlots();
   if((missing[player.role]||0)<=0)return -Infinity;
@@ -8066,7 +8101,7 @@ function recommendedScore(player){
   const quality=.55*pmaNorm + .20*tit + .15*aff + .10*integ;
 
   const totalMissing=Object.values(missing).reduce((a,b)=>a+b,0);
-  const credits=Math.max(0,Number(myTeam.credits)||0);
+  const credits=Math.max(0,Number(team.credits)||0);
   const pma=Math.max(0,Number(player.pmaCredits)||0);
 
   const absoluteMax=Math.max(1,credits-Math.max(0,totalMissing-1));
@@ -8083,7 +8118,7 @@ function recommendedScore(player){
 }
 
 function recommendedCandidates(limit=5){
-  if(!myTeam)return [];
+  if(!recommendedMyTeam())return [];
   return players
     .filter(p=>!sold(p.key))
     .map(player=>({player,score:recommendedScore(player)}))
@@ -8093,9 +8128,10 @@ function recommendedCandidates(limit=5){
 }
 
 function recommendationReason(player){
+  const team=recommendedMyTeam();
   const missing=recommendedMissingSlots();
   const totalMissing=Object.values(missing).reduce((a,b)=>a+b,0);
-  const credits=Math.max(0,Number(myTeam?.credits)||0);
+  const credits=Math.max(0,Number(team?.credits)||0);
   const avg=Math.floor(credits/Math.max(1,totalMissing));
 
   return `${missing[player.role]||0} slot ${player.role} ancora liberi · ${credits} crediti rimasti · ` +
@@ -8108,7 +8144,7 @@ function renderRecommendedCall(){
   const body=document.getElementById("recommendedCallBody");
   if(!body)return;
 
-  if(!myTeam){
+  if(!recommendedMyTeam()){
     body.innerHTML=`<div class="recommended-empty">Disponibile solo quando partecipi alla divisione selezionata.</div>`;
     return
   }
