@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.23</title>
+<title>Fanta Agente 2.24</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -5120,6 +5120,96 @@ body.modal-open .topbar{
   }
 }
 
+
+/* ===== v2.24 iPhone roster controls + larger table font ===== */
+.roster-actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.roster-history-row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+@media(max-width:700px){
+  .roster-actions{
+    width:100% !important;
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:8px !important;
+  }
+
+  .roster-history-btn{
+    justify-self:center !important;
+    min-width:46% !important;
+    text-align:center !important;
+  }
+
+  .roster-history-row{
+    width:100% !important;
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:8px !important;
+  }
+
+  .roster-history-row .secondary-btn{
+    width:100% !important;
+    justify-content:center !important;
+    text-align:center !important;
+  }
+
+  /* Tabelle rose: sfruttiamo lo spazio disponibile con font più grandi */
+  #auctionView .footerbar th{
+    font-size:10px !important;
+  }
+
+  #auctionView .footerbar .team-name{
+    font-size:10px !important;
+  }
+
+  #auctionView .footerbar .credit{
+    font-size:11px !important;
+  }
+
+  #auctionView .footerbar .roster-head-mobile{
+    font-size:10px !important;
+  }
+
+  #auctionView .footerbar .role-mobile strong{
+    font-size:9px !important;
+  }
+
+  #auctionView .footerbar .role-mobile span{
+    font-size:10px !important;
+  }
+
+  #auctionView .footerbar tbody tr{
+    height:44px !important;
+  }
+}
+
+@media(max-width:390px){
+  #auctionView .footerbar .team-name{
+    font-size:9.5px !important;
+  }
+
+  #auctionView .footerbar .credit{
+    font-size:10.5px !important;
+  }
+
+  #auctionView .footerbar .role-mobile strong{
+    font-size:8.5px !important;
+  }
+
+  #auctionView .footerbar .role-mobile span{
+    font-size:9.5px !important;
+  }
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -5498,10 +5588,12 @@ body.modal-open .topbar{
           <strong class="std-a">A 40%</strong>
         </div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <button class="secondary-btn" onclick="openHistory()">Storico completo</button>
-        <button id="undoBtn" class="secondary-btn" onclick="undoLastPurchase()">↩ Annulla ultimo</button>
-        <button id="redoBtn" class="secondary-btn" onclick="restoreLastPurchase()">↪ Ripristina ultimo</button>
+      <div class="roster-actions">
+        <button class="secondary-btn roster-history-btn" onclick="openHistory()">Storico completo</button>
+        <div class="roster-history-row">
+          <button id="undoBtn" class="secondary-btn" onclick="undoLastPurchase()">↩ Annulla ultimo</button>
+          <button id="redoBtn" class="secondary-btn" onclick="restoreLastPurchase()">↪ Ripristina ultimo</button>
+        </div>
       </div>
     </div>
     <div class="table-wrap">
