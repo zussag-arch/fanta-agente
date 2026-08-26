@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.14</title>
+<title>Fanta Agente 2.15</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -4485,6 +4485,25 @@ body.modal-open .topbar{
   }
 }
 
+
+/* ===== v2.15 setup sequenziale + storico indipendente ===== */
+.setup-waiting{
+  grid-column:1/-1;
+  padding:18px;
+  border:1px dashed #34444f;
+  border-radius:12px;
+  background:#141d23;
+  color:#8798a4;
+  font-size:12px;
+  line-height:1.5;
+}
+#homeLeagueSelect:disabled,
+#leagueTeamCount:disabled,
+#newLeagueBtn:disabled{
+  opacity:.42 !important;
+  cursor:not-allowed !important;
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -4546,7 +4565,8 @@ body.modal-open .topbar{
 
             <div class="field">
               <label>Numero squadre</label>
-              <select id="leagueTeamCount" onchange="leagueTeamCountChanged()">
+              <select id="leagueTeamCount" onchange="leagueTeamCountChanged()" disabled>
+                <option value="" selected>— seleziona numero squadre —</option>
                 <option value="6">6 squadre</option>
                 <option value="7">7 squadre</option>
                 <option value="8">8 squadre</option>
@@ -4557,8 +4577,8 @@ body.modal-open .topbar{
           </div>
 
           <div class="setup-actions">
-            <button class="secondary-btn" onclick="createNewSeason()">＋ Nuova stagione</button>
-            <button class="secondary-btn" onclick="createNewLeague()">＋ Nuova divisione</button>
+            <button id="newSeasonBtn" class="secondary-btn" onclick="createNewSeason()">＋ Nuova stagione</button>
+            <button id="newLeagueBtn" class="secondary-btn" onclick="createNewLeague()">＋ Nuova divisione</button>
           </div>
 
           <div id="homeArchiveStatus" class="status"></div>
@@ -5131,7 +5151,7 @@ body.modal-open .topbar{
 
 <script>
 
-const REMOTE_MANAGER_HISTORY_PATHS=["./backup/latest.json","./backups/latest.json"];
+const REMOTE_MANAGER_HISTORY_PATHS=["./backup/latest.json"];
 let remoteManagerHistory=null;
 
 function normalizeManagerHistoryName(name){
@@ -6218,24 +6238,46 @@ async function createNewLeague(){
 
 function switchSeason(id){
   if(!archive)return;
-  syncCurrentLeagueToArchive();
+  if(!id){
+    currentSeasonId=null;
+    currentLeagueId=null;
+    renderHomeSetup();
+    return
+  }
+
+  if(currentSeasonId && getCurrentLeague())syncCurrentLeagueToArchive();
 
   const season=archive.seasons.find(s=>s.id===id);
   if(!season)return;
 
-  const leagueId=season.currentLeagueId||season.leagues[0]?.id;
-  loadLeagueIntoRuntime(season.id,leagueId);
-  save();
-  clearSelection();
-  render();
-  autoLoadRemoteDatabase(true)
+  const leagueId=season.currentLeagueId||season.leagues[0]?.id||null;
+  if(leagueId){
+    loadLeagueIntoRuntime(season.id,leagueId);
+    save();
+    clearSelection();
+    render();
+    autoLoadRemoteDatabase(true)
+  }else{
+    currentSeasonId=season.id;
+    currentLeagueId=null;
+    archive.currentSeasonId=season.id;
+    archive.currentLeagueId=null;
+    saveArchive();
+    renderHomeSetup()
+  }
 }
 
 function switchLeague(id){
-  const season=getCurrentSeason();
-  if(!season || id===currentLeagueId)return;
+  const season=archive?.seasons?.find(s=>s.id===currentSeasonId)||null;
+  if(!season)return;
+  if(!id){
+    currentLeagueId=null;
+    renderHomeSetup();
+    return
+  }
+  if(id===currentLeagueId){renderHomeSetup();return}
 
-  syncCurrentLeagueToArchive();
+  if(getCurrentLeague())syncCurrentLeagueToArchive();
   loadLeagueIntoRuntime(season.id,id);
   save();
   clearSelection();
@@ -6245,10 +6287,30 @@ function switchLeague(id){
 function renderParticipantEditor(){
   const box=document.getElementById("participantEditor");
   const hint=document.getElementById("participantHint");
-  const league=getCurrentLeague();
-  if(!box||!league)return;
+  if(!box)return;
 
-  hint.textContent=`${league.label} · ${league.teamCount} squadre · scegli gli allenatori dall'archivio permanente`;
+  const season=getCurrentSeason();
+  const league=getCurrentLeague();
+
+  if(!season){
+    box.innerHTML=`<div class="setup-waiting">1. Seleziona o crea prima la stagione.</div>`;
+    if(hint)hint.textContent="La configurazione partecipanti si attiva dopo aver scelto stagione, divisione e numero di squadre.";
+    return
+  }
+
+  if(!league){
+    box.innerHTML=`<div class="setup-waiting">2. Seleziona o crea una divisione.</div>`;
+    if(hint)hint.textContent="Ora scegli la divisione da configurare.";
+    return
+  }
+
+  if(!(Number(league.teamCount)>=MIN_LEAGUE_TEAMS)){
+    box.innerHTML=`<div class="setup-waiting">3. Seleziona il numero di squadre.</div>`;
+    if(hint)hint.textContent="Dopo il numero di squadre compariranno le righe dei partecipanti.";
+    return
+  }
+
+  if(hint)hint.textContent=`${league.label} · ${league.teamCount} squadre · scegli gli allenatori dallo storico permanente`;
   box.innerHTML="";
 
   for(let i=0;i<league.teamCount;i++){
@@ -6256,9 +6318,8 @@ function renderParticipantEditor(){
     const row=document.createElement("div");
     row.className="participant-row";
 
-    const season=getCurrentSeason();
     const elsewhere=new Map();
-    season?.leagues
+    season.leagues
       .filter(l=>l.id!==league.id)
       .forEach(l=>l.participants.forEach(p=>elsewhere.set(p.managerId,l.label)));
 
@@ -6453,87 +6514,103 @@ async function addGlobalManager(){
 
 function renderGlobalManagerList(){
   const box=document.getElementById("globalManagerList");
-  if(!box||!archive)return;
+  if(!box)return;
   box.innerHTML="";
 
-  archive.managers
-    .slice()
-    .sort((a,b)=>(b.isMe?1:0)-(a.isMe?1:0)||a.displayName.localeCompare(b.displayName,"it"))
-    .forEach(m=>{
-      const p=managerProfile(m.id);
-      const card=document.createElement("div");
-      card.className=`manager-profile-card ${m.isMe?"me-profile":""}`;
+  const localManagers=Array.isArray(archive?.managers)?archive.managers:[];
+  const remoteManagers=Array.isArray(remoteManagerHistory?.managers)?remoteManagerHistory.managers:[];
+  const merged=new Map();
 
-      const activeAssignments=(getCurrentSeason()?.leagues||[])
-        .filter(l=>l.participants.some(x=>x.managerId===m.id))
-        .map(l=>{
-          const part=l.participants.find(x=>x.managerId===m.id);
-          return `${l.label}: ${part?.teamName||m.displayName}`
-        });
+  [...remoteManagers,...localManagers].forEach(m=>{
+    const displayName=String(m.displayName||m.name||"").trim();
+    if(!displayName)return;
+    const k=normalizeManagerHistoryName(displayName);
+    const local=localManagers.find(x=>normalizeManagerHistoryName(x.displayName)===k);
+    merged.set(k,local||{id:m.id,displayName,isMe:k==="gabriele"})
+  });
 
-      const roleBits=ROLES
-        .filter(r=>p.byRole[r].samples)
-        .map(r=>`${r} ${fmt(p.byRole[r].ratio,2)}×`)
-        .join(" · ");
+  const managers=[...merged.values()].sort((a,b)=>(b.isMe?1:0)-(a.isMe?1:0)||a.displayName.localeCompare(b.displayName,"it"));
 
-      card.innerHTML=`
-        <div class="manager-profile-name">${m.isMe?"★ ":""}${m.displayName}</div>
-        <div class="manager-profile-meta">
-          ${p.samples} acquisti storici · ${p.ratioSamples?p.ratioSamples+" con PMA":"nessun PMA storico"}<br>
-          ${p.overallRatio!=null?`Mediana ${fmt(p.overallRatio,2)}× PMA`:"Profilo ancora da costruire"}
-          ${activeAssignments.length?`<br><strong>Ora:</strong> ${activeAssignments.join(" · ")}`:"<br>Non assegnato nella stagione attiva"}
-          ${roleBits?`<br>${roleBits}`:""}
-          ${p.divisions.length?`<br>Storico divisioni: ${p.divisions.join(", ")}`:""}
-        </div>
-      `;
-      box.appendChild(card)
-    })
+  if(!managers.length){
+    box.innerHTML=`<div class="setup-waiting">Caricamento di backup/latest.json…</div>`;
+    return
+  }
+
+  managers.forEach(m=>{
+    const p=m.id?managerProfile(m.id):{samples:0,ratioSamples:0,overallRatio:null,byRole:Object.fromEntries(ROLES.map(r=>[r,{samples:0,ratio:null}])),divisions:[]};
+    const card=document.createElement("div");
+    card.className=`manager-profile-card ${m.isMe?"me-profile":""}`;
+
+    const roleBits=ROLES.filter(r=>p.byRole?.[r]?.samples).map(r=>`${r} ${fmt(p.byRole[r].ratio,2)}×`).join(" · ");
+
+    card.innerHTML=`
+      <div class="manager-profile-name">${m.isMe?"★ ":""}${m.displayName}</div>
+      <div class="manager-profile-meta">
+        ${p.samples||0} acquisti storici · ${p.ratioSamples?(p.ratioSamples+" con PMA"):"nessun PMA storico"}<br>
+        ${p.overallRatio!=null?`Mediana ${fmt(p.overallRatio,2)}× PMA`:"Profilo ancora da costruire"}
+        ${roleBits?`<br>${roleBits}`:""}
+        ${p.divisions?.length?`<br>Storico divisioni: ${p.divisions.join(", ")}`:""}
+      </div>
+    `;
+    box.appendChild(card)
+  })
 }
 
 function renderHomeSetup(){
   if(!archive)return;
-  const season=getCurrentSeason();
-  const league=getCurrentLeague();
-  const faTeamCountSync=document.getElementById("leagueTeamCount");
-  if(faTeamCountSync && league){
-    faTeamCountSync.value=String(league.teamCount||league.participants?.length||9);
-  }
 
+  const season=archive.seasons?.find(s=>s.id===currentSeasonId)||null;
+  const league=season?.leagues?.find(l=>l.id===currentLeagueId)||null;
 
   const ss=document.getElementById("homeSeasonSelect");
   if(ss){
-    ss.innerHTML="";
-    archive.seasons.forEach(s=>{
+    ss.innerHTML=`<option value="">— seleziona stagione —</option>`;
+    (archive.seasons||[]).forEach(s=>{
       const o=document.createElement("option");
-      o.value=s.id;o.textContent=s.label;o.selected=s.id===currentSeasonId;
+      o.value=s.id;
+      o.textContent=s.label;
+      o.selected=!!season && s.id===season.id;
       ss.appendChild(o)
-    })
+    });
+    ss.value=season?.id||""
   }
 
   const ls=document.getElementById("homeLeagueSelect");
-  if(ls&&season){
-    ls.innerHTML="";
-    season.leagues.forEach(l=>{
+  if(ls){
+    ls.innerHTML=`<option value="">— seleziona divisione —</option>`;
+    ls.disabled=!season;
+    (season?.leagues||[]).forEach(l=>{
       const o=document.createElement("option");
-      o.value=l.id;o.textContent=l.label;
-      o.selected=l.id===currentLeagueId;
+      o.value=l.id;
+      o.textContent=l.label;
+      o.selected=!!league && l.id===league.id;
       ls.appendChild(o)
-    })
+    });
+    ls.value=league?.id||""
   }
 
   const count=document.getElementById("leagueTeamCount");
-  if(count&&league)count.value=String(league.teamCount);
+  if(count){
+    count.disabled=!league;
+    count.value=league?String(league.teamCount||""):"";
+  }
+
+  const newLeagueBtn=document.getElementById("newLeagueBtn");
+  if(newLeagueBtn)newLeagueBtn.disabled=!season;
 
   const auctionStatus=document.getElementById("auctionConfigStatus");
-
-  if(auctionStatus&&league){
-    auctionStatus.textContent=`${league.label} · ${league.participants.length}/${league.teamCount} partecipanti configurati`;
+  if(auctionStatus){
+    if(!season)auctionStatus.textContent="Seleziona prima la stagione.";
+    else if(!league)auctionStatus.textContent="Seleziona poi la divisione.";
+    else auctionStatus.textContent=`${league.label} · ${league.participants.length}/${league.teamCount} partecipanti configurati`;
   }
 
   const status=document.getElementById("homeArchiveStatus");
   if(status){
     const seasonPurchases=(season?.leagues||[]).reduce((n,l)=>n+(l.purchases?.length||0),0);
-    status.textContent=`${archive.managers.length} allenatori nello storico · ${season?.leagues.length||0} divisioni · ${seasonPurchases} acquisti registrati in ${season?.label||"—"}`
+    status.textContent=season
+      ?`${season.leagues.length} divisioni · ${seasonPurchases} acquisti registrati in ${season.label}`
+      :"Configura l'asta in ordine: stagione → divisione → numero squadre. Lo storico allenatori è indipendente.";
   }
 
   renderParticipantEditor();
@@ -8771,19 +8848,15 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   })
 }
 
-load();render();
+load();
+render();
+renderHomeSetup();
 showTopSettingsButton();
 const initialWorkspace=localStorage.getItem("fa_workspace_v2")||"home";
 setWorkspace(initialWorkspace);
 autoLoadRemoteDatabase();
 checkRemoteBackup();
-
-window.addEventListener("DOMContentLoaded",()=>{
-  setTimeout(()=>{
-    try{renderHomeSetup()}catch(e){}
-    loadRemoteManagerHistory()
-  },0)
-});
+loadRemoteManagerHistory();
 
 </script>
 
