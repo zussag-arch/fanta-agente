@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.6</title>
+<title>Fanta Agente 2.7</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -3716,6 +3716,93 @@ body{
   }
 }
 
+
+/* v2.7 fix iPhone:
+   1) la rotella non deve stare sopra alla finestra impostazioni
+   2) la lente nel campo ricerca deve essere centrata bene */
+
+/* ---------- Layering modal vs topbar ---------- */
+/* la topbar resta alta, ma le modali e backdrop stanno sopra */
+.topbar{
+  z-index:1450 !important;
+}
+
+.runnerup-backdrop,
+.fa-modal-backdrop,
+.club-overlay,
+.player-overlay,
+#simpleModalBackdrop,
+#runnerUpBackdrop{
+  z-index:3000 !important;
+}
+
+.runnerup-modal,
+.fa-modal,
+.club-picker,
+.player-picker{
+  position:relative !important;
+  z-index:3001 !important;
+}
+
+/* Se il backdrop delle impostazioni è aperto, la topbar non deve interferire */
+html.modal-open .topbar,
+body.modal-open .topbar{
+  pointer-events:none !important;
+}
+
+@media(max-width:700px){
+  .topbar{
+    z-index:1200 !important;
+  }
+
+  .runnerup-backdrop,
+  .fa-modal-backdrop,
+  .club-overlay,
+  .player-overlay,
+  #simpleModalBackdrop,
+  #runnerUpBackdrop{
+    z-index:4000 !important;
+  }
+}
+
+/* ---------- Search icon alignment ---------- */
+#auctionView .search-toolbar{
+  position:relative !important;
+}
+
+#auctionView .search-toolbar::before{
+  content:"⌕" !important;
+  position:absolute !important;
+  left:16px !important;
+  top:28px !important;
+  transform:translateY(-50%) !important;
+  margin:0 !important;
+  z-index:3 !important;
+  color:#738496 !important;
+  font-size:24px !important;
+  line-height:1 !important;
+  pointer-events:none !important;
+}
+
+#auctionView #playerSearch{
+  padding-left:46px !important;
+}
+
+/* affinamento mobile */
+@media(max-width:700px){
+  #auctionView .search-toolbar::before{
+    left:15px !important;
+    top:28px !important;
+    transform:translateY(-50%) !important;
+    font-size:23px !important;
+  }
+
+  #auctionView #playerSearch{
+    height:56px !important;
+    padding-left:48px !important;
+  }
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -5008,6 +5095,9 @@ function closeSimpleModal(e){
     simpleModalResolver=null;
     resolve(null)
   }
+
+  document.documentElement.classList.remove("modal-open");
+  document.body.classList.remove("modal-open");
 }
 
 async function createNewSeason(){
@@ -7000,6 +7090,9 @@ function openRunnerUpOverlay(purchaseId){
   if(!/iPhone|iPad|iPod/i.test(navigator.userAgent)){
     setTimeout(()=>managerSelect.focus(),60)
   }
+
+  document.documentElement.classList.add("modal-open");
+  document.body.classList.add("modal-open");
 }
 
 function closeRunnerUpOverlay(){
@@ -7010,6 +7103,9 @@ function closeRunnerUpOverlay(){
   }
   document.documentElement.classList.remove("runnerup-open");
   document.body.classList.remove("runnerup-open")
+
+  document.documentElement.classList.remove("modal-open");
+  document.body.classList.remove("modal-open");
 }
 
 function skipRunnerUp(){
@@ -7294,8 +7390,14 @@ function render(){
   }
 }
 
-function openSettings(){renderArchiveSettings();document.getElementById("settingsBackdrop").style.display="block"}
-function closeSettings(e){if(e&&e.target!==document.getElementById("settingsBackdrop"))return;document.getElementById("settingsBackdrop").style.display="none"}
+function openSettings(){renderArchiveSettings();document.getElementById("settingsBackdrop").style.display="block"
+  document.documentElement.classList.add("modal-open");
+  document.body.classList.add("modal-open");
+}
+function closeSettings(e){if(e&&e.target!==document.getElementById("settingsBackdrop"))return;document.getElementById("settingsBackdrop").style.display="none"
+  document.documentElement.classList.remove("modal-open");
+  document.body.classList.remove("modal-open");
+}
 function openHistory(){renderHistory();document.getElementById("historyModal").style.display="block"}
 function closeHistory(e){if(e&&e.target!==document.getElementById("historyModal"))return;document.getElementById("historyModal").style.display="none"}
 
