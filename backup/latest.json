@@ -1,0 +1,565 @@
+{
+  "schemaVersion": 1,
+  "kind": "fanta-agente-manager-history",
+  "generatedAt": null,
+  "managers": [
+    {
+      "id": "mgr-gabriele",
+      "displayName": "Gabriele",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-maxpasta",
+      "displayName": "MaxPasta",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-brosky",
+      "displayName": "Brosky",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-pacca",
+      "displayName": "pacca",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-michael",
+      "displayName": "Michael",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-alessio",
+      "displayName": "Alessio",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-marco-dalla-pietra",
+      "displayName": "Marco dalla Pietra",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-mariolino",
+      "displayName": "Mariolino",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-davidava",
+      "displayName": "Davidava",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-giby",
+      "displayName": "Giby",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-linda-e-ste",
+      "displayName": "Linda e ste",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-bamby",
+      "displayName": "Bamby",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-zilli",
+      "displayName": "Zilli",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-mauro",
+      "displayName": "Mauro",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-gian-darsie",
+      "displayName": "Gian Darsie",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-simogiorgia",
+      "displayName": "Simogiorgia",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-ketto",
+      "displayName": "Ketto",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-camel-willy",
+      "displayName": "camel willy",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    }
+  ]
+}
