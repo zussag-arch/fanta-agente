@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.27</title>
+<title>Fanta Agente 2.28</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -5369,6 +5369,39 @@ body.modal-open .topbar{
   color:#fff !important;
 }
 
+
+/* ===== v2.28 settings + desktop centering ===== */
+@media(min-width:701px){
+  .app-tabs{
+    position:fixed !important;
+    top:12px !important;
+    left:50% !important;
+    right:auto !important;
+    bottom:auto !important;
+    transform:translateX(-50%) !important;
+    width:min(780px,calc(100vw - 160px)) !important;
+    max-width:780px !important;
+    margin:0 !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    padding:7px !important;
+    box-sizing:border-box !important;
+  }
+}
+@media(max-width:700px){
+  .app-tabs{
+    position:fixed !important;
+    top:auto !important;
+    left:10px !important;
+    right:10px !important;
+    bottom:max(10px,env(safe-area-inset-bottom)) !important;
+    transform:none !important;
+    width:auto !important;
+    max-width:none !important;
+    margin:0 !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  }
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -7675,11 +7708,8 @@ function updateMobileNavState(){
 }
 
 function setWorkspace(view){
-  if(settingsIsOpen()){
-    closeSettingsForNavigation()
-  }
-
-  if(view==="auction"){
+  closeSettingsForNavigation();
+if(view==="auction"){
     const league=getCurrentLeague();
     if(!league || league.participants.length!==league.teamCount){
       alert("Completa prima i partecipanti della divisione nel tab Fanta Agente.");
@@ -9780,21 +9810,27 @@ function settingsIsOpen(){
 
 function closeSettingsForNavigation(){
   const backdrop=document.getElementById("settingsBackdrop");
-  if(backdrop)backdrop.style.display="none";
-
+  if(backdrop){
+    backdrop.style.display="none";
+    backdrop.classList.remove("open","show","active");
+  }
   document.documentElement.classList.remove("modal-open");
   document.body.classList.remove("modal-open");
-
-  const settingsBtn=document.getElementById("topSettingsBtn");
-  if(settingsBtn)settingsBtn.classList.remove("active")
+  const btn=document.getElementById("topSettingsBtn");
+  if(btn)btn.classList.remove("active");
 }
 
 function openSettingsFromTab(){
-  if(settingsIsOpen())return;
-
   workspaceBeforeSettings=workspace||"home";
   setSettingsTabActive(true);
-  openSettings()
+  const backdrop=document.getElementById("settingsBackdrop");
+  if(backdrop){
+    backdrop.style.display="flex";
+    backdrop.classList.add("open","show","active");
+  }
+  document.documentElement.classList.add("modal-open");
+  document.body.classList.add("modal-open");
+  if(typeof renderSettings==="function")renderSettings();
 }
 
 function openSettings(){renderArchiveSettings();document.getElementById("settingsBackdrop").style.display="block"
@@ -9811,7 +9847,7 @@ function closeSettingsFromBackdrop(event){
 
 function closeSettings(){
   closeSettingsForNavigation();
-  setSettingsTabActive(false)
+  setSettingsTabActive(false);
 }
 function openHistory(){renderHistory();document.getElementById("historyModal").style.display="block"}
 function closeHistory(e){if(e&&e.target!==document.getElementById("historyModal"))return;document.getElementById("historyModal").style.display="none"}
