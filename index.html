@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.32</title>
+<title>Fanta Agente 2.33</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -5503,6 +5503,77 @@ body.modal-open .topbar{
   justify-content:flex-start !important;
 }
 
+
+/* ===== v2.33 strategy profiles ===== */
+.strategy-config{
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+}
+.strategy-config-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:9px;
+}
+.strategy-config-title{
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:.02em;
+}
+.strategy-selector{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:7px;
+}
+.strategy-option{
+  min-width:0;
+  padding:9px 8px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:rgba(255,255,255,.035);
+  color:var(--text);
+  cursor:pointer;
+  text-align:left;
+}
+.strategy-option strong{
+  display:block;
+  font-size:10px;
+  line-height:1.1;
+}
+.strategy-option span{
+  display:block;
+  margin-top:4px;
+  font-size:8px;
+  line-height:1.1;
+  color:var(--muted);
+  white-space:nowrap;
+}
+.strategy-option.active{
+  background:rgba(255,255,255,.14);
+  border-color:rgba(255,255,255,.28);
+}
+.strategy-option.active strong,
+.strategy-option.active span{
+  color:#fff;
+}
+.strategy-plan-summary{
+  margin-top:8px;
+  font-size:9px;
+  line-height:1.45;
+  color:var(--muted);
+}
+.strategy-plan-summary strong{color:var(--text)}
+@media(max-width:700px){
+  .strategy-selector{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+  }
+  .strategy-option{padding:9px 8px}
+  .strategy-option strong{font-size:10px}
+  .strategy-option span{font-size:8px}
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -5575,10 +5646,32 @@ body.modal-open .topbar{
               </select>
             </div>
           </div>
+          <div class="strategy-config">
+            <div class="strategy-config-head">
+              <div>
+                <div class="strategy-config-title">Strategia budget</div>
+                <div class="muted" style="font-size:10px;margin-top:3px">
+                  Guida tetto strategico e chiamata consigliata per questa singola asta.
+                </div>
+              </div>
+            </div>
 
-          <div class="setup-actions">
-            
-            <button class="secondary-btn" onclick="createNewLeague()">＋ Nuova divisione</button>
+            <div id="auctionStrategySelector" class="strategy-selector">
+              <button type="button" class="strategy-option" data-strategy="defensive" onclick="setAuctionStrategy('defensive')">
+                <strong>Difensivo</strong><span>P12 · D27 · C22 · A39</span>
+              </button>
+              <button type="button" class="strategy-option" data-strategy="reliable" onclick="setAuctionStrategy('reliable')">
+                <strong>Affidabile</strong><span>P12 · D25 · C21 · A42</span>
+              </button>
+              <button type="button" class="strategy-option" data-strategy="balanced" onclick="setAuctionStrategy('balanced')">
+                <strong>Equilibrato</strong><span>P11 · D21 · C23 · A45</span>
+              </button>
+              <button type="button" class="strategy-option" data-strategy="attack" onclick="setAuctionStrategy('attack')">
+                <strong>Attacco</strong><span>P7 · D14 · C25 · A54</span>
+              </button>
+            </div>
+
+            <div id="strategyPlanSummary" class="strategy-plan-summary"></div>
           </div>
 
           <div id="homeArchiveStatus" class="status"></div>
@@ -5771,12 +5864,12 @@ body.modal-open .topbar{
         <div class="ceiling-step">
           <strong>3. Limite del reparto</strong>
           <span>
-            Il valore ottenuto viene confrontato con il budget strategico del reparto:
-            <strong>Portieri 10%</strong>, <strong>Difensori 20%</strong>,
-            <strong>Centrocampisti 30%</strong> e <strong>Attaccanti 40%</strong> del budget iniziale.
-            Questo limite non è rigido: viene reso più elastico per uno slot di prima fascia
-            o quando la pressione di mercato è alta. Dal limite viene sottratto quanto hai già
-            speso in quel reparto.
+            Il valore ottenuto viene confrontato con il <strong>profilo strategico scelto per la singola asta</strong>.
+            I quattro preset sono Difensivo, Affidabile, Equilibrato e Attacco. Il piano segue l'ordine
+            <strong>P → D → C → A</strong>: un avanzo viene distribuito proporzionalmente sui reparti successivi,
+            mentre uno sforamento viene recuperato subito dal reparto seguente e, se necessario, propagato oltre.
+            Durante ogni reparto il limite si restringe progressivamente in base a quanto hai già speso e agli slot
+            che devi ancora completare.
           </span>
         </div>
 
@@ -5951,22 +6044,22 @@ body.modal-open .topbar{
           </div>
           <div class="my-budget-grid">
             <div class="my-budget-card role-p">
-              <span>PORTIERI · std 10%</span>
+              <span id="myBudgetLabelP">PORTIERI · target 11%</span>
               <strong id="myBudgetP">0 cr · 0,0%</strong>
               <small id="myDeltaP">▼ −10,0 pp</small>
             </div>
             <div class="my-budget-card role-d">
-              <span>DIFENSORI · std 20%</span>
+              <span id="myBudgetLabelD">DIFENSORI · target 21%</span>
               <strong id="myBudgetD">0 cr · 0,0%</strong>
               <small id="myDeltaD">▼ −20,0 pp</small>
             </div>
             <div class="my-budget-card role-c">
-              <span>CENTROCAMPISTI · std 30%</span>
+              <span id="myBudgetLabelC">CENTROCAMPISTI · target 23%</span>
               <strong id="myBudgetC">0 cr · 0,0%</strong>
               <small id="myDeltaC">▼ −30,0 pp</small>
             </div>
             <div class="my-budget-card role-a">
-              <span>ATTACCANTI · std 40%</span>
+              <span id="myBudgetLabelA">ATTACCANTI · target 45%</span>
               <strong id="myBudgetA">0 cr · 0,0%</strong>
               <small id="myDeltaA">▼ −40,0 pp</small>
             </div>
@@ -6241,7 +6334,145 @@ const INITIAL_BUDGET=500;
 const ROLES=["P","D","C","A"];
 const ROSTER_SIZE={P:3,D:8,C:8,A:6};
 const RESERVE_FACTOR=0.90; // elasticità: protegge il 90% del costo medio atteso degli slot rimasti
-const ROLE_TARGET_PCT={P:10,D:20,C:30,A:40};
+const ROLE_TARGET_PCT={P:10,D:20,C:30,A:40}; // solo riferimento standard della tabella Rose
+
+const STRATEGY_PROFILES={
+  defensive:{label:"Difensivo",targets:{P:12,D:27,C:22,A:39}},
+  reliable:{label:"Affidabile",targets:{P:12,D:25,C:21,A:42}},
+  balanced:{label:"Equilibrato",targets:{P:11,D:21,C:23,A:45}},
+  attack:{label:"Attacco",targets:{P:7,D:14,C:25,A:54}}
+};
+const DEFAULT_STRATEGY_PROFILE="balanced";
+
+function strategyProfileKey(){
+  const key=getCurrentLeague()?.strategyProfile;
+  return STRATEGY_PROFILES[key]?key:DEFAULT_STRATEGY_PROFILE
+}
+
+function strategyProfile(){
+  const key=strategyProfileKey();
+  return {key,...STRATEGY_PROFILES[key]}
+}
+
+function minimumRolePct(team,role){
+  const missing=Math.max(0,ROSTER_SIZE[role]-(team?.slots?.[role]||0));
+  return missing/INITIAL_BUDGET*100
+}
+
+function strategyPlan(team){
+  const profile=strategyProfile();
+  const base={...profile.targets};
+  const targets={...base};
+  const reference={...base};
+  const closed={P:false,D:false,C:false,A:false};
+  let currentRole=null;
+  let unrecoveredDeficit=0;
+
+  for(let i=0;i<ROLES.length;i++){
+    const role=ROLES[i];
+    reference[role]=targets[role];
+
+    const isClosed=(team?.slots?.[role]||0)>=ROSTER_SIZE[role];
+    closed[role]=isClosed;
+
+    if(!isClosed){
+      currentRole=role;
+      break
+    }
+
+    const actualPct=((team?.spent?.[role]||0)/INITIAL_BUDGET)*100;
+    const plannedPct=targets[role];
+    targets[role]=actualPct;
+
+    const delta=plannedPct-actualPct;
+    const future=ROLES.slice(i+1);
+
+    if(delta>0.0001 && future.length){
+      const weightTotal=future.reduce((sum,r)=>sum+Math.max(0,targets[r]),0);
+
+      if(weightTotal>0){
+        future.forEach(r=>{
+          targets[r]+=delta*(Math.max(0,targets[r])/weightTotal)
+        })
+      }else{
+        const share=delta/future.length;
+        future.forEach(r=>targets[r]+=share)
+      }
+    }else if(delta<-0.0001 && future.length){
+      let deficit=-delta;
+
+      for(const r of future){
+        if(deficit<=0.0001)break;
+        const floor=minimumRolePct(team,r);
+        const reducible=Math.max(0,targets[r]-floor);
+        const take=Math.min(deficit,reducible);
+        targets[r]-=take;
+        deficit-=take
+      }
+
+      unrecoveredDeficit+=Math.max(0,deficit)
+    }
+  }
+
+  return {
+    profileKey:profile.key,
+    profileLabel:profile.label,
+    base,
+    targets,
+    reference,
+    closed,
+    currentRole,
+    unrecoveredDeficit
+  }
+}
+
+function strategicTargetPct(team,role){
+  const plan=strategyPlan(team);
+  return Number(plan.targets[role]??plan.base[role]??0)
+}
+
+function setAuctionStrategy(key){
+  if(!STRATEGY_PROFILES[key])return;
+  const league=getCurrentLeague();
+  if(!league)return;
+
+  league.strategyProfile=key;
+  save();
+
+  renderStrategySelector();
+  renderMyBudget();
+  renderRecommendedCall();
+
+  if(selectedKey){
+    updateCompetitiveAnalysis();
+    updateLiveAnalysis()
+  }
+}
+
+function renderStrategySelector(){
+  const league=getCurrentLeague();
+  const box=document.getElementById("auctionStrategySelector");
+  const summary=document.getElementById("strategyPlanSummary");
+  if(!league || !box)return;
+
+  const key=strategyProfileKey();
+  box.querySelectorAll("[data-strategy]").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.strategy===key)
+  });
+
+  if(summary){
+    const team=teams.find(t=>isMyTeam(t));
+    const plan=strategyPlan(team);
+    const base=ROLES.map(r=>`${r} ${fmt(plan.base[r],0)}%`).join(" · ");
+    const dynamic=ROLES.map(r=>`${r} ${fmt(plan.targets[r],1)}%`).join(" · ");
+    const changed=ROLES.some(r=>Math.abs(plan.targets[r]-plan.base[r])>.05);
+
+    summary.innerHTML=changed
+      ? `<strong>${plan.profileLabel}</strong> · base ${base}<br><span>Target aggiornato: ${dynamic}</span>`
+      : `<strong>${plan.profileLabel}</strong> · ${base}`;
+  }
+}
+
 const DEFAULT_MANAGER_TEAM_PAIRS=[
   ["Gabriele","Arcamadò",true],
   ["MaxPasta","Stoke Azzo",false],
@@ -6456,19 +6687,29 @@ function roleDeltaHtml(team,role){
 }
 
 function budgetDeltaData(team,role){
+  const plan=strategyPlan(team);
   const current=((team.spent[role]||0)/INITIAL_BUDGET)*100;
-  const target=roleTargetPct(role);
-  const delta=current-target;
+  const isClosed=(team.slots?.[role]||0)>=ROSTER_SIZE[role];
 
-  if(Math.abs(delta)<0.05){
-    return {current,target,delta,cls:"equal",text:"= standard"}
+  const target=isClosed
+    ? Number(plan.reference[role]??plan.base[role]??0)
+    : Number(plan.targets[role]??plan.base[role]??0);
+
+  const delta=current-target;
+  const targetCredits=Math.round(INITIAL_BUDGET*target/100);
+  const remainingCredits=Math.max(0,targetCredits-(team.spent[role]||0));
+
+  if(isClosed){
+    if(Math.abs(delta)<0.05){
+      return {current,target,delta,cls:"equal",text:`chiuso · target ${fmt(target,1)}%`}
+    }
+    const cls=delta>0?"over":"under";
+    const sign=delta>0?"+":"";
+    return {current,target,delta,cls,text:`chiuso ${sign}${fmt(delta,1)} pp · target ${fmt(target,1)}%`}
   }
 
-  const cls=delta>0?"over":"under";
-  const arrow=delta>0?"▲":"▼";
-  const sign=delta>0?"+":"";
-
-  return {current,target,delta,cls,text:`${arrow} ${sign}${fmt(delta,1)} pp`}
+  const cls=delta>0?"over":Math.abs(delta)<0.05?"equal":"under";
+  return {current,target,delta,cls,text:`target ${fmt(target,1)}% · ${remainingCredits} cr disponibili`}
 }
 
 function renderMyBudget(){
@@ -6489,7 +6730,8 @@ function renderMyBudget(){
     return
   }
 
-  if(title)title.textContent=`Andamento budget ${team.name}`;
+  const plan=strategyPlan(team);
+  if(title)title.textContent=`Andamento budget ${team.name} · ${plan.profileLabel}`;
   if(total)total.textContent=`${team.credits} cr rimasti`;
 
   ["P","D","C","A"].forEach(role=>{
@@ -6497,6 +6739,8 @@ function renderMyBudget(){
     const deltaEl=document.getElementById(`myDelta${role}`);
     const data=budgetDeltaData(team,role);
 
+    const labelEl=document.getElementById(`myBudgetLabel${role}`);
+    if(labelEl)labelEl.textContent=`${({P:"PORTIERI",D:"DIFENSORI",C:"CENTROCAMPISTI",A:"ATTACCANTI"})[role]} · target ${fmt(data.target,1)}%`;
     if(main)main.textContent=`${team.spent[role]||0} cr · ${fmt(data.current,1)}%`;
     if(deltaEl){
       deltaEl.textContent=data.text;
@@ -6529,6 +6773,7 @@ function makeLeague(id,label,teamCount,participants=[],database=null){
     participants:participants.slice(0,count),
     purchases:[],
     redo:[],
+    strategyProfile:DEFAULT_STRATEGY_PROFILE,
     database:database||{filename:null,importedAt:null,players:[]}
   }
 }
@@ -6688,6 +6933,7 @@ function ensureArchiveShape(raw){
       l.participants=Array.isArray(l.participants)?l.participants.slice(0,l.teamCount):[];
       l.purchases=Array.isArray(l.purchases)?l.purchases:[];
       l.redo=Array.isArray(l.redo)?l.redo:[];
+      l.strategyProfile=STRATEGY_PROFILES[l.strategyProfile]?l.strategyProfile:DEFAULT_STRATEGY_PROFILE;
       l.database=l.database||{filename:null,importedAt:null,players:[]};
       l.database.players=Array.isArray(l.database.players)?l.database.players:[]
     });
@@ -7771,7 +8017,8 @@ function renderHomeSetup(){
   }
 
   renderParticipantEditor();
-  renderGlobalManagerList()
+  renderGlobalManagerList();
+  renderStrategySelector()
 
   const faCount=document.getElementById("leagueTeamCount");
   if(faCount){
@@ -8749,6 +8996,7 @@ function setRoleTab(role){
 
   runPlayerSearch(true);
   renderClubFilter();
+  renderRecommendedCall();
 
   if(document.getElementById("playerOverlay").style.display==="block"){
     renderPlayerPicker()
@@ -9096,11 +9344,32 @@ function getMyTeam(){
   return teams.find(t=>isMyTeam(t))
 }
 
+function strategicRoleReserveAfterPurchase(team,role,targetCredits){
+  const bought=Math.min(team.slots?.[role]||0,ROSTER_SIZE[role]);
+  const afterPurchase=Math.min(ROSTER_SIZE[role],bought+1);
+  const remainingSlots=Math.max(0,ROSTER_SIZE[role]-afterPurchase);
+
+  if(!remainingSlots)return {reserve:0,remainingSlots,rawReserve:0};
+
+  const allBench=[];
+  for(let slot=1;slot<=ROSTER_SIZE[role];slot++){
+    allBench.push(slotBenchmark(role,slot))
+  }
+
+  const totalBench=Math.max(1,allBench.reduce((a,b)=>a+b,0));
+  const remainingBench=allBench.slice(afterPurchase).reduce((a,b)=>a+b,0);
+  const rawReserve=targetCredits*(remainingBench/totalBench);
+  const reserve=Math.max(remainingSlots,rawReserve);
+
+  return {reserve,remainingSlots,rawReserve}
+}
+
 function getRoleElasticCap(team,player,ctx){
-  const target=INITIAL_BUDGET*(ROLE_TARGET_PCT[player.role]/100);
+  const plan=strategyPlan(team);
+  const targetPct=Number(plan.targets[player.role]??plan.base[player.role]??0);
+  const targetCredits=INITIAL_BUDGET*(targetPct/100);
 
   let elasticity=1.08;
-
   if(ctx){
     if(ctx.slot===1 && ctx.pressure==="ALTA") elasticity=1.30;
     else if(ctx.slot===1) elasticity=1.22;
@@ -9108,8 +9377,13 @@ function getRoleElasticCap(team,player,ctx){
     else if(ctx.pressure==="MEDIA") elasticity=1.12;
   }
 
-  const totalRoleCap=target*elasticity;
-  return Math.max(1,Math.floor(totalRoleCap-(team.spent[player.role]||0)))
+  const roleReserve=strategicRoleReserveAfterPurchase(team,player.role,targetCredits);
+  const totalRoleCap=targetCredits*elasticity;
+
+  return Math.max(
+    1,
+    Math.floor(totalRoleCap-(team.spent[player.role]||0)-roleReserve.reserve)
+  )
 }
 
 function median(values){
@@ -9259,13 +9533,11 @@ function recommendedScore(player){
   const tit=Math.max(0,Math.min(5,Number(player.titolarita)||0))/5;
   const aff=Math.max(0,Math.min(5,Number(player.affidabilita)||0))/5;
   const integ=Math.max(0,Math.min(5,Number(player.integrita)||0))/5;
-
   const quality=.55*pmaNorm + .20*tit + .15*aff + .10*integ;
 
   const totalMissing=Object.values(missing).reduce((a,b)=>a+b,0);
   const credits=Math.max(0,Number(team.credits)||0);
   const pma=Math.max(0,Number(player.pmaCredits)||0);
-
   const absoluteMax=Math.max(1,credits-Math.max(0,totalMissing-1));
   const avgBudget=Math.max(1,credits/Math.max(1,totalMissing));
 
@@ -9275,8 +9547,31 @@ function recommendedScore(player){
   else if(pma>avgBudget*1.65)affordability=.70;
   else if(pma>avgBudget*1.25)affordability=.87;
 
+  const ceiling=getDynamicCeiling(team,player);
+  const strategicMax=Math.max(1,Number(ceiling?.maxBid)||1);
+  const strategicRatio=pma/strategicMax;
+
+  let strategyFit=1.06;
+  if(strategicRatio>1.40)strategyFit=.18;
+  else if(strategicRatio>1.18)strategyFit=.42;
+  else if(strategicRatio>1.00)strategyFit=.68;
+  else if(strategicRatio>.85)strategyFit=.92;
+
+  const plan=strategyPlan(team);
+  const targetPct=Number(plan.targets[player.role]??plan.base[player.role]??0);
+  const targetCredits=INITIAL_BUDGET*targetPct/100;
+  const roleRemaining=Math.max(0,targetCredits-(team.spent[player.role]||0));
+  const roleSlots=Math.max(1,missing[player.role]||1);
+  const roleAvg=Math.max(1,roleRemaining/roleSlots);
+
+  let pacing=1;
+  if(pma>roleAvg*2.7)pacing=.72;
+  else if(pma>roleAvg*2.1)pacing=.84;
+  else if(pma>roleAvg*1.6)pacing=.93;
+  else if(pma<=roleAvg*1.05)pacing=1.04;
+
   const urgency=1+Math.min(.12,.10/Math.max(1,missing[player.role]));
-  return quality*affordability*urgency*100
+  return quality*affordability*strategyFit*pacing*urgency*100
 }
 
 
@@ -9303,14 +9598,17 @@ function recommendedCandidates(limit=5){
 function recommendationReason(player){
   const team=recommendedMyTeam();
   const missing=recommendedMissingSlots();
-  const totalMissing=Object.values(missing).reduce((a,b)=>a+b,0);
-  const credits=Math.max(0,Number(team?.credits)||0);
-  const avg=Math.floor(credits/Math.max(1,totalMissing));
+  const plan=strategyPlan(team);
+  const targetPct=Number(plan.targets[player.role]??plan.base[player.role]??0);
+  const targetCredits=Math.round(INITIAL_BUDGET*targetPct/100);
+  const roleSpent=team?.spent?.[player.role]||0;
+  const roleRemaining=Math.max(0,targetCredits-roleSpent);
+  const ceiling=getDynamicCeiling(team,player);
 
-  return `${missing[player.role]||0} slot ${player.role} ancora liberi · ${credits} crediti rimasti · ` +
-         `media sostenibile circa ${avg} cr per ogni posto ancora da occupare. ` +
-         `Il ranking pesa PMA 55%, titolarità 20%, affidabilità 15% e integrità 10%, ` +
-         `riducendo il punteggio quando il PMA è troppo alto rispetto alla liquidità residua.`;
+  return `${plan.profileLabel} · target dinamico ${player.role} ${fmt(targetPct,1)}% (${targetCredits} cr) · ` +
+         `${roleRemaining} cr strategici per ${missing[player.role]||0} slot ancora liberi. ` +
+         `Per ${player.name} il tetto live è ${ceiling?.maxBid??"—"} cr. ` +
+         `Se i primi slot del reparto assorbono molti crediti, tetti e ranking diventano progressivamente più conservativi.`;
 }
 
 function openRecommendedPlayer(key){
