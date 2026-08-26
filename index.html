@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.28</title>
+<title>Fanta Agente 2.29</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -5402,6 +5402,76 @@ body.modal-open .topbar{
   }
 }
 
+
+/* ===== v2.29 Settings standalone workspace ===== */
+.settings-page-shell{
+  max-width:1180px;
+  margin:0 auto;
+  padding:92px 18px 34px;
+  box-sizing:border-box;
+}
+
+.settings-page-panel{
+  width:100%;
+  box-sizing:border-box;
+}
+
+/* The old drawer content becomes normal page content */
+#settingsView .drawer-head{
+  position:static !important;
+  padding:0 0 14px !important;
+  margin-bottom:14px !important;
+  border-bottom:1px solid var(--line);
+  background:transparent !important;
+}
+
+#settingsView .drawer-head h2,
+#settingsView .drawer-head .panel-title{
+  font-size:24px !important;
+}
+
+#settingsView .setting-card{
+  margin-bottom:14px !important;
+  border-radius:14px !important;
+}
+
+#settingsView .settings-close-btn,
+#settingsView .icon-btn[onclick*="closeSettings"]{
+  display:none !important;
+}
+
+/* no overlay behavior */
+.drawer-backdrop{
+  display:none !important;
+}
+
+@media(max-width:700px){
+  .settings-page-shell{
+    padding:14px 14px 96px !important;
+    width:100% !important;
+    max-width:100% !important;
+    margin:0 !important;
+  }
+
+  #settingsView .drawer-head h2,
+  #settingsView .drawer-head .panel-title{
+    font-size:21px !important;
+  }
+
+  #settingsView .setting-card{
+    margin-bottom:10px !important;
+  }
+}
+
+
+.settings-tab-btn{
+  position:relative !important;
+  inset:auto !important;
+  transform:none !important;
+  width:auto !important;
+  min-width:0 !important;
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -5434,7 +5504,7 @@ body.modal-open .topbar{
     <button id="homeTabBtn" class="app-tab active" onclick="setWorkspace('home')">FANTA AGENTE</button>
     <button id="auctionTabBtn" class="app-tab" onclick="setWorkspace('auction')">ASTA</button>
     <button id="keepersTabBtn" class="app-tab" onclick="setWorkspace('keepers')"><span>ABBINAMENTO</span><br><span>PORTIERI</span></button>
-    <button id="topSettingsBtn" class="app-tab settings-tab-btn" onclick="openSettingsFromTab()" aria-label="Impostazioni"><span class="settings-tab-icon">⚙</span><span class="settings-tab-label">IMPOSTAZIONI</span></button>
+    <button id="settingsTabBtn" class="app-tab settings-tab-btn" onclick="setWorkspace('settings')" aria-label="Impostazioni"><span class="settings-tab-icon">⚙</span><span class="settings-tab-label">IMPOSTAZIONI</span></button>
   </nav>
 
   <section id="homeView" class="workspace-view">
@@ -5574,6 +5644,35 @@ body.modal-open .topbar{
             <table id="keeperMatrix" class="keeper-matrix"></table>
           </div>
         </div>
+      </section>
+    </div>
+  </section>
+
+
+  <section id="settingsView" class="workspace-view" style="display:none">
+    <div class="settings-page-shell">
+      <section class="settings-page-panel">
+        
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h2>Impostazioni</h2>
+      
+    </div>
+
+    <div class="setting-card">
+      <div class="panel-title">Archivio multi-stagione</div>
+      <p class="status">
+        Ogni stagione conserva database, acquisti e contesto d'asta. I profili degli avversari
+        seguono il manager anche se cambia il nome della squadra.
+      </p>
+
+      <div class="settings-grid">
+        <div>
+          <label class="setting-label">Stagione attiva</label>
+          <select id="seasonSelect" class="settings-select" onchange="switchSeason(this.value)"></select>
+        </div>
+        <div style="display:flex;align-items:end">
+          <button class="secondary-btn wide-btn" onclick="createNewSeason()">＋ Nuova stagione</button>
+        
       </section>
     </div>
   </section>
@@ -5903,29 +6002,7 @@ body.modal-open .topbar{
   </div>
 </div>
 
-<div id="settingsBackdrop" class="drawer-backdrop" onclick="closeSettingsFromBackdrop(event)">
-  <div class="drawer" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <h2>Impostazioni</h2>
-      <button type="button" class="icon-btn settings-close-btn" onclick="closeSettings();return false;">✕</button>
-    </div>
 
-    <div class="setting-card">
-      <div class="panel-title">Archivio multi-stagione</div>
-      <p class="status">
-        Ogni stagione conserva database, acquisti e contesto d'asta. I profili degli avversari
-        seguono il manager anche se cambia il nome della squadra.
-      </p>
-
-      <div class="settings-grid">
-        <div>
-          <label class="setting-label">Stagione attiva</label>
-          <select id="seasonSelect" class="settings-select" onchange="switchSeason(this.value)"></select>
-        </div>
-        <div style="display:flex;align-items:end">
-          <button class="secondary-btn wide-btn" onclick="createNewSeason()">＋ Nuova stagione</button>
-        </div>
-      </div>
 
       <div id="archiveStatus" class="status"></div>
 
@@ -7708,8 +7785,7 @@ function updateMobileNavState(){
 }
 
 function setWorkspace(view){
-  closeSettingsForNavigation();
-if(view==="auction"){
+  if(view==="auction"){
     const league=getCurrentLeague();
     if(!league || league.participants.length!==league.teamCount){
       alert("Completa prima i partecipanti della divisione nel tab Fanta Agente.");
@@ -7717,28 +7793,41 @@ if(view==="auction"){
     }
   }
 
-  if(!["home","auction","keepers"].includes(view))view="home";
+  if(!["home","auction","keepers","settings"].includes(view))view="home";
+  workspace=view;
 
-  const home=document.getElementById("homeView");
-  const auction=document.getElementById("auctionView");
-  const keepers=document.getElementById("keepersView");
-  const hb=document.getElementById("homeTabBtn");
-  const ab=document.getElementById("auctionTabBtn");
-  const kb=document.getElementById("keepersTabBtn");
+  const views={
+    home:document.getElementById("homeView"),
+    auction:document.getElementById("auctionView"),
+    keepers:document.getElementById("keepersView"),
+    settings:document.getElementById("settingsView")
+  };
 
-  if(home)home.style.display=view==="home"?"block":"none";
-  if(auction)auction.style.display=view==="auction"?"block":"none";
-  if(keepers)keepers.style.display=view==="keepers"?"block":"none";
+  Object.entries(views).forEach(([key,el])=>{
+    if(el)el.style.display=key===view?"block":"none"
+  });
 
-  if(hb)hb.classList.toggle("active",view==="home");
-  if(ab)ab.classList.toggle("active",view==="auction");
-  if(kb)kb.classList.toggle("active",view==="keepers");
+  const buttons={
+    home:document.getElementById("homeTabBtn"),
+    auction:document.getElementById("auctionTabBtn"),
+    keepers:document.getElementById("keepersTabBtn"),
+    settings:document.getElementById("settingsTabBtn")
+  };
+
+  Object.entries(buttons).forEach(([key,btn])=>{
+    if(btn)btn.classList.toggle("active",key===view)
+  });
 
   localStorage.setItem("fa_workspace_v2",view);
 
+  if(view==="home")renderHomeSetup();
+  if(view==="auction")render();
   if(view==="keepers")renderKeeperPairing();
-  updateMobileNavState()
+  if(view==="settings"){
+    if(typeof renderSettings==="function")renderSettings()
+  }
 
+  if(typeof updateMobileNavState==="function")updateMobileNavState()
 }
 
 function createTeams(){
@@ -9764,80 +9853,23 @@ function render(){
 }
 
 
-function hideTopSettingsButton(){
-  setSettingsTabActive(true)
-}
+function hideTopSettingsButton(){}
 
-function showTopSettingsButton(){
-  const btn=document.getElementById("topSettingsBtn");
-  if(btn)btn.style.display="";
-  setSettingsTabActive(false)
-}
+function showTopSettingsButton(){}
 
 
 let workspaceBeforeSettings="home";
 
-function setSettingsTabActive(active){
-  const settingsBtn=document.getElementById("topSettingsBtn");
-  if(!settingsBtn)return;
-
-  settingsBtn.classList.toggle("active",!!active);
-
-  if(active){
-    document.querySelectorAll(".app-tab").forEach(btn=>{
-      if(btn!==settingsBtn)btn.classList.remove("active")
-    })
-  }else{
-    document.querySelectorAll(".app-tab").forEach(btn=>{
-      if(btn===settingsBtn)return;
-
-      const target=
-        btn.id==="homeTabBtn"?"home":
-        btn.id==="auctionTabBtn"?"auction":
-        btn.id==="keepersTabBtn"?"keepers":
-        null;
-
-      if(target)btn.classList.toggle("active",target===workspace)
-    })
-  }
-}
+function setSettingsTabActive(active){}
 
 
-function settingsIsOpen(){
-  const backdrop=document.getElementById("settingsBackdrop");
-  return !!backdrop && getComputedStyle(backdrop).display!=="none"
-}
+function settingsIsOpen(){return workspace==="settings"}
 
-function closeSettingsForNavigation(){
-  const backdrop=document.getElementById("settingsBackdrop");
-  if(backdrop){
-    backdrop.style.display="none";
-    backdrop.classList.remove("open","show","active");
-  }
-  document.documentElement.classList.remove("modal-open");
-  document.body.classList.remove("modal-open");
-  const btn=document.getElementById("topSettingsBtn");
-  if(btn)btn.classList.remove("active");
-}
+function closeSettingsForNavigation(){}
 
-function openSettingsFromTab(){
-  workspaceBeforeSettings=workspace||"home";
-  setSettingsTabActive(true);
-  const backdrop=document.getElementById("settingsBackdrop");
-  if(backdrop){
-    backdrop.style.display="flex";
-    backdrop.classList.add("open","show","active");
-  }
-  document.documentElement.classList.add("modal-open");
-  document.body.classList.add("modal-open");
-  if(typeof renderSettings==="function")renderSettings();
-}
+function openSettingsFromTab(){setWorkspace("settings")}
 
-function openSettings(){renderArchiveSettings();document.getElementById("settingsBackdrop").style.display="block"
-  document.documentElement.classList.add("modal-open");
-  document.body.classList.add("modal-open");
-
-}
+function openSettings(){setWorkspace("settings")}
 
 function closeSettingsFromBackdrop(event){
   if(event && event.target===document.getElementById("settingsBackdrop")){
@@ -9845,10 +9877,7 @@ function closeSettingsFromBackdrop(event){
   }
 }
 
-function closeSettings(){
-  closeSettingsForNavigation();
-  setSettingsTabActive(false);
-}
+function closeSettings(){setWorkspace(workspaceBeforeSettings||"home")}
 function openHistory(){renderHistory();document.getElementById("historyModal").style.display="block"}
 function closeHistory(e){if(e&&e.target!==document.getElementById("historyModal"))return;document.getElementById("historyModal").style.display="none"}
 
