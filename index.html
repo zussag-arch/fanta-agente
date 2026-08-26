@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.12</title>
+<title>Fanta Agente 2.13</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -4372,6 +4372,119 @@ body.modal-open .topbar{
   }
 }
 
+
+/* ===== v2.13 live keeper availability + dynamic rival max ===== */
+
+/* Portieri non più disponibili */
+.keeper-unavailable{
+  opacity:.34 !important;
+  text-decoration:line-through;
+  text-decoration-thickness:1px;
+}
+.keeper-unavailable-cell{
+  opacity:.24 !important;
+  filter:saturate(.2);
+}
+.keeper-best-chip{
+  position:relative;
+  padding-left:34px !important;
+}
+.keeper-chip-rank{
+  position:absolute;
+  left:9px;
+  top:50%;
+  transform:translateY(-50%);
+  width:18px;
+  height:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:#31424e;
+  color:#fff;
+  font-size:9px;
+  font-weight:950;
+}
+.keeper-best-chip small{
+  display:block;
+  margin-top:3px;
+  overflow:hidden;
+  color:#7e909d;
+  font-size:9px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.keeper-best-empty{
+  padding:10px 12px;
+  border-radius:10px;
+  background:#141d23;
+  color:#8fa0ad;
+  font-size:11px;
+}
+
+/* La stima avversario diventa il dato principale */
+.competitor-estimate{
+  margin:10px 0 8px;
+  padding:11px 12px;
+  border-radius:11px;
+  background:#1d2931;
+  border:1px solid #344651;
+}
+.competitor-estimate-label{
+  display:block;
+  color:#70838f;
+  font-size:8px;
+  font-weight:950;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+}
+.competitor-estimate strong{
+  display:block;
+  margin-top:3px;
+  color:#fff;
+  font-size:24px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-.03em;
+}
+.competitor-estimate small{
+  display:block;
+  margin-top:5px;
+  color:#91a1ac;
+  font-size:9px;
+  font-weight:850;
+  text-transform:uppercase;
+}
+.competitor-card.strong .competitor-estimate{
+  border-left:4px solid #d9475b;
+}
+.competitor-card.medium .competitor-estimate{
+  border-left:4px solid #d5a832;
+}
+.competitor-card.low .competitor-estimate{
+  border-left:4px solid #4e9638;
+}
+.competitor-estimate.is-empty{
+  opacity:.55;
+}
+.competitor-live-meta{
+  color:#a7b3bc !important;
+}
+.competitor-history-meta{
+  margin-top:4px !important;
+  color:#70808c !important;
+  font-size:9px !important;
+}
+
+@media(max-width:700px){
+  .competitor-estimate strong{
+    font-size:27px;
+  }
+  .competitor-estimate{
+    padding:12px;
+  }
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -5564,9 +5677,10 @@ function medianNumber(values){
 }
 
 function managerProfile(managerId){
-  const purchases=archivePurchases().filter(p=>p.managerId===managerId);
+  const purchases=archivePurchases();
+  const won=purchases.filter(p=>p.managerId===managerId);
 
-  const withRatio=purchases
+  const withRatio=won
     .map(p=>({p,ratio:validPmaRatio(p)}))
     .filter(x=>x.ratio!=null);
 
@@ -5589,11 +5703,76 @@ function managerProfile(managerId){
     (x.p.context?.market?.pressure||"").toUpperCase()==="ALTA"
   );
 
-  const divisions=[...new Set(purchases.map(p=>p._leagueLabel||p.leagueLabel).filter(Boolean))];
+  /*
+    Osservazioni di disponibilità a spendere:
+    - acquisto vinto = sappiamo che è arrivato almeno a quel prezzo;
+    - ultimo rilancio perso = segnale ancora più vicino al suo vero limite.
+  */
+  const bidObservations=[];
+
+  purchases.forEach(p=>{
+    const pma=Number(p.pmaCreditsAtPurchase ?? p.playerSnapshot?.pmaCredits);
+    if(!(pma>0))return;
+
+    const role=p.playerRole||p.playerSnapshot?.role;
+    const slot=Number(p.context?.market?.slot ?? p.playerSnapshot?.slot);
+    const pressure=(p.context?.market?.pressure||"").toUpperCase();
+
+    if(p.managerId===managerId && Number(p.price)>0){
+      bidObservations.push({
+        ratio:Number(p.price)/pma,
+        role,
+        slot,
+        pressure,
+        kind:"winner",
+        weight:.85
+      })
+    }
+
+    if(p.runnerUp?.managerId===managerId && Number(p.runnerUp.lastBid)>0){
+      bidObservations.push({
+        ratio:Number(p.runnerUp.lastBid)/pma,
+        role,
+        slot,
+        pressure,
+        kind:"runnerup",
+        weight:1.20
+      })
+    }
+  });
+
+  function weightedRatio(rows){
+    if(!rows.length)return null;
+    const sum=rows.reduce((s,x)=>s+x.ratio*x.weight,0);
+    const weights=rows.reduce((s,x)=>s+x.weight,0);
+    return weights>0?sum/weights:null
+  }
+
+  function behaviorSlice(filterFn){
+    const rows=bidObservations.filter(filterFn);
+    return {
+      samples:rows.length,
+      ratio:weightedRatio(rows),
+      runnerUpSamples:rows.filter(x=>x.kind==="runnerup").length
+    }
+  }
+
+  const behavior={
+    overall:behaviorSlice(()=>true),
+    byRole:{},
+    topSlot:behaviorSlice(x=>x.slot===1),
+    highPressure:behaviorSlice(x=>x.pressure==="ALTA")
+  };
+
+  ROLES.forEach(role=>{
+    behavior.byRole[role]=behaviorSlice(x=>x.role===role)
+  });
+
+  const divisions=[...new Set(won.map(p=>p._leagueLabel||p.leagueLabel).filter(Boolean))];
 
   return {
     managerId,
-    samples:purchases.length,
+    samples:won.length,
     ratioSamples:withRatio.length,
     overallRatio:overall,
     byRole,
@@ -5605,6 +5784,9 @@ function managerProfile(managerId){
       samples:highPressureRows.length,
       ratio:medianNumber(highPressureRows.map(x=>x.ratio))
     },
+    bidBehavior:behavior,
+    bidSamples:bidObservations.length,
+    runnerUpSamples:bidObservations.filter(x=>x.kind==="runnerup").length,
     divisions
   }
 }
@@ -5614,45 +5796,137 @@ function predictionForManager(team,player,classification){
   const pma=Number(player.pmaCredits);
 
   if(!(pma>0) || classification.level==="out"){
-    return {estimate:null,low:null,high:null,confidence:"—",samples:profile.ratioSamples,ratio:null}
+    return {
+      estimate:null,low:null,high:null,confidence:"—",
+      samples:profile.bidSamples||0,ratio:null,
+      runnerUpSamples:profile.runnerUpSamples||0,
+      roleSamples:0,financialMax:0
+    }
   }
 
-  const roleStat=profile.byRole[player.role];
+  const behavior=profile.bidBehavior||{};
+  const roleBehavior=behavior.byRole?.[player.role];
   const slot=getPlayerSlot(player);
+  const ctx=getMarketContext(player);
+
+  function shrinkRatio(value,samples){
+    if(value==null)return null;
+    const trust=Math.min(1,(samples||0)/6);
+    return 1+(value-1)*trust
+  }
+
   const parts=[];
 
-  if(profile.overallRatio!=null)parts.push({value:profile.overallRatio,w:1});
-  if(roleStat?.ratio!=null && roleStat.samples>=2)parts.push({value:roleStat.ratio,w:1.5});
-  if(slot===1 && profile.topSlot.ratio!=null && profile.topSlot.samples>=2){
-    parts.push({value:profile.topSlot.ratio,w:1})
+  const overall=shrinkRatio(behavior.overall?.ratio,behavior.overall?.samples);
+  if(overall!=null)parts.push({value:overall,w:1});
+
+  const roleRatio=shrinkRatio(roleBehavior?.ratio,roleBehavior?.samples);
+  if(roleRatio!=null && (roleBehavior?.samples||0)>=2){
+    parts.push({value:roleRatio,w:1.65})
+  }
+
+  const topRatio=shrinkRatio(behavior.topSlot?.ratio,behavior.topSlot?.samples);
+  if(slot===1 && topRatio!=null && (behavior.topSlot?.samples||0)>=2){
+    parts.push({value:topRatio,w:1.15})
+  }
+
+  const pressureRatio=shrinkRatio(
+    behavior.highPressure?.ratio,
+    behavior.highPressure?.samples
+  );
+
+  if(ctx?.pressure==="ALTA" && pressureRatio!=null && (behavior.highPressure?.samples||0)>=2){
+    parts.push({value:pressureRatio,w:1.05})
   }
 
   let ratio=parts.length
     ?parts.reduce((s,x)=>s+x.value*x.w,0)/parts.reduce((s,x)=>s+x.w,0)
     :1;
 
-  const ctx=getMarketContext(player);
-  if(ctx?.pressure==="ALTA" && profile.highPressure.ratio!=null && profile.highPressure.samples>=2){
-    ratio=(ratio*2+profile.highPressure.ratio)/3
+  /*
+    Correzioni live della singola asta.
+    Non descrivono "chi è" l'allenatore, ma quanto può essere aggressivo adesso.
+  */
+  if(classification.level==="strong")ratio*=1.07;
+  else if(classification.level==="medium")ratio*=1.00;
+  else if(classification.level==="low")ratio*=.87;
+
+  const roleSpent=team.spent[player.role]||0;
+  const roleTarget=INITIAL_BUDGET*(ROLE_TARGET_PCT[player.role]/100);
+  const roleSpendRatio=roleTarget>0?roleSpent/roleTarget:0;
+
+  if(roleSpendRatio<.45)ratio*=1.05;
+  else if(roleSpendRatio>.95)ratio*=.91;
+  else if(roleSpendRatio>.80)ratio*=.96;
+
+  if(ctx?.pressure==="ALTA")ratio*=1.03;
+  else if(ctx?.pressure==="BASSA")ratio*=.98;
+
+  const missingTotal=ROLES.reduce(
+    (sum,r)=>sum+Math.max(0,ROSTER_SIZE[r]-(team.slots[r]||0)),
+    0
+  );
+
+  /*
+    Limite finanziario avversario:
+    dopo questo acquisto deve poter lasciare almeno 1 credito
+    a ogni slot ancora da completare.
+  */
+  const financialMax=Math.max(
+    1,
+    team.credits-Math.max(0,missingTotal-1)
+  );
+
+  // Fase asta: chi è ancora scoperto in uno slot importante può diventare più aggressivo.
+  const totalSlots=Math.max(1,leagueTeamCount()*ROLES.reduce((s,r)=>s+ROSTER_SIZE[r],0));
+  const completion=Math.min(1,history.length/totalSlots);
+
+  if(
+    completion>.55 &&
+    !teamHasSlotOrBetter(team.id,player.role,slot) &&
+    classification.level!=="low"
+  ){
+    ratio*=1.03
   }
 
-  if(classification.level==="strong")ratio*=1.05;
-  else if(classification.level==="low")ratio*=0.88;
+  ratio=Math.max(.55,Math.min(1.80,ratio));
 
-  const estimate=Math.max(1,Math.min(team.credits,Math.round(pma*ratio)));
+  const rawEstimate=Math.round(pma*ratio);
+  const estimate=Math.max(1,Math.min(financialMax,team.credits,rawEstimate));
 
-  let confidence="BASSA",spread=.16;
-  if(profile.ratioSamples>=8){confidence="ALTA";spread=.08}
-  else if(profile.ratioSamples>=4){confidence="MEDIA";spread=.11}
-  if(profile.ratioSamples===0){confidence="NESSUNO STORICO";spread=.20}
+  const comparableSamples=
+    (roleBehavior?.samples||0) +
+    (slot===1?(behavior.topSlot?.samples||0):0) +
+    (ctx?.pressure==="ALTA"?(behavior.highPressure?.samples||0):0);
+
+  const totalSamples=profile.bidSamples||0;
+
+  let confidence="BASSA",spread=.18;
+  if(totalSamples>=10 && comparableSamples>=5){
+    confidence="ALTA";spread=.07
+  }else if(totalSamples>=5 && comparableSamples>=2){
+    confidence="MEDIA";spread=.11
+  }else if(totalSamples===0){
+    confidence="BASSA";spread=.22
+  }
+
+  const low=Math.max(1,Math.round(estimate*(1-spread)));
+  const high=Math.max(
+    low,
+    Math.min(financialMax,team.credits,Math.round(estimate*(1+spread)))
+  );
 
   return {
     estimate,
-    low:Math.max(1,Math.round(estimate*(1-spread))),
-    high:Math.min(team.credits,Math.round(estimate*(1+spread))),
+    low,
+    high,
     confidence,
-    samples:profile.ratioSamples,
-    ratio:profile.ratioSamples?ratio:null
+    samples:totalSamples,
+    ratio,
+    runnerUpSamples:profile.runnerUpSamples||0,
+    roleSamples:roleBehavior?.samples||0,
+    financialMax,
+    comparableSamples
   }
 }
 
@@ -7374,13 +7648,22 @@ function updateCompetitiveAnalysis(){
         <span class="competitor-name">${c.team.name}${identity}</span>
         <strong class="comp-level level-${c.level}">${c.label}</strong>
       </div>
-      <div class="competitor-meta">
-        ${c.team.credits} cr · ${p.role} ${fmt(rolePct,1)}% · ${c.team.slots[p.role]}/${ROSTER_SIZE[p.role]} gioc.
+
+      <div class="competitor-estimate ${pred.estimate==null?"is-empty":""}">
+        <span class="competitor-estimate-label">MASSIMO RILANCIO STIMATO</span>
+        <strong>${pred.estimate!=null?`${pred.low}–${pred.high} cr`:"—"}</strong>
+        <small>confidenza ${pred.confidence}</small>
       </div>
-      <div class="competitor-meta">
+
+      <div class="competitor-meta competitor-live-meta">
+        ${c.team.credits} cr disponibili · ${p.role} ${fmt(rolePct,1)}% speso ·
+        ${c.team.slots[p.role]}/${ROSTER_SIZE[p.role]} gioc.
+      </div>
+
+      <div class="competitor-meta competitor-history-meta">
         ${pred.estimate!=null
-          ? `stima ${pred.low}–${pred.high} cr · conf. ${pred.confidence}${pred.ratio?` · ${fmt(pred.ratio,2)}× PMA`:""}`
-          : `stima — · ${pred.samples?`${pred.samples} dati storici`:"nessuno storico"}`}
+          ? `${pred.samples} segnali storici${pred.runnerUpSamples?` · ${pred.runnerUpSamples} ultimi rilanci persi`:""}${pred.ratio?` · ${fmt(pred.ratio,2)}× PMA`:""}`
+          : `Nessuna stima disponibile`}
       </div>
     `;
     rows.appendChild(div)
@@ -7711,6 +7994,30 @@ function keeperTeams(){
   )].sort((a,b)=>a.localeCompare(b,"it"))
 }
 
+
+function keeperMainPlayer(club){
+  const keepers=players
+    .filter(p=>p.role==="P" && p.club===club)
+    .slice()
+    .sort((a,b)=>
+      (Number(b.titolarita)||0)-(Number(a.titolarita)||0) ||
+      (Number(b.pmaCredits)||0)-(Number(a.pmaCredits)||0) ||
+      (Number(b.quo)||0)-(Number(a.quo)||0)
+    );
+
+  return keepers[0]||null
+}
+
+function keeperClubAvailable(club){
+  const main=keeperMainPlayer(club);
+  return !!main && !sold(main.key)
+}
+
+function keeperMainLabel(club){
+  const main=keeperMainPlayer(club);
+  return main?.name||"—"
+}
+
 function keeperClubStrength(club){
   const keepers=players.filter(p=>p.role==="P" && p.club===club);
   if(!keepers.length)return 0;
@@ -7765,33 +8072,59 @@ function renderKeeperPairing(){
   }
 
   const previous=select.value;
-  select.innerHTML=clubs.map(c=>`<option value="${c}">${c}</option>`).join("");
-  if(clubs.includes(previous))select.value=previous;
 
+  select.innerHTML=clubs.map(c=>{
+    const main=keeperMainPlayer(c);
+    const unavailable=!keeperClubAvailable(c);
+    return `<option value="${c}">${c}${unavailable?` · ${main?.name||"portiere"} assegnato`:""}</option>`
+  }).join("");
+
+  if(clubs.includes(previous))select.value=previous;
   const primary=select.value||clubs[0];
 
-  bestBox.innerHTML=clubs
-    .filter(c=>c!==primary)
-    .map(c=>({club:c,score:keeperPairScore(primary,c)}))
+  const availableMatches=clubs
+    .filter(c=>c!==primary && keeperClubAvailable(c))
+    .map(c=>({
+      club:c,
+      score:keeperPairScore(primary,c),
+      main:keeperMainPlayer(c)
+    }))
     .sort((a,b)=>b.score-a.score)
-    .slice(0,4)
-    .map(x=>`
-      <div class="keeper-best-chip">
+    .slice(0,4);
+
+  bestBox.innerHTML=availableMatches.length
+    ?availableMatches.map((x,index)=>`
+      <div class="keeper-best-chip keeper-rank-${index+1}">
+        <div class="keeper-chip-rank">${index+1}</div>
         <strong>${x.club}</strong>
+        <small>${x.main?.name||"—"}</small>
         <span class="${keeperScoreClass(x.score)}">${x.score}</span>
       </div>
-    `).join("");
+    `).join("")
+    :`<div class="keeper-best-empty">Nessun abbinamento ancora disponibile.</div>`;
 
   let out=`<thead><tr><th>Squadra</th>`;
-  clubs.forEach(c=>out+=`<th>${c}</th>`);
+  clubs.forEach(c=>{
+    const available=keeperClubAvailable(c);
+    out+=`<th class="${available?"":"keeper-unavailable"}" title="${available?"Disponibile":`${keeperMainLabel(c)} già assegnato`}">${c}</th>`
+  });
   out+=`</tr></thead><tbody>`;
 
   clubs.forEach(row=>{
-    out+=`<tr><td class="keeper-row-head">${row}</td>`;
+    const rowAvailable=keeperClubAvailable(row);
+    out+=`<tr><td class="keeper-row-head ${rowAvailable?"":"keeper-unavailable"}" title="${rowAvailable?"Disponibile":`${keeperMainLabel(row)} già assegnato`}">${row}</td>`;
+
     clubs.forEach(col=>{
       const score=keeperPairScore(row,col);
-      out+=`<td class="${keeperScoreClass(score)}">${score==null?"—":score}</td>`
+      const colAvailable=keeperClubAvailable(col);
+      const unavailable=row!==col && (!rowAvailable || !colAvailable);
+
+      out+=`<td
+        class="${keeperScoreClass(score)} ${unavailable?"keeper-unavailable-cell":""}"
+        title="${unavailable?`${!colAvailable?keeperMainLabel(col):keeperMainLabel(row)} già assegnato`:`Indice ${score??"—"}`}"
+      >${score==null?"—":score}</td>`
     });
+
     out+=`</tr>`
   });
 
