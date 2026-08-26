@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.7</title>
+<title>Fanta Agente 2.10.1</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -3803,6 +3803,58 @@ body.modal-open .topbar{
   }
 }
 
+
+/* v2.8: nascondi il tool impostazioni mentre la sidebar è aperta */
+.topbar .icon-btn.settings-hidden{
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+  transform:scale(.92) !important;
+}
+
+.topbar .icon-btn{
+  transition:
+    opacity .14s ease,
+    visibility .14s ease,
+    transform .14s ease !important;
+}
+
+
+.ceiling-explain{
+  display:grid;
+  gap:9px;
+  margin-top:12px
+}
+.ceiling-step,
+.ceiling-formula{
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:11px 12px
+}
+.ceiling-step strong,
+.ceiling-formula strong{
+  display:block;
+  margin-bottom:5px;
+  color:var(--text);
+  font-size:12px
+}
+.ceiling-step span,
+.ceiling-formula span{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.52
+}
+.ceiling-formula{
+  border-color:#415866;
+  background:rgba(95,199,247,.045)
+}
+.settings-close-btn{
+  position:relative;
+  z-index:2
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -3827,7 +3879,7 @@ body.modal-open .topbar{
     <div class="top-stats">
       <div class="pill season-pill">Stagione <strong id="currentSeasonLabel">2026/27</strong></div>
       <div class="pill"><strong id="availableCount">0</strong> disponibili</div>
-      <button class="icon-btn" onclick="openSettings()" title="Impostazioni">⚙</button>
+      <button class="icon-btn" onclick="openSettings()" title="Impostazioni" id="topSettingsBtn">⚙</button>
     </div>
   </header>
 
@@ -4250,11 +4302,11 @@ body.modal-open .topbar{
   </div>
 </div>
 
-<div id="settingsBackdrop" class="drawer-backdrop" onclick="closeSettings(event)">
-  <div class="drawer">
+<div id="settingsBackdrop" class="drawer-backdrop" onclick="closeSettingsFromBackdrop(event)">
+  <div class="drawer" onclick="event.stopPropagation()">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <h2>Impostazioni</h2>
-      <button class="icon-btn" onclick="closeSettings()">✕</button>
+      <button type="button" class="icon-btn settings-close-btn" onclick="closeSettings();return false;">✕</button>
     </div>
 
     <div class="setting-card">
@@ -4308,20 +4360,74 @@ body.modal-open .topbar{
 
     <div class="setting-card">
       <div class="panel-title">Tetto strategico</div>
-      <p class="status">
-        Il tetto parte dal <strong>PMA del singolo giocatore</strong> e applica un premio
-        percentuale solo quando scarsità, domanda e concorrenti lo giustificano.
-        Poi viene confrontato con il limite elastico del reparto e con il budget necessario
-        per completare la rosa. Il vecchio tetto economico resta quindi solo un limite di sicurezza.
-      </p>
-    </div>
 
-    <div class="setting-card">
-      <div class="panel-title">Scorciatoie</div>
-      <p class="status"><span class="kbd">Ctrl</span> + <span class="kbd">K</span> cerca giocatore</p>
-      <p class="status"><span class="kbd">Esc</span> deseleziona</p>
-      <p class="status"><span class="kbd">Ctrl</span> + <span class="kbd">Z</span> annulla ultimo acquisto</p>
-      <p class="status"><span class="kbd">Ctrl</span> + <span class="kbd">Y</span> ripristina ultimo acquisto</p>
+      <p class="status">
+        Il <strong>tetto strategico</strong> è il prezzo massimo consigliato per il giocatore
+        selezionato. Non è un valore fisso per ruolo o slot: parte dal valore specifico del
+        giocatore e viene corretto in base a ciò che sta succedendo realmente durante l'asta.
+      </p>
+
+      <div class="ceiling-explain">
+        <div class="ceiling-step">
+          <strong>1. Base PMA</strong>
+          <span>
+            Il punto di partenza è il <strong>PMA % di FantaLab</strong>, convertito sul budget
+            iniziale di 500 crediti. Ad esempio, un PMA del 10% equivale a una base di 50 crediti.
+          </span>
+        </div>
+
+        <div class="ceiling-step">
+          <strong>2. Premio contestuale</strong>
+          <span>
+            Alla base PMA può essere applicato un premio percentuale se il mercato lo giustifica.
+            Il premio cresce quando aumenta la <strong>pressione domanda/offerta</strong>, quando
+            restano pochi giocatori equivalenti nello stesso slot, quando più avversari sono ancora
+            fortemente interessati e, in misura limitata, per i giocatori di prima fascia.
+            I PMA bassi hanno inoltre maggiore elasticità, perché pochi crediti di differenza
+            incidono proporzionalmente di più.
+          </span>
+        </div>
+
+        <div class="ceiling-step">
+          <strong>3. Limite del reparto</strong>
+          <span>
+            Il valore ottenuto viene confrontato con il budget strategico del reparto:
+            <strong>Portieri 10%</strong>, <strong>Difensori 20%</strong>,
+            <strong>Centrocampisti 30%</strong> e <strong>Attaccanti 40%</strong> del budget iniziale.
+            Questo limite non è rigido: viene reso più elastico per uno slot di prima fascia
+            o quando la pressione di mercato è alta. Dal limite viene sottratto quanto hai già
+            speso in quel reparto.
+          </span>
+        </div>
+
+        <div class="ceiling-step">
+          <strong>4. Limite finanziario</strong>
+          <span>
+            Infine Fanta Agente controlla che, dopo l'acquisto, restino abbastanza crediti per
+            completare tutti gli slot mancanti della rosa. La riserva viene stimata usando i
+            valori mediani PMA delle fasce ancora da acquistare, con un piccolo margine di
+            elasticità. Questo parametro serve soprattutto come <strong>freno di sicurezza</strong>,
+            non come valutazione del giocatore.
+          </span>
+        </div>
+
+        <div class="ceiling-formula">
+          <strong>Valore finale</strong>
+          <span>
+            Il tetto mostrato è il più basso tra:
+            <strong>PMA contestualizzato</strong>,
+            <strong>limite elastico del reparto</strong> e
+            <strong>limite finanziario</strong>.
+          </span>
+        </div>
+
+        <p class="status" style="margin-top:10px">
+          Il semaforo usa questo valore per dirti se hai ancora margine:
+          <strong>verde</strong> quando puoi salire,
+          <strong>giallo</strong> quando sei vicino al limite e
+          <strong>rosso</strong> quando il prezzo corrente ha raggiunto o superato il tetto.
+        </p>
+      </div>
     </div>
 
     <div class="setting-card">
@@ -7390,13 +7496,36 @@ function render(){
   }
 }
 
+
+function hideTopSettingsButton(){
+  document.getElementById("topSettingsBtn")?.classList.add("settings-hidden")
+}
+
+function showTopSettingsButton(){
+  document.getElementById("topSettingsBtn")?.classList.remove("settings-hidden")
+}
+
 function openSettings(){renderArchiveSettings();document.getElementById("settingsBackdrop").style.display="block"
   document.documentElement.classList.add("modal-open");
   document.body.classList.add("modal-open");
+
+  hideTopSettingsButton();
 }
-function closeSettings(e){if(e&&e.target!==document.getElementById("settingsBackdrop"))return;document.getElementById("settingsBackdrop").style.display="none"
+
+function closeSettingsFromBackdrop(event){
+  if(event && event.target===document.getElementById("settingsBackdrop")){
+    closeSettings()
+  }
+}
+
+function closeSettings(){
+  const backdrop=document.getElementById("settingsBackdrop");
+  if(backdrop)backdrop.style.display="none";
+
   document.documentElement.classList.remove("modal-open");
   document.body.classList.remove("modal-open");
+
+  showTopSettingsButton();
 }
 function openHistory(){renderHistory();document.getElementById("historyModal").style.display="block"}
 function closeHistory(e){if(e&&e.target!==document.getElementById("historyModal"))return;document.getElementById("historyModal").style.display="none"}
@@ -7428,6 +7557,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
 }
 
 load();render();
+showTopSettingsButton();
 const initialWorkspace=localStorage.getItem("fa_workspace_v2")||"home";
 setWorkspace(initialWorkspace);
 autoLoadRemoteDatabase();
