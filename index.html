@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.15</title>
+<title>Fanta Agente 2.16</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -4504,6 +4504,10 @@ body.modal-open .topbar{
   cursor:not-allowed !important;
 }
 
+
+/* ===== v2.16 setup realmente indipendente ===== */
+[onclick="startConfiguredAuction()"]:disabled{opacity:.38!important;cursor:not-allowed!important}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -4618,7 +4622,7 @@ body.modal-open .topbar{
           <div>
             <div class="panel-title">Storico allenatori</div>
             <div class="muted" style="font-size:11px;margin-top:4px">
-              Archivio permanente: promozioni, retrocessioni e cambi nome squadra non cancellano lo storico.
+              Archivio indipendente dall’asta corrente, caricato automaticamente da backup/latest.json.
             </div>
           </div>
 
@@ -5020,7 +5024,7 @@ body.modal-open .topbar{
       <div class="settings-grid">
         <div>
           <label class="setting-label">Stagione attiva</label>
-          <select id="seasonSelect" class="settings-select" onchange="switchSeason(this.value)"></select>
+          <select id="seasonSelect" class="settings-select" onchange="switchRuntimeSeason(this.value)"></select>
         </div>
         <div style="display:flex;align-items:end">
           <button class="secondary-btn wide-btn" onclick="createNewSeason()">＋ Nuova stagione</button>
@@ -5353,6 +5357,7 @@ const MAX_LEAGUE_TEAMS=10;
 
 let players=[],history=[],redoHistory=[],teams=[],selectedKey=null;
 let archive=null,currentSeasonId=null,currentLeagueId=null;
+let setupSeasonId=null,setupLeagueId=null;
 
 function norm(v){return String(v??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"")}
 function txt(v){return v==null?"":String(v).trim()}
@@ -5664,6 +5669,17 @@ function ensureArchiveShape(raw){
   raw.updatedAt=raw.updatedAt||new Date().toISOString();
 
   return raw
+}
+
+function getSetupSeason(){
+  if(!archive||!setupSeasonId)return null;
+  return archive.seasons.find(s=>s.id===setupSeasonId)||null
+}
+
+function getSetupLeague(){
+  const season=getSetupSeason();
+  if(!season||!setupLeagueId)return null;
+  return season.leagues.find(l=>l.id===setupLeagueId)||null
 }
 
 function getCurrentSeason(){
@@ -6185,6 +6201,8 @@ async function createNewSeason(){
   });
 
   loadLeagueIntoRuntime(id,firstLeague.id);
+  setupSeasonId=id;
+  setupLeagueId=firstLeague.id;
   save();
   render();
   setWorkspace("home");
@@ -6198,7 +6216,7 @@ async function createNewSeason(){
 async function createNewLeague(){
   syncCurrentLeagueToArchive();
 
-  const season=getCurrentSeason();
+  const season=getSetupSeason();
   if(!season)return;
 
   const suggestion=season.leagues.some(l=>norm(l.label)==="leagueb")
@@ -6231,57 +6249,62 @@ async function createNewLeague(){
 
   season.leagues.push(league);
   loadLeagueIntoRuntime(season.id,league.id);
+  setupSeasonId=season.id;
+  setupLeagueId=league.id;
   save();
   render();
   setWorkspace("home")
 }
 
-function switchSeason(id){
-  if(!archive)return;
-  if(!id){
-    currentSeasonId=null;
-    currentLeagueId=null;
-    renderHomeSetup();
-    return
-  }
-
-  if(currentSeasonId && getCurrentLeague())syncCurrentLeagueToArchive();
-
+function switchRuntimeSeason(id){
+  if(!archive||!id)return;
   const season=archive.seasons.find(s=>s.id===id);
   if(!season)return;
+  const leagueId=season.currentLeagueId||season.leagues?.[0]?.id;
+  if(!leagueId)return;
+  if(getCurrentLeague())syncCurrentLeagueToArchive();
+  loadLeagueIntoRuntime(season.id,leagueId);
+  save();
+  clearSelection();
+  render();
+  autoLoadRemoteDatabase(true)
+}
 
-  const leagueId=season.currentLeagueId||season.leagues[0]?.id||null;
-  if(leagueId){
-    loadLeagueIntoRuntime(season.id,leagueId);
-    save();
-    clearSelection();
-    render();
-    autoLoadRemoteDatabase(true)
-  }else{
-    currentSeasonId=season.id;
-    currentLeagueId=null;
-    archive.currentSeasonId=season.id;
-    archive.currentLeagueId=null;
-    saveArchive();
-    renderHomeSetup()
-  }
+function switchSeason(id){
+  setupSeasonId=id||null;
+  setupLeagueId=null;
+  renderHomeSetup()
 }
 
 function switchLeague(id){
-  const season=archive?.seasons?.find(s=>s.id===currentSeasonId)||null;
-  if(!season)return;
-  if(!id){
-    currentLeagueId=null;
+  const season=getSetupSeason();
+  setupLeagueId=id||null;
+
+  if(!season||!setupLeagueId){
     renderHomeSetup();
     return
   }
-  if(id===currentLeagueId){renderHomeSetup();return}
 
-  if(getCurrentLeague())syncCurrentLeagueToArchive();
-  loadLeagueIntoRuntime(season.id,id);
+  const league=season.leagues.find(l=>l.id===setupLeagueId);
+  if(!league){
+    setupLeagueId=null;
+    renderHomeSetup();
+    return
+  }
+
+  if(currentSeasonId && currentLeagueId && getCurrentLeague()){
+    syncCurrentLeagueToArchive()
+  }
+
+  loadLeagueIntoRuntime(season.id,league.id);
+  archive.currentSeasonId=season.id;
+  archive.currentLeagueId=league.id;
+  season.currentLeagueId=league.id;
   save();
   clearSelection();
-  render()
+  render();
+  renderHomeSetup();
+  autoLoadRemoteDatabase(true)
 }
 
 function renderParticipantEditor(){
@@ -6289,28 +6312,26 @@ function renderParticipantEditor(){
   const hint=document.getElementById("participantHint");
   if(!box)return;
 
-  const season=getCurrentSeason();
-  const league=getCurrentLeague();
+  const season=getSetupSeason();
+  const league=getSetupLeague();
 
   if(!season){
-    box.innerHTML=`<div class="setup-waiting">1. Seleziona o crea prima la stagione.</div>`;
-    if(hint)hint.textContent="La configurazione partecipanti si attiva dopo aver scelto stagione, divisione e numero di squadre.";
+    box.innerHTML=`<div class="setup-waiting"><strong>1 · Stagione</strong><br>Seleziona l'annata dell'asta.</div>`;
+    if(hint)hint.textContent="Configurazione asta: stagione → divisione → numero squadre.";
     return
   }
-
   if(!league){
-    box.innerHTML=`<div class="setup-waiting">2. Seleziona o crea una divisione.</div>`;
-    if(hint)hint.textContent="Ora scegli la divisione da configurare.";
+    box.innerHTML=`<div class="setup-waiting"><strong>2 · Divisione</strong><br>Seleziona la divisione della stagione ${season.label}.</div>`;
+    if(hint)hint.textContent="La stagione è selezionata. Ora scegli la divisione.";
     return
   }
-
   if(!(Number(league.teamCount)>=MIN_LEAGUE_TEAMS)){
-    box.innerHTML=`<div class="setup-waiting">3. Seleziona il numero di squadre.</div>`;
-    if(hint)hint.textContent="Dopo il numero di squadre compariranno le righe dei partecipanti.";
+    box.innerHTML=`<div class="setup-waiting"><strong>3 · Numero squadre</strong><br>Scegli quante squadre partecipano a ${league.label}.</div>`;
+    if(hint)hint.textContent="Dopo il numero di squadre compariranno i partecipanti.";
     return
   }
 
-  if(hint)hint.textContent=`${league.label} · ${league.teamCount} squadre · scegli gli allenatori dallo storico permanente`;
+  if(hint)hint.textContent=`${season.label} · ${league.label} · ${league.teamCount} squadre`;
   box.innerHTML="";
 
   for(let i=0;i<league.teamCount;i++){
@@ -6319,8 +6340,7 @@ function renderParticipantEditor(){
     row.className="participant-row";
 
     const elsewhere=new Map();
-    season.leagues
-      .filter(l=>l.id!==league.id)
+    season.leagues.filter(l=>l.id!==league.id)
       .forEach(l=>l.participants.forEach(p=>elsewhere.set(p.managerId,l.label)));
 
     const options=[
@@ -6334,9 +6354,7 @@ function renderParticipantEditor(){
 
     row.innerHTML=`
       <div class="participant-num">${i+1}</div>
-      <select class="participant-select" data-participant-manager="${i}" onchange="participantManagerChanged(${i})">
-        ${options}
-      </select>
+      <select class="participant-select" data-participant-manager="${i}" onchange="participantManagerChanged(${i})">${options}</select>
       <input class="participant-team-input" data-participant-team="${i}"
              value="${String(current.teamName||managerById(current.managerId)?.defaultTeamName||"").replace(/"/g,"&quot;")}"
              placeholder="Nome squadra">
@@ -6358,38 +6376,48 @@ function participantManagerChanged(index){
 
 
 function leagueTeamCountChanged(){
-  const league=getCurrentLeague();
-  if(!league)return;
+  const season=getSetupSeason();
+  const league=getSetupLeague();
+  if(!season||!league)return;
 
-  const count=Number(document.getElementById("leagueTeamCount").value);
-
+  const el=document.getElementById("leagueTeamCount");
+  const count=Number(el?.value);
   if(count<MIN_LEAGUE_TEAMS||count>MAX_LEAGUE_TEAMS)return;
 
-  if(history.length && count!==league.teamCount){
+  const leagueHistory=Array.isArray(league.purchases)?league.purchases:[];
+  if(leagueHistory.length && count!==league.teamCount){
     alert("Non puoi cambiare il numero di squadre dopo l'inizio dell'asta.");
-    document.getElementById("leagueTeamCount").value=String(league.teamCount);
+    el.value=String(league.teamCount);
     return
   }
 
   league.teamCount=count;
-  league.participants=league.participants.slice(0,count);
+  league.participants=(league.participants||[]).slice(0,count);
 
+  if(currentSeasonId!==season.id || currentLeagueId!==league.id){
+    loadLeagueIntoRuntime(season.id,league.id)
+  }
+
+  archive.currentSeasonId=season.id;
+  archive.currentLeagueId=league.id;
+  season.currentLeagueId=league.id;
   save();
   rebuildTeams();
   renderHomeSetup()
 }
 
 function startConfiguredAuction(){
-  const league=getCurrentLeague();
-  if(!league)return;
-
+  const season=getSetupSeason();
+  const league=getSetupLeague();
+  if(!season){alert("Seleziona prima la stagione.");return}
+  if(!league){alert("Seleziona prima la divisione.");return}
+  if(!(Number(league.teamCount)>=MIN_LEAGUE_TEAMS)){alert("Seleziona il numero di squadre.");return}
   if(!saveParticipants(true))return;
-
   if(league.participants.length!==league.teamCount){
-    alert("Completa tutti i partecipanti prima di avviare l'asta.");
-    return
+    alert("Completa tutti i partecipanti prima di avviare l'asta.");return
   }
-
+  loadLeagueIntoRuntime(season.id,league.id);
+  save();
   setWorkspace("auction")
 }
 
@@ -6418,54 +6446,36 @@ function saveLeagueBasics(){
 }
 
 function saveParticipants(silent=false){
-  const league=getCurrentLeague();
-  const season=getCurrentSeason();
-
+  const season=getSetupSeason();
+  const league=getSetupLeague();
   if(!league||!season)return false;
 
-  if(history.length){
-    if(!silent){
-      alert("Per sicurezza i partecipanti non possono essere modificati dopo l'inizio dell'asta.")
-    }
+  const leagueHistory=Array.isArray(league.purchases)?league.purchases:[];
+  if(leagueHistory.length){
+    if(!silent)alert("Per sicurezza i partecipanti non possono essere modificati dopo l'inizio dell'asta.");
     return false
   }
 
   const participants=[];
-
   for(let i=0;i<league.teamCount;i++){
     const managerId=document.querySelector(`[data-participant-manager="${i}"]`)?.value||"";
     const teamName=document.querySelector(`[data-participant-team="${i}"]`)?.value.trim()||"";
-
-    if(!managerId){
-      alert(`Seleziona l'allenatore per la posizione ${i+1}.`);
-      return false
-    }
-
-    if(!teamName){
-      alert(`Inserisci il nome squadra per la posizione ${i+1}.`);
-      return false
-    }
-
+    if(!managerId){alert(`Seleziona l'allenatore per la posizione ${i+1}.`);return false}
+    if(!teamName){alert(`Inserisci il nome squadra per la posizione ${i+1}.`);return false}
     participants.push({managerId,teamName})
   }
 
   const ids=participants.map(p=>p.managerId);
-
   if(new Set(ids).size!==ids.length){
     alert("Lo stesso allenatore non può comparire due volte nella stessa divisione.");
     return false
   }
 
   const otherAssigned=new Map();
-
-  season.leagues
-    .filter(l=>l.id!==league.id)
-    .forEach(l=>{
-      l.participants.forEach(p=>otherAssigned.set(p.managerId,l.label))
-    });
-
+  season.leagues.filter(l=>l.id!==league.id).forEach(l=>{
+    l.participants.forEach(p=>otherAssigned.set(p.managerId,l.label))
+  });
   const duplicateCross=participants.find(p=>otherAssigned.has(p.managerId));
-
   if(duplicateCross){
     const m=managerById(duplicateCross.managerId);
     alert(`${m?.displayName||"Questo allenatore"} è già assegnato a ${otherAssigned.get(duplicateCross.managerId)} nella stessa stagione.`);
@@ -6473,11 +6483,11 @@ function saveParticipants(silent=false){
   }
 
   league.participants=participants;
-
+  loadLeagueIntoRuntime(season.id,league.id);
   save();
   rebuildTeams();
   render();
-
+  renderHomeSetup();
   return true
 }
 
@@ -6559,8 +6569,8 @@ function renderGlobalManagerList(){
 function renderHomeSetup(){
   if(!archive)return;
 
-  const season=archive.seasons?.find(s=>s.id===currentSeasonId)||null;
-  const league=season?.leagues?.find(l=>l.id===currentLeagueId)||null;
+  const season=getSetupSeason();
+  const league=getSetupLeague();
 
   const ss=document.getElementById("homeSeasonSelect");
   if(ss){
@@ -6569,10 +6579,9 @@ function renderHomeSetup(){
       const o=document.createElement("option");
       o.value=s.id;
       o.textContent=s.label;
-      o.selected=!!season && s.id===season.id;
       ss.appendChild(o)
     });
-    ss.value=season?.id||""
+    ss.value=setupSeasonId||""
   }
 
   const ls=document.getElementById("homeLeagueSelect");
@@ -6583,34 +6592,28 @@ function renderHomeSetup(){
       const o=document.createElement("option");
       o.value=l.id;
       o.textContent=l.label;
-      o.selected=!!league && l.id===league.id;
       ls.appendChild(o)
     });
-    ls.value=league?.id||""
+    ls.value=setupLeagueId||""
   }
 
   const count=document.getElementById("leagueTeamCount");
   if(count){
     count.disabled=!league;
-    count.value=league?String(league.teamCount||""):"";
+    count.value=league && Number(league.teamCount)>=MIN_LEAGUE_TEAMS ? String(league.teamCount) : "";
   }
 
   const newLeagueBtn=document.getElementById("newLeagueBtn");
   if(newLeagueBtn)newLeagueBtn.disabled=!season;
 
-  const auctionStatus=document.getElementById("auctionConfigStatus");
-  if(auctionStatus){
-    if(!season)auctionStatus.textContent="Seleziona prima la stagione.";
-    else if(!league)auctionStatus.textContent="Seleziona poi la divisione.";
-    else auctionStatus.textContent=`${league.label} · ${league.participants.length}/${league.teamCount} partecipanti configurati`;
-  }
+  const startBtn=document.querySelector('[onclick="startConfiguredAuction()"]');
+  if(startBtn)startBtn.disabled=!(season&&league&&Number(league.teamCount)>=MIN_LEAGUE_TEAMS);
 
   const status=document.getElementById("homeArchiveStatus");
   if(status){
-    const seasonPurchases=(season?.leagues||[]).reduce((n,l)=>n+(l.purchases?.length||0),0);
-    status.textContent=season
-      ?`${season.leagues.length} divisioni · ${seasonPurchases} acquisti registrati in ${season.label}`
-      :"Configura l'asta in ordine: stagione → divisione → numero squadre. Lo storico allenatori è indipendente.";
+    if(!season)status.textContent="1. Seleziona l'annata dell'asta.";
+    else if(!league)status.textContent=`2. Seleziona la divisione di ${season.label}.`;
+    else status.textContent=`3. Conferma il numero di squadre per ${league.label}.`;
   }
 
   renderParticipantEditor();
@@ -8849,6 +8852,8 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
 }
 
 load();
+setupSeasonId=null;
+setupLeagueId=null;
 render();
 renderHomeSetup();
 showTopSettingsButton();
