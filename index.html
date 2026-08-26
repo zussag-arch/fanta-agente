@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.24</title>
+<title>Fanta Agente 2.25</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -5210,6 +5210,48 @@ body.modal-open .topbar{
   }
 }
 
+
+/* ===== v2.25 rotella impostazioni dentro la barra ===== */
+.app-tabs{
+  position:relative !important;
+  padding-right:58px !important;
+}
+
+.app-settings-btn{
+  position:absolute !important;
+  right:7px !important;
+  top:50% !important;
+  transform:translateY(-50%) !important;
+  width:44px !important;
+  height:44px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:0 !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  border-radius:15px !important;
+  background:rgba(255,255,255,.08) !important;
+  color:#eef3f6 !important;
+  font-size:20px !important;
+  line-height:1 !important;
+  cursor:pointer !important;
+  z-index:3 !important;
+}
+
+@media(max-width:700px){
+  .app-tabs{
+    padding-right:59px !important;
+  }
+
+  .app-settings-btn{
+    right:7px !important;
+    width:48px !important;
+    height:48px !important;
+    border-radius:17px !important;
+    font-size:22px !important;
+  }
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -5234,7 +5276,7 @@ body.modal-open .topbar{
     <div class="top-stats">
       <div class="pill season-pill">Stagione <strong id="currentSeasonLabel">2026/27</strong></div>
       <div class="pill"><strong id="availableCount">0</strong> disponibili</div>
-      <button class="icon-btn" onclick="openSettings()" title="Impostazioni" id="topSettingsBtn">⚙</button>
+      
     </div>
   </header>
 
@@ -5242,6 +5284,7 @@ body.modal-open .topbar{
     <button id="homeTabBtn" class="app-tab active" onclick="setWorkspace('home')">FANTA AGENTE</button>
     <button id="auctionTabBtn" class="app-tab" onclick="setWorkspace('auction')">ASTA</button>
     <button id="keepersTabBtn" class="app-tab" onclick="setWorkspace('keepers')"><span>ABBINAMENTO</span><br><span>PORTIERI</span></button>
+    <button class="app-settings-btn" onclick="openSettings()" title="Impostazioni" id="topSettingsBtn" aria-label="Impostazioni">⚙</button>
   </nav>
 
   <section id="homeView" class="workspace-view">
