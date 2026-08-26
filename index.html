@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.11</title>
+<title>Fanta Agente 2.12</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -4121,6 +4121,257 @@ body.modal-open .topbar{
   }
 }
 
+
+/* =========================================================
+   v2.12 mobile polish: barra leggibile + portieri responsive
+   ========================================================= */
+
+/* Barra generale: più leggibile */
+.app-tabs{
+  min-height:64px !important;
+}
+
+.app-tab{
+  white-space:normal !important;
+  line-height:1.08 !important;
+  text-align:center !important;
+  font-weight:950 !important;
+  letter-spacing:.01em !important;
+}
+
+@media(min-width:701px){
+  .app-tab{
+    font-size:13px !important;
+    padding:0 12px !important;
+  }
+}
+
+/* Mobile: etichette più grandi e il tab portieri su 2 righe */
+@media(max-width:700px){
+  .app-tabs{
+    left:10px !important;
+    right:10px !important;
+    bottom:max(10px,env(safe-area-inset-bottom)) !important;
+    padding:7px !important;
+    min-height:72px !important;
+    border-radius:24px !important;
+  }
+
+  .app-tab{
+    height:54px !important;
+    padding:0 8px !important;
+    border-radius:18px !important;
+    font-size:12px !important;
+    line-height:1.05 !important;
+  }
+
+  #keepersTabBtn{
+    font-size:11.5px !important;
+  }
+
+  #keepersTabBtn::first-line{
+    line-height:1 !important;
+  }
+}
+
+/* Abbinamento portieri: usa davvero tutta la larghezza */
+.keepers-shell{
+  width:100% !important;
+  max-width:none !important;
+  box-sizing:border-box !important;
+}
+
+#keepersView{
+  width:100% !important;
+  max-width:100% !important;
+  overflow-x:hidden !important;
+}
+
+#keepersView .panel{
+  width:100% !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+
+#keepersView .panel-body{
+  width:100% !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+
+.keeper-controls{
+  width:100% !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+
+.keeper-controls .field,
+.keeper-controls select{
+  min-width:0 !important;
+  max-width:100% !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+}
+
+.keeper-best-matches{
+  min-width:0 !important;
+  max-width:100% !important;
+}
+
+.keeper-grid-wrap{
+  width:100% !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+
+/* Font più leggibili */
+#keepersView .panel-title{
+  font-size:22px !important;
+}
+
+#keepersView .muted{
+  font-size:13px !important;
+  line-height:1.45 !important;
+}
+
+.keeper-controls label,
+.keeper-best-label{
+  font-size:11px !important;
+  font-weight:950 !important;
+}
+
+#keeperPrimaryTeam{
+  height:52px !important;
+  font-size:17px !important;
+  font-weight:850 !important;
+}
+
+.keeper-best-chip{
+  min-width:110px !important;
+  padding:10px 12px !important;
+}
+
+.keeper-best-chip strong{
+  font-size:15px !important;
+}
+
+.keeper-best-chip span{
+  font-size:13px !important;
+}
+
+.keeper-note{
+  font-size:12px !important;
+  line-height:1.55 !important;
+}
+
+.keeper-matrix th{
+  font-size:11px !important;
+  min-width:68px !important;
+  height:46px !important;
+}
+
+.keeper-matrix td{
+  font-size:12px !important;
+  min-width:62px !important;
+  height:38px !important;
+}
+
+.keeper-row-head{
+  min-width:118px !important;
+  font-size:12px !important;
+}
+
+/* Mobile: contenitore a tutta larghezza e scroll interno, non pagina */
+@media(max-width:700px){
+  .keepers-shell{
+    width:100% !important;
+    max-width:100% !important;
+    padding:14px 10px 104px !important;
+    margin:0 !important;
+  }
+
+  #keepersView .panel{
+    width:100% !important;
+    max-width:100% !important;
+    margin:0 !important;
+    border-radius:16px !important;
+    overflow:hidden !important;
+  }
+
+  #keepersView .panel-head{
+    padding:16px 16px 12px !important;
+  }
+
+  #keepersView .panel-body{
+    padding:14px !important;
+    overflow:hidden !important;
+  }
+
+  #keepersView .panel-title{
+    font-size:20px !important;
+  }
+
+  #keepersView .muted{
+    font-size:12px !important;
+  }
+
+  .keeper-controls{
+    grid-template-columns:1fr !important;
+    gap:14px !important;
+  }
+
+  .keeper-best-matches{
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:8px !important;
+    overflow:visible !important;
+  }
+
+  .keeper-best-chip{
+    min-width:0 !important;
+    width:100% !important;
+    padding:10px !important;
+  }
+
+  .keeper-note{
+    margin:14px 0 !important;
+    padding:12px !important;
+    font-size:11.5px !important;
+  }
+
+  .keeper-grid-wrap{
+    width:100% !important;
+    max-width:100% !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    -webkit-overflow-scrolling:touch !important;
+    overscroll-behavior-x:contain !important;
+  }
+
+  .keeper-matrix{
+    min-width:980px !important;
+    width:max-content !important;
+    padding:5px !important;
+  }
+
+  .keeper-matrix th{
+    font-size:11px !important;
+    min-width:64px !important;
+    height:44px !important;
+  }
+
+  .keeper-matrix td{
+    font-size:12px !important;
+    min-width:60px !important;
+    height:38px !important;
+  }
+
+  .keeper-row-head{
+    min-width:108px !important;
+    font-size:12px !important;
+  }
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -4152,7 +4403,7 @@ body.modal-open .topbar{
   <nav class="app-tabs">
     <button id="homeTabBtn" class="app-tab active" onclick="setWorkspace('home')">FANTA AGENTE</button>
     <button id="auctionTabBtn" class="app-tab" onclick="setWorkspace('auction')">ASTA</button>
-    <button id="keepersTabBtn" class="app-tab" onclick="setWorkspace('keepers')">ABBINAMENTO PORTIERI</button>
+    <button id="keepersTabBtn" class="app-tab" onclick="setWorkspace('keepers')"><span>ABBINAMENTO</span><br><span>PORTIERI</span></button>
   </nav>
 
   <section id="homeView" class="workspace-view">
