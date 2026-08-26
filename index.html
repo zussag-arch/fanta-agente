@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.30</title>
+<title>Fanta Agente 2.32</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -5497,6 +5497,12 @@ body.modal-open .topbar{
   .settings-tab-icon{font-size:22px !important}
 }
 
+
+/* ===== v2.32 DB-driven seasons ===== */
+#homeView .setup-actions{
+  justify-content:flex-start !important;
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -5571,7 +5577,7 @@ body.modal-open .topbar{
           </div>
 
           <div class="setup-actions">
-            <button class="secondary-btn" onclick="createNewSeason()">＋ Nuova stagione</button>
+            
             <button class="secondary-btn" onclick="createNewLeague()">＋ Nuova divisione</button>
           </div>
 
@@ -6141,119 +6147,7 @@ body.modal-open .topbar{
 
 
 
-      <div id="archiveStatus" class="status"></div>
-
-      <div id="remoteBackupStatus" class="status" style="margin-top:8px">
-        Controllo backup GitHub…
-      </div>
-
-      <div class="settings-actions">
-        <button class="secondary-btn" onclick="exportArchive()">⬇ Esporta archivio JSON</button>
-        <button class="secondary-btn" onclick="exportOpponentProfilesCsv()">⬇ Profili avversari CSV</button>
-        <button class="secondary-btn" onclick="triggerRestoreArchive()">⬆ Ripristina JSON</button>
-        <button class="secondary-btn" onclick="triggerMergeArchive()">⊕ Unisci JSON</button>
-        <input type="file" id="archiveFile" accept=".json,application/json" style="display:none">
-        <input type="file" id="mergeArchiveFile" accept=".json,application/json" style="display:none">
-      </div>
-    </div>
-
-
-    <div class="setting-card">
-      <div class="panel-title">Database</div>
-      <p class="status">
-        Il database viene cercato automaticamente nella cartella <strong>database</strong>
-        in base alla stagione attiva, ad esempio <strong>database/2026-27.xlsx</strong>.
-        L'import manuale resta disponibile come fallback.
-      </p>
-      <div id="dbRemoteStatus" class="status" style="margin-bottom:8px"></div>
-      <label class="file-label">
-        📥 Importa / aggiorna manualmente
-        <input type="file" id="databaseFile" accept=".xlsx,.xls">
-      </label>
-      <div id="dbStatus" class="status">Nessun database caricato.</div>
-    </div>
-
-    <div class="setting-card">
-      <div class="panel-title">Tetto strategico</div>
-
-      <p class="status">
-        Il <strong>tetto strategico</strong> è il prezzo massimo consigliato per il giocatore
-        selezionato. Non è un valore fisso per ruolo o slot: parte dal valore specifico del
-        giocatore e viene corretto in base a ciò che sta succedendo realmente durante l'asta.
-      </p>
-
-      <div class="ceiling-explain">
-        <div class="ceiling-step">
-          <strong>1. Base PMA</strong>
-          <span>
-            Il punto di partenza è il <strong>PMA % di FantaLab</strong>, convertito sul budget
-            iniziale di 500 crediti. Ad esempio, un PMA del 10% equivale a una base di 50 crediti.
-          </span>
-        </div>
-
-        <div class="ceiling-step">
-          <strong>2. Premio contestuale</strong>
-          <span>
-            Alla base PMA può essere applicato un premio percentuale se il mercato lo giustifica.
-            Il premio cresce quando aumenta la <strong>pressione domanda/offerta</strong>, quando
-            restano pochi giocatori equivalenti nello stesso slot, quando più avversari sono ancora
-            fortemente interessati e, in misura limitata, per i giocatori di prima fascia.
-            I PMA bassi hanno inoltre maggiore elasticità, perché pochi crediti di differenza
-            incidono proporzionalmente di più.
-          </span>
-        </div>
-
-        <div class="ceiling-step">
-          <strong>3. Limite del reparto</strong>
-          <span>
-            Il valore ottenuto viene confrontato con il budget strategico del reparto:
-            <strong>Portieri 10%</strong>, <strong>Difensori 20%</strong>,
-            <strong>Centrocampisti 30%</strong> e <strong>Attaccanti 40%</strong> del budget iniziale.
-            Questo limite non è rigido: viene reso più elastico per uno slot di prima fascia
-            o quando la pressione di mercato è alta. Dal limite viene sottratto quanto hai già
-            speso in quel reparto.
-          </span>
-        </div>
-
-        <div class="ceiling-step">
-          <strong>4. Limite finanziario</strong>
-          <span>
-            Infine Fanta Agente controlla che, dopo l'acquisto, restino abbastanza crediti per
-            completare tutti gli slot mancanti della rosa. La riserva viene stimata usando i
-            valori mediani PMA delle fasce ancora da acquistare, con un piccolo margine di
-            elasticità. Questo parametro serve soprattutto come <strong>freno di sicurezza</strong>,
-            non come valutazione del giocatore.
-          </span>
-        </div>
-
-        <div class="ceiling-formula">
-          <strong>Valore finale</strong>
-          <span>
-            Il tetto mostrato è il più basso tra:
-            <strong>PMA contestualizzato</strong>,
-            <strong>limite elastico del reparto</strong> e
-            <strong>limite finanziario</strong>.
-          </span>
-        </div>
-
-        <p class="status" style="margin-top:10px">
-          Il semaforo usa questo valore per dirti se hai ancora margine:
-          <strong>verde</strong> quando puoi salire,
-          <strong>giallo</strong> quando sei vicino al limite e
-          <strong>rosso</strong> quando il prezzo corrente ha raggiunto o superato il tetto.
-        </p>
-      </div>
-    </div>
-
-    <div class="setting-card">
-      <div class="panel-title">Asta</div>
-      <p class="status">Resetta soltanto gli acquisti della divisione attiva. Le altre aste e lo storico degli allenatori restano salvati.</p>
-      <button class="danger-btn" onclick="resetAuction()">Reset asta</button>
-    </div>
-  </div>
-</div>
-
-<div id="historyModal" class="history-modal" onclick="closeHistory(event)">
+      <div id="historyModal" class="history-modal" onclick="closeHistory(event)">
   <div class="history-card">
     <div class="panel-head">
       <div class="panel-title">Storico acquisti</div>
@@ -7412,7 +7306,13 @@ function switchSeason(id){
   if(!archive)return;
   syncCurrentLeagueToArchive();
 
-  const season=archive.seasons.find(s=>s.id===id);
+  let season=archive.seasons.find(s=>s.id===id);
+
+  if(!season){
+    const dbSeason=databaseSeasonCatalog?.find(s=>s.id===id);
+    if(dbSeason)season=ensureArchiveSeasonForDatabase(dbSeason)
+  }
+
   if(!season)return;
 
   const leagueId=season.currentLeagueId||season.leagues[0]?.id;
@@ -7694,6 +7594,143 @@ function renderGlobalManagerList(){
   })
 }
 
+
+const DATABASE_GITHUB_CONTENTS_URL="https://api.github.com/repos/zussag-arch/fanta-agente/contents/database";
+let databaseSeasonCatalog=null;
+let databaseSeasonCatalogLoading=null;
+
+function databaseSeasonFromFilename(filename){
+  const name=String(filename||"").trim();
+  const m=name.match(/^(\d{4})-(\d{2}|\d{4})\.xlsx$/i);
+  if(!m)return null;
+
+  const y1=m[1];
+  const y2=m[2].length===4?m[2].slice(-2):m[2];
+
+  return {
+    filename:name,
+    id:`${y1}-${y2}`,
+    label:`${y1}/${y2}`
+  }
+}
+
+function sortDatabaseSeasons(items){
+  return [...items].sort((a,b)=>b.id.localeCompare(a.id))
+}
+
+async function loadDatabaseSeasonCatalog(force=false){
+  if(databaseSeasonCatalog && !force)return databaseSeasonCatalog;
+  if(databaseSeasonCatalogLoading && !force)return databaseSeasonCatalogLoading;
+
+  databaseSeasonCatalogLoading=(async()=>{
+    try{
+      const response=await fetch(DATABASE_GITHUB_CONTENTS_URL,{
+        headers:{"Accept":"application/vnd.github+json"},
+        cache:"no-store"
+      });
+
+      if(!response.ok)throw new Error(`GitHub ${response.status}`);
+
+      const files=await response.json();
+      if(!Array.isArray(files))throw new Error("Risposta database non valida");
+
+      const seasons=sortDatabaseSeasons(
+        files
+          .filter(file=>file && file.type==="file")
+          .map(file=>databaseSeasonFromFilename(file.name))
+          .filter(Boolean)
+      );
+
+      if(!seasons.length)throw new Error("Nessun database stagionale trovato");
+
+      databaseSeasonCatalog=seasons;
+      return seasons
+    }catch(err){
+      console.warn("Impossibile leggere l'elenco database da GitHub:",err);
+      return null
+    }finally{
+      databaseSeasonCatalogLoading=null
+    }
+  })();
+
+  return databaseSeasonCatalogLoading
+}
+
+function ensureArchiveSeasonForDatabase(entry){
+  if(!archive || !entry)return null;
+
+  let season=archive.seasons.find(s=>s.id===entry.id);
+
+  if(!season){
+    const firstLeague=makeLeague(
+      "league-a",
+      "League A",
+      9,
+      [],
+      {filename:entry.filename,importedAt:null,players:[]}
+    );
+
+    season={
+      id:entry.id,
+      label:entry.label,
+      createdAt:new Date().toISOString(),
+      currentLeagueId:firstLeague.id,
+      leagues:[firstLeague]
+    };
+
+    archive.seasons.push(season);
+    save()
+  }else{
+    season.label=entry.label
+  }
+
+  return season
+}
+
+function populateHomeSeasonSelectFromDatabases(){
+  const ss=document.getElementById("homeSeasonSelect");
+  if(!ss)return;
+
+  const catalog=databaseSeasonCatalog;
+
+  if(!catalog?.length){
+    ss.innerHTML="";
+    const current=getCurrentSeason();
+    if(current){
+      const o=document.createElement("option");
+      o.value=current.id;
+      o.textContent=current.label;
+      o.selected=true;
+      ss.appendChild(o)
+    }else{
+      const o=document.createElement("option");
+      o.value="";
+      o.textContent="Caricamento stagioni…";
+      ss.appendChild(o)
+    }
+    return
+  }
+
+  ss.innerHTML="";
+
+  catalog.forEach(entry=>{
+    const o=document.createElement("option");
+    o.value=entry.id;
+    o.textContent=entry.label;
+    o.selected=entry.id===currentSeasonId;
+    ss.appendChild(o)
+  });
+
+  if(!catalog.some(entry=>entry.id===currentSeasonId) && catalog[0]){
+    ss.value=catalog[0].id
+  }
+}
+
+async function refreshDatabaseSeasonSelect(){
+  await loadDatabaseSeasonCatalog();
+  populateHomeSeasonSelectFromDatabases()
+}
+
 function renderHomeSetup(){
   if(!archive)return;
   const season=getCurrentSeason();
@@ -7701,12 +7738,10 @@ function renderHomeSetup(){
 
   const ss=document.getElementById("homeSeasonSelect");
   if(ss){
-    ss.innerHTML="";
-    archive.seasons.forEach(s=>{
-      const o=document.createElement("option");
-      o.value=s.id;o.textContent=s.label;o.selected=s.id===currentSeasonId;
-      ss.appendChild(o)
-    })
+    populateHomeSeasonSelectFromDatabases();
+    if(!databaseSeasonCatalog && !databaseSeasonCatalogLoading){
+      refreshDatabaseSeasonSelect()
+    }
   }
 
   const ls=document.getElementById("homeLeagueSelect");
@@ -10062,6 +10097,14 @@ setWorkspace(initialWorkspace);
 autoLoadRemoteDatabase();
 checkRemoteBackup();
 loadRemoteManagerHistory();
+
+/* v2.32: seasons shown in Fanta Agente come from database filenames */
+if(document.readyState==="loading"){
+  document.addEventListener("DOMContentLoaded",()=>refreshDatabaseSeasonSelect())
+}else{
+  refreshDatabaseSeasonSelect()
+}
+
 </script>
 
 <nav class="mobile-bottom-nav" aria-label="Navigazione mobile">
