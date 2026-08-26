@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.16</title>
+<title>Fanta Agente 2.17</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -4508,6 +4508,17 @@ body.modal-open .topbar{
 /* ===== v2.16 setup realmente indipendente ===== */
 [onclick="startConfiguredAuction()"]:disabled{opacity:.38!important;cursor:not-allowed!important}
 
+
+.history-source-status{
+  grid-column:1/-1;
+  margin-bottom:10px;
+  padding:8px 10px;
+  border-radius:9px;
+  background:#141d23;
+  color:#81939f;
+  font-size:10px;
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -5167,41 +5178,76 @@ function remoteHistoryManagerByName(name){
   return remoteManagerHistory.managers.find(m=>normalizeManagerHistoryName(m.displayName||m.name)===target)||null
 }
 function mergeRemoteManagersIntoArchive(payload){
-  if(!payload||!Array.isArray(payload.managers)||!archive||!Array.isArray(archive.managers))return false;
+  if(!payload || !Array.isArray(payload.managers) || !archive || !Array.isArray(archive.managers))return false;
+
   let changed=false;
+
   payload.managers.forEach(remote=>{
     const displayName=String(remote.displayName||remote.name||"").trim();
     if(!displayName)return;
-    const exists=archive.managers.some(local=>normalizeManagerHistoryName(local.displayName)===normalizeManagerHistoryName(displayName));
-    if(!exists){
-      archive.managers.push({
-        id:remote.id||`mgr-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
-        displayName,
-        isMe:normalizeManagerHistoryName(displayName)==="gabriele",
-        createdAt:new Date().toISOString()
-      });
-      changed=true
+
+    const normalized=normalizeManagerHistoryName(displayName);
+    const local=archive.managers.find(m=>
+      normalizeManagerHistoryName(m.displayName)===normalized
+    );
+
+    if(local){
+      if(!local.defaultTeamName && remote.defaultTeamName){
+        local.defaultTeamName=remote.defaultTeamName;
+        changed=true
+      }
+      if(remote.isMe && !local.isMe){
+        local.isMe=true;
+        changed=true
+      }
+      return
     }
+
+    archive.managers.push({
+      id:remote.id||`m-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
+      displayName,
+      isMe:!!remote.isMe,
+      createdAt:remote.createdAt||new Date().toISOString(),
+      defaultTeamName:remote.defaultTeamName||""
+    });
+    changed=true
   });
+
   if(changed)saveArchive();
   return changed
 }
 async function loadRemoteManagerHistory(){
-  let payload=null,loadedPath=null;
-  for(const path of REMOTE_MANAGER_HISTORY_PATHS){
-    try{
-      const res=await fetch(`${path}?t=${Date.now()}`,{cache:"no-store"});
-      if(!res.ok)continue;
-      const data=await res.json();
-      if(data&&Array.isArray(data.managers)){payload=data;loadedPath=path;break}
-    }catch(e){}
+  try{
+    const res=await fetch(`./backup/latest.json?t=${Date.now()}`,{cache:"no-store"});
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+
+    const payload=await res.json();
+
+    if(
+      !payload ||
+      Number(payload.schemaVersion)!==2 ||
+      !Array.isArray(payload.managers) ||
+      !Array.isArray(payload.seasons)
+    ){
+      throw new Error("latest.json non è un archivio Fanta Agente schema 2")
+    }
+
+    remoteManagerHistory=payload;
+    mergeRemoteManagersIntoArchive(payload);
+
+    window.faRemoteManagerHistoryLoaded=true;
+    window.faRemoteManagerHistoryPath="./backup/latest.json";
+
+    renderGlobalManagerList();
+    renderHomeSetup();
+    return true
+  }catch(err){
+    console.warn("Impossibile caricare backup/latest.json:",err);
+    remoteManagerHistory=null;
+    window.faRemoteManagerHistoryLoaded=false;
+    renderGlobalManagerList();
+    return false
   }
-  if(!payload)return false;
-  remoteManagerHistory=payload;
-  mergeRemoteManagersIntoArchive(payload);
-  window.faRemoteManagerHistoryPath=loadedPath;
-  try{renderHomeSetup()}catch(e){}
-  return true
 }
 
 const INITIAL_BUDGET=500;
@@ -5749,6 +5795,83 @@ function archivePurchases(){
   )
 }
 
+function purchasesFromArchive(source){
+  if(!source || !Array.isArray(source.seasons))return [];
+  return source.seasons.flatMap(s=>
+    (s.leagues||[]).flatMap(l=>
+      (l.purchases||[]).map(p=>({
+        ...p,
+        _seasonId:s.id,
+        _seasonLabel:s.label,
+        _leagueId:l.id,
+        _leagueLabel:l.label
+      }))
+    )
+  )
+}
+
+function sourceManagerName(source,managerId){
+  if(!source || !managerId)return "";
+  return source.managers?.find(m=>m.id===managerId)?.displayName||""
+}
+
+function historicalPurchases(){
+  const localRows=purchasesFromArchive(archive);
+
+  const remoteRows=purchasesFromArchive(remoteManagerHistory).map(p=>{
+    const winnerName=sourceManagerName(remoteManagerHistory,p.managerId);
+    const localWinner=archive.managers.find(m=>
+      normalizeManagerHistoryName(m.displayName)===
+      normalizeManagerHistoryName(winnerName)
+    );
+
+    let runnerUp=p.runnerUp?{...p.runnerUp}:p.runnerUp;
+
+    if(runnerUp?.managerId){
+      const runnerName=
+        sourceManagerName(remoteManagerHistory,runnerUp.managerId) ||
+        runnerUp.managerName ||
+        "";
+
+      const localRunner=archive.managers.find(m=>
+        normalizeManagerHistoryName(m.displayName)===
+        normalizeManagerHistoryName(runnerName)
+      );
+
+      if(localRunner){
+        runnerUp.managerId=localRunner.id;
+        runnerUp.managerName=localRunner.displayName
+      }
+    }
+
+    return {
+      ...p,
+      managerId:localWinner?.id||p.managerId,
+      runnerUp
+    }
+  });
+
+  const map=new Map();
+
+  [...remoteRows,...localRows].forEach(p=>{
+    const key=
+      p.id ||
+      [
+        p._seasonId,
+        p._leagueId,
+        p.sequence,
+        p.playerKey||p.playerSnapshot?.key||p.playerName,
+        p.managerId,
+        p.price
+      ].join("|");
+
+    map.set(key,p)
+  });
+
+  return [...map.values()]
+}
+
+
 function validPmaRatio(purchase){
   const pma=Number(purchase.pmaCreditsAtPurchase ?? purchase.playerSnapshot?.pmaCredits);
   const price=Number(purchase.price);
@@ -5763,7 +5886,7 @@ function medianNumber(values){
 }
 
 function managerProfile(managerId){
-  const purchases=archivePurchases();
+  const purchases=historicalPurchases();
   const won=purchases.filter(p=>p.managerId===managerId);
 
   const withRatio=won
@@ -5774,7 +5897,9 @@ function managerProfile(managerId){
   const byRole={};
 
   ROLES.forEach(role=>{
-    const rows=withRatio.filter(x=>(x.p.playerRole||x.p.playerSnapshot?.role)===role);
+    const rows=withRatio.filter(x=>
+      (x.p.playerRole||x.p.playerSnapshot?.role)===role
+    );
     byRole[role]={
       samples:rows.length,
       ratio:medianNumber(rows.map(x=>x.ratio))
@@ -5789,11 +5914,6 @@ function managerProfile(managerId){
     (x.p.context?.market?.pressure||"").toUpperCase()==="ALTA"
   );
 
-  /*
-    Osservazioni di disponibilità a spendere:
-    - acquisto vinto = sappiamo che è arrivato almeno a quel prezzo;
-    - ultimo rilancio perso = segnale ancora più vicino al suo vero limite.
-  */
   const bidObservations=[];
 
   purchases.forEach(p=>{
@@ -5807,9 +5927,7 @@ function managerProfile(managerId){
     if(p.managerId===managerId && Number(p.price)>0){
       bidObservations.push({
         ratio:Number(p.price)/pma,
-        role,
-        slot,
-        pressure,
+        role,slot,pressure,
         kind:"winner",
         weight:.85
       })
@@ -5818,9 +5936,7 @@ function managerProfile(managerId){
     if(p.runnerUp?.managerId===managerId && Number(p.runnerUp.lastBid)>0){
       bidObservations.push({
         ratio:Number(p.runnerUp.lastBid)/pma,
-        role,
-        slot,
-        pressure,
+        role,slot,pressure,
         kind:"runnerup",
         weight:1.20
       })
@@ -5854,41 +5970,9 @@ function managerProfile(managerId){
     behavior.byRole[role]=behaviorSlice(x=>x.role===role)
   });
 
-  const divisions=[...new Set(won.map(p=>p._leagueLabel||p.leagueLabel).filter(Boolean))];
-
-
-  const managerName=archive.managers.find(m=>m.id===managerId)?.displayName||"";
-  const remoteSeed=remoteHistoryManagerByName(managerName);
-  const remoteStats=remoteSeed?.stats||null;
-  const localHasHistory=won.length>0 || bidObservations.length>0;
-
-  if(!localHasHistory && remoteStats){
-    const remoteByRole={};
-    ROLES.forEach(role=>{
-      remoteByRole[role]={
-        samples:Number(remoteStats.roles?.[role]?.samples)||0,
-        ratio:Number(remoteStats.roles?.[role]?.ratio)||null
-      }
-    });
-    return {
-      managerId,
-      samples:Number(remoteStats.samples)||0,
-      ratioSamples:Number(remoteStats.ratioSamples)||0,
-      overallRatio:Number(remoteStats.overallRatio)||null,
-      byRole:remoteByRole,
-      topSlot:{samples:Number(remoteStats.topSlotSamples)||0,ratio:null},
-      highPressure:{samples:Number(remoteStats.highPressureSamples)||0,ratio:null},
-      bidBehavior:{
-        overall:{samples:Number(remoteStats.bidSamples)||0,ratio:Number(remoteStats.overallRatio)||null,runnerUpSamples:Number(remoteStats.runnerUpSamples)||0},
-        byRole:Object.fromEntries(ROLES.map(role=>[role,{samples:Number(remoteStats.roles?.[role]?.samples)||0,ratio:Number(remoteStats.roles?.[role]?.ratio)||null,runnerUpSamples:0}])),
-        topSlot:{samples:Number(remoteStats.topSlotSamples)||0,ratio:null,runnerUpSamples:0},
-        highPressure:{samples:Number(remoteStats.highPressureSamples)||0,ratio:null,runnerUpSamples:0}
-      },
-      bidSamples:Number(remoteStats.bidSamples)||0,
-      runnerUpSamples:Number(remoteStats.runnerUpSamples)||0,
-      divisions:[]
-    }
-  }
+  const divisions=[
+    ...new Set(won.map(p=>p._leagueLabel||p.leagueLabel).filter(Boolean))
+  ];
 
   return {
     managerId,
@@ -6169,9 +6253,8 @@ function closeSimpleModal(e){
 }
 
 async function createNewSeason(){
-  syncCurrentLeagueToArchive();
+  const current=getSetupSeason()||getCurrentSeason();
 
-  const current=getCurrentSeason();
   let suggestion="2027/28";
   const m=(current?.label||"").match(/(20\d{2})\s*\/\s*(\d{2,4})/);
 
@@ -6189,35 +6272,39 @@ async function createNewSeason(){
 
   if(!label)return;
 
-  const id=seasonIdFromLabel(label);
-  const firstLeague=makeLeague("league-a","League A",leagueTeamCount(),[]);
+  const clean=label.trim();
+  const id=seasonIdFromLabel(clean);
+
+  if(archive.seasons.some(s=>s.id===id || norm(s.label)===norm(clean))){
+    alert("Questa stagione esiste già.");
+    return
+  }
 
   archive.seasons.push({
     id,
-    label:label.trim(),
+    label:clean,
     createdAt:new Date().toISOString(),
-    currentLeagueId:firstLeague.id,
-    leagues:[firstLeague]
+    currentLeagueId:null,
+    leagues:[]
   });
 
-  loadLeagueIntoRuntime(id,firstLeague.id);
   setupSeasonId=id;
-  setupLeagueId=firstLeague.id;
-  save();
-  render();
-  setWorkspace("home");
+  setupLeagueId=null;
 
-  await autoLoadRemoteDatabase(true);
+  saveArchive();
+  renderHomeSetup();
 
   const status=document.getElementById("homeArchiveStatus");
-  if(status)status.textContent=`Stagione ${label.trim()} creata. Configura League A e partecipanti.`
+  if(status)status.textContent=`Stagione ${clean} creata. Ora crea o seleziona la divisione.`
 }
 
 async function createNewLeague(){
-  syncCurrentLeagueToArchive();
-
   const season=getSetupSeason();
-  if(!season)return;
+
+  if(!season){
+    alert("Seleziona prima una stagione.");
+    return
+  }
 
   const suggestion=season.leagues.some(l=>norm(l.label)==="leagueb")
     ?"Nuova divisione"
@@ -6232,28 +6319,29 @@ async function createNewLeague(){
 
   if(!label)return;
 
-  const id=leagueIdFromLabel(season,label);
-  const source=getCurrentLeague();
+  const clean=label.trim();
+  const id=leagueIdFromLabel(season,clean);
 
-  const copiedDb=source?.database?.players?.length
-    ?deepCopy(source.database)
-    :{filename:null,importedAt:null,players:[]};
-
-  const league=makeLeague(
+  const league={
     id,
-    label.trim(),
-    source?.teamCount||9,
-    [],
-    copiedDb
-  );
+    label:clean,
+    teamCount:0,
+    createdAt:new Date().toISOString(),
+    participants:[],
+    purchases:[],
+    redo:[],
+    database:{filename:null,importedAt:null,source:null,players:[]}
+  };
 
   season.leagues.push(league);
-  loadLeagueIntoRuntime(season.id,league.id);
-  setupSeasonId=season.id;
+  season.currentLeagueId=league.id;
   setupLeagueId=league.id;
-  save();
-  render();
-  setWorkspace("home")
+
+  saveArchive();
+  renderHomeSetup();
+
+  const status=document.getElementById("homeArchiveStatus");
+  if(status)status.textContent=`${clean} creata. Ora scegli il numero di squadre.`
 }
 
 function switchRuntimeSeason(id){
@@ -6280,31 +6368,36 @@ function switchLeague(id){
   const season=getSetupSeason();
   setupLeagueId=id||null;
 
-  if(!season||!setupLeagueId){
+  if(!season || !setupLeagueId){
     renderHomeSetup();
     return
   }
 
   const league=season.leagues.find(l=>l.id===setupLeagueId);
+
   if(!league){
     setupLeagueId=null;
     renderHomeSetup();
     return
   }
 
-  if(currentSeasonId && currentLeagueId && getCurrentLeague()){
-    syncCurrentLeagueToArchive()
+  if(Number(league.teamCount)>=MIN_LEAGUE_TEAMS){
+    if(currentSeasonId && currentLeagueId && getCurrentLeague()){
+      syncCurrentLeagueToArchive()
+    }
+
+    loadLeagueIntoRuntime(season.id,league.id);
+    archive.currentSeasonId=season.id;
+    archive.currentLeagueId=league.id;
+    season.currentLeagueId=league.id;
+    save()
+  }else{
+    saveArchive()
   }
 
-  loadLeagueIntoRuntime(season.id,league.id);
-  archive.currentSeasonId=season.id;
-  archive.currentLeagueId=league.id;
-  season.currentLeagueId=league.id;
-  save();
   clearSelection();
   render();
-  renderHomeSetup();
-  autoLoadRemoteDatabase(true)
+  renderHomeSetup()
 }
 
 function renderParticipantEditor(){
@@ -6378,14 +6471,15 @@ function participantManagerChanged(index){
 function leagueTeamCountChanged(){
   const season=getSetupSeason();
   const league=getSetupLeague();
-  if(!season||!league)return;
+
+  if(!season || !league)return;
 
   const el=document.getElementById("leagueTeamCount");
   const count=Number(el?.value);
-  if(count<MIN_LEAGUE_TEAMS||count>MAX_LEAGUE_TEAMS)return;
 
-  const leagueHistory=Array.isArray(league.purchases)?league.purchases:[];
-  if(leagueHistory.length && count!==league.teamCount){
+  if(count<MIN_LEAGUE_TEAMS || count>MAX_LEAGUE_TEAMS)return;
+
+  if((league.purchases||[]).length && count!==league.teamCount){
     alert("Non puoi cambiare il numero di squadre dopo l'inizio dell'asta.");
     el.value=String(league.teamCount);
     return
@@ -6393,16 +6487,15 @@ function leagueTeamCountChanged(){
 
   league.teamCount=count;
   league.participants=(league.participants||[]).slice(0,count);
+  season.currentLeagueId=league.id;
 
-  if(currentSeasonId!==season.id || currentLeagueId!==league.id){
-    loadLeagueIntoRuntime(season.id,league.id)
-  }
-
+  loadLeagueIntoRuntime(season.id,league.id);
   archive.currentSeasonId=season.id;
   archive.currentLeagueId=league.id;
-  season.currentLeagueId=league.id;
+
   save();
   rebuildTeams();
+  render();
   renderHomeSetup()
 }
 
@@ -6525,38 +6618,53 @@ async function addGlobalManager(){
 function renderGlobalManagerList(){
   const box=document.getElementById("globalManagerList");
   if(!box)return;
-  box.innerHTML="";
 
-  const localManagers=Array.isArray(archive?.managers)?archive.managers:[];
-  const remoteManagers=Array.isArray(remoteManagerHistory?.managers)?remoteManagerHistory.managers:[];
-  const merged=new Map();
+  box.innerHTML=`
+    <div class="history-source-status">
+      ${remoteManagerHistory
+        ?"Storico caricato da backup/latest.json"
+        :"Storico remoto non caricato · uso dati locali"}
+    </div>
+  `;
 
-  [...remoteManagers,...localManagers].forEach(m=>{
-    const displayName=String(m.displayName||m.name||"").trim();
-    if(!displayName)return;
-    const k=normalizeManagerHistoryName(displayName);
-    const local=localManagers.find(x=>normalizeManagerHistoryName(x.displayName)===k);
-    merged.set(k,local||{id:m.id,displayName,isMe:k==="gabriele"})
-  });
+  const sourceManagers=
+    remoteManagerHistory?.managers?.length
+      ?remoteManagerHistory.managers
+      :(archive?.managers||[]);
 
-  const managers=[...merged.values()].sort((a,b)=>(b.isMe?1:0)-(a.isMe?1:0)||a.displayName.localeCompare(b.displayName,"it"));
-
-  if(!managers.length){
-    box.innerHTML=`<div class="setup-waiting">Caricamento di backup/latest.json…</div>`;
-    return
-  }
+  const managers=sourceManagers
+    .map(remote=>{
+      const displayName=remote.displayName||remote.name||"";
+      return archive.managers.find(m=>
+        normalizeManagerHistoryName(m.displayName)===
+        normalizeManagerHistoryName(displayName)
+      )||remote
+    })
+    .sort((a,b)=>
+      (b.isMe?1:0)-(a.isMe?1:0) ||
+      String(a.displayName).localeCompare(String(b.displayName),"it")
+    );
 
   managers.forEach(m=>{
-    const p=m.id?managerProfile(m.id):{samples:0,ratioSamples:0,overallRatio:null,byRole:Object.fromEntries(ROLES.map(r=>[r,{samples:0,ratio:null}])),divisions:[]};
+    const local=archive.managers.find(x=>
+      normalizeManagerHistoryName(x.displayName)===
+      normalizeManagerHistoryName(m.displayName)
+    );
+
+    const p=managerProfile(local?.id||m.id);
     const card=document.createElement("div");
     card.className=`manager-profile-card ${m.isMe?"me-profile":""}`;
 
-    const roleBits=ROLES.filter(r=>p.byRole?.[r]?.samples).map(r=>`${r} ${fmt(p.byRole[r].ratio,2)}×`).join(" · ");
+    const roleBits=ROLES
+      .filter(r=>p.byRole?.[r]?.samples)
+      .map(r=>`${r} ${fmt(p.byRole[r].ratio,2)}×`)
+      .join(" · ");
 
     card.innerHTML=`
       <div class="manager-profile-name">${m.isMe?"★ ":""}${m.displayName}</div>
       <div class="manager-profile-meta">
-        ${p.samples||0} acquisti storici · ${p.ratioSamples?(p.ratioSamples+" con PMA"):"nessun PMA storico"}<br>
+        ${p.samples||0} acquisti storici ·
+        ${p.ratioSamples?`${p.ratioSamples} con PMA`:"nessun PMA storico"}<br>
         ${p.overallRatio!=null?`Mediana ${fmt(p.overallRatio,2)}× PMA`:"Profilo ancora da costruire"}
         ${roleBits?`<br>${roleBits}`:""}
         ${p.divisions?.length?`<br>Storico divisioni: ${p.divisions.join(", ")}`:""}
