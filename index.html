@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.10.1</title>
+<title>Fanta Agente 2.11</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -3855,6 +3855,272 @@ body.modal-open .topbar{
   z-index:2
 }
 
+
+/* ===== v2.11: chiamata consigliata + abbinamento portieri ===== */
+.app-tabs{
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  width:min(660px,calc(100vw - 120px)) !important;
+}
+.app-tab{
+  min-width:0 !important;
+}
+
+.recommended-state{
+  padding:0 !important;
+  border:0 !important;
+  background:transparent !important;
+}
+.recommended-call-panel{
+  background:#182229;
+  border:1px solid #2d3b45;
+  border-radius:14px;
+  overflow:hidden;
+}
+.recommended-call-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px 12px 8px;
+}
+.recommended-kicker{
+  margin-bottom:2px;
+  color:#6f8190;
+  font-size:8px;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.recommended-title{
+  color:#fff;
+  font-size:16px;
+  font-weight:950;
+}
+.recommended-refresh{
+  width:32px;
+  min-width:32px;
+  height:32px;
+  padding:0 !important;
+}
+.recommended-call-body{
+  padding:0 10px 10px;
+}
+.recommended-empty{
+  padding:11px;
+  border-radius:9px;
+  background:#141d23;
+  color:#82939f;
+  font-size:10px;
+  line-height:1.45;
+}
+.recommended-best{
+  display:grid;
+  grid-template-columns:minmax(0,1.3fr) repeat(4,minmax(64px,.48fr));
+  gap:6px;
+}
+.recommended-player{
+  min-width:0;
+  padding:10px 11px;
+  border-radius:10px;
+  background:#1d2931;
+  border-left:4px solid #4f7df3;
+}
+.recommended-player strong{
+  display:block;
+  overflow:hidden;
+  color:#fff;
+  font-size:16px;
+  font-weight:950;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.recommended-player span{
+  display:block;
+  margin-top:3px;
+  color:#80919d;
+  font-size:8px;
+  font-weight:850;
+}
+.recommended-metric{
+  padding:9px 5px;
+  border-radius:10px;
+  background:#1d2931;
+  text-align:center;
+}
+.recommended-metric span{
+  display:block;
+  color:#6e7f8c;
+  font-size:7px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+.recommended-metric strong{
+  display:block;
+  margin-top:4px;
+  color:#fff;
+  font-size:15px;
+}
+.recommended-reason{
+  margin-top:6px;
+  padding:8px 9px;
+  border-radius:9px;
+  background:#141d23;
+  color:#9dabb5;
+  font-size:9px;
+  line-height:1.5;
+}
+
+/* Ripristina gradiente rosso -> verde nei rating 1-5 */
+.detail.score{
+  transition:background .15s ease,border-color .15s ease;
+}
+
+/* Keeper pairing */
+.keepers-shell{
+  max-width:1380px;
+  margin:0 auto;
+  padding:92px 18px 34px;
+}
+.keeper-controls{
+  display:grid;
+  grid-template-columns:minmax(220px,320px) 1fr;
+  gap:14px;
+  align-items:end;
+}
+.keeper-best-label{
+  margin-bottom:7px;
+  color:#758794;
+  font-size:9px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+.keeper-best-matches{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+}
+.keeper-best-chip{
+  min-width:100px;
+  padding:8px 10px;
+  border-radius:10px;
+  background:#1d2931;
+  border:1px solid #31414c;
+}
+.keeper-best-chip strong{
+  display:block;
+  color:#fff;
+  font-size:13px;
+}
+.keeper-best-chip span{
+  display:block;
+  margin-top:3px;
+  font-size:11px;
+  font-weight:950;
+}
+.keeper-note{
+  margin:12px 0;
+  padding:10px 11px;
+  border-radius:10px;
+  background:#141d23;
+  color:#8fa0ad;
+  font-size:10px;
+  line-height:1.5;
+}
+.keeper-grid-wrap{
+  overflow:auto;
+  border:1px solid #2d3b45;
+  border-radius:12px;
+  background:#121a20;
+}
+.keeper-matrix{
+  border-collapse:separate;
+  border-spacing:4px;
+  min-width:1120px;
+  padding:6px;
+}
+.keeper-matrix th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  min-width:62px;
+  height:42px;
+  padding:5px 6px;
+  border:0;
+  background:#172128;
+  color:#d7dee4;
+  font-size:9px;
+  white-space:nowrap;
+}
+.keeper-matrix th:first-child{
+  left:0;
+  z-index:3;
+}
+.keeper-matrix td{
+  min-width:54px;
+  height:34px;
+  padding:0 5px;
+  border:1px solid #33434e;
+  border-radius:7px;
+  background:#151e25;
+  text-align:center;
+  font-size:10px;
+  font-weight:850;
+}
+.keeper-row-head{
+  position:sticky;
+  left:0;
+  z-index:1;
+  min-width:110px !important;
+  background:#172128 !important;
+  color:#e9eef2 !important;
+  text-align:left !important;
+  font-weight:900 !important;
+}
+.keeper-score-high{
+  color:#81ff56 !important;
+  font-weight:950 !important;
+}
+.keeper-score-mid{color:#d7dee4 !important}
+.keeper-score-low{color:#e09382 !important}
+.keeper-score-empty{
+  color:#4f5d68 !important;
+  background:#141b21 !important;
+}
+
+@media(max-width:700px){
+  .app-tabs{
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    width:auto !important;
+  }
+  .app-tab{
+    padding:0 4px !important;
+    font-size:9px !important;
+  }
+  .recommended-best{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .recommended-player{
+    grid-column:1/-1;
+  }
+  .recommended-metric{
+    min-height:58px;
+  }
+  .keepers-shell{
+    padding:10px 14px 96px;
+  }
+  .keeper-controls{
+    grid-template-columns:1fr;
+  }
+  .keeper-best-matches{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    padding-bottom:3px;
+  }
+  .keeper-best-chip{
+    flex:0 0 auto;
+  }
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -3886,6 +4152,7 @@ body.modal-open .topbar{
   <nav class="app-tabs">
     <button id="homeTabBtn" class="app-tab active" onclick="setWorkspace('home')">FANTA AGENTE</button>
     <button id="auctionTabBtn" class="app-tab" onclick="setWorkspace('auction')">ASTA</button>
+    <button id="keepersTabBtn" class="app-tab" onclick="setWorkspace('keepers')">ABBINAMENTO PORTIERI</button>
   </nav>
 
   <section id="homeView" class="workspace-view">
@@ -3989,6 +4256,45 @@ body.modal-open .topbar{
     </div>
   </section>
 
+
+  <section id="keepersView" class="workspace-view" style="display:none">
+    <div class="keepers-shell">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Abbinamento portieri</div>
+            <div class="muted" style="font-size:11px;margin-top:4px">
+              Confronta le squadre e individua gli abbinamenti più interessanti per completare il reparto.
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-body">
+          <div class="keeper-controls">
+            <div class="field">
+              <label>Squadra principale</label>
+              <select id="keeperPrimaryTeam" onchange="renderKeeperPairing()"></select>
+            </div>
+
+            <div>
+              <div class="keeper-best-label">Migliori abbinamenti</div>
+              <div id="keeperBestMatches" class="keeper-best-matches"></div>
+            </div>
+          </div>
+
+          <div class="keeper-note">
+            L'indice 0–100 è una stima interna di compatibilità del pacchetto portieri.
+            La matrice è già pronta per essere sostituita in futuro con valori specifici da calendario.
+          </div>
+
+          <div class="keeper-grid-wrap">
+            <table id="keeperMatrix" class="keeper-matrix"></table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+
   <div id="auctionView" class="workspace-view" style="display:none">
   <main class="main">
     <section class="panel">
@@ -4023,8 +4329,19 @@ body.modal-open .topbar{
           <div id="searchResults" class="search-results"></div>
         </div>
 
-        <div id="emptyState" class="empty-state">
-          Importa il database FantaLab dalle ⚙ Impostazioni, poi cerca il primo giocatore.
+        <div id="emptyState" class="empty-state recommended-state">
+          <div id="recommendedCallPanel" class="recommended-call-panel">
+            <div class="recommended-call-head">
+              <div>
+                <div class="recommended-kicker">Prossima mossa</div>
+                <div class="recommended-title">Chiamata consigliata</div>
+              </div>
+              <button type="button" class="secondary-btn recommended-refresh" onclick="renderRecommendedCall()">↻</button>
+            </div>
+            <div id="recommendedCallBody" class="recommended-call-body">
+              <div class="recommended-empty">Calcolo del suggerimento…</div>
+            </div>
+          </div>
         </div>
 
         <div id="playerCard" class="player-card">
@@ -4641,8 +4958,8 @@ function applyScoreColor(cardId,value){
   const clamped=Math.max(1,Math.min(5,n));
   const hue=((clamped-1)/4)*120;   // 1 = 0° rosso, 5 = 120° verde
 
-  card.style.background=`hsl(${hue}, 68%, 38%)`;
-  card.style.borderColor=`hsl(${hue}, 72%, 48%)`;
+  card.style.setProperty("background",`hsl(${hue}, 68%, 38%)`,"important");
+  card.style.setProperty("border-color",`hsl(${hue}, 72%, 48%)`,"important");
 }
 function key(role,name){return `${role}|${norm(name)}`}
 function roleLabel(r){return({P:"Portiere",D:"Difensore",C:"Centrocampista",A:"Attaccante"})[r]||r}
@@ -5777,9 +6094,11 @@ function mobileNavRosters(){
 
 function updateMobileNavState(){
   document.querySelectorAll(".mobile-nav-btn").forEach(btn=>btn.classList.remove("active"));
-  const isHome=workspace==="home";
-  const key=isHome?"home":"auction";
-  document.querySelector(`.mobile-nav-btn[data-mobile-nav="${key}"]`)?.classList.add("active")
+  if(workspace==="home"){
+    document.querySelector(`.mobile-nav-btn[data-mobile-nav="home"]`)?.classList.add("active")
+  }else if(workspace==="auction"){
+    document.querySelector(`.mobile-nav-btn[data-mobile-nav="auction"]`)?.classList.add("active")
+  }
 }
 
 function setWorkspace(view){
@@ -5791,19 +6110,27 @@ function setWorkspace(view){
     }
   }
 
+  if(!["home","auction","keepers"].includes(view))view="home";
+
   const home=document.getElementById("homeView");
   const auction=document.getElementById("auctionView");
+  const keepers=document.getElementById("keepersView");
   const hb=document.getElementById("homeTabBtn");
   const ab=document.getElementById("auctionTabBtn");
+  const kb=document.getElementById("keepersTabBtn");
 
   if(home)home.style.display=view==="home"?"block":"none";
   if(auction)auction.style.display=view==="auction"?"block":"none";
+  if(keepers)keepers.style.display=view==="keepers"?"block":"none";
+
   if(hb)hb.classList.toggle("active",view==="home");
   if(ab)ab.classList.toggle("active",view==="auction");
+  if(kb)kb.classList.toggle("active",view==="keepers");
 
-  localStorage.setItem("fa_workspace_v2",view)
+  localStorage.setItem("fa_workspace_v2",view);
 
-  updateMobileNavState();
+  if(view==="keepers")renderKeeperPairing();
+  updateMobileNavState()
 }
 
 function createTeams(){
@@ -7013,6 +7340,215 @@ function mobileRevealPurchaseControls(){
   })
 }
 
+
+function recommendedMissingSlots(){
+  if(!myTeam)return {P:0,D:0,C:0,A:0};
+  return {
+    P:Math.max(0,ROSTER_SIZE.P-(myTeam.slots?.P||0)),
+    D:Math.max(0,ROSTER_SIZE.D-(myTeam.slots?.D||0)),
+    C:Math.max(0,ROSTER_SIZE.C-(myTeam.slots?.C||0)),
+    A:Math.max(0,ROSTER_SIZE.A-(myTeam.slots?.A||0))
+  }
+}
+
+function recommendedScore(player){
+  if(!player || sold(player.key) || !myTeam)return -Infinity;
+
+  const missing=recommendedMissingSlots();
+  if((missing[player.role]||0)<=0)return -Infinity;
+
+  const roleAvail=players.filter(p=>p.role===player.role && !sold(p.key));
+  const maxPma=Math.max(1,...roleAvail.map(p=>Number(p.pmaCredits)||0));
+
+  const pmaNorm=(Number(player.pmaCredits)||0)/maxPma;
+  const tit=Math.max(0,Math.min(5,Number(player.titolarita)||0))/5;
+  const aff=Math.max(0,Math.min(5,Number(player.affidabilita)||0))/5;
+  const integ=Math.max(0,Math.min(5,Number(player.integrita)||0))/5;
+
+  const quality=.55*pmaNorm + .20*tit + .15*aff + .10*integ;
+
+  const totalMissing=Object.values(missing).reduce((a,b)=>a+b,0);
+  const credits=Math.max(0,Number(myTeam.credits)||0);
+  const pma=Math.max(0,Number(player.pmaCredits)||0);
+
+  const absoluteMax=Math.max(1,credits-Math.max(0,totalMissing-1));
+  const avgBudget=Math.max(1,credits/Math.max(1,totalMissing));
+
+  let affordability=1;
+  if(pma>absoluteMax)affordability=.05;
+  else if(pma>avgBudget*2.2)affordability=.48;
+  else if(pma>avgBudget*1.65)affordability=.70;
+  else if(pma>avgBudget*1.25)affordability=.87;
+
+  const urgency=1+Math.min(.12,.10/Math.max(1,missing[player.role]));
+  return quality*affordability*urgency*100
+}
+
+function recommendedCandidates(limit=5){
+  if(!myTeam)return [];
+  return players
+    .filter(p=>!sold(p.key))
+    .map(player=>({player,score:recommendedScore(player)}))
+    .filter(x=>Number.isFinite(x.score)&&x.score>-Infinity)
+    .sort((a,b)=>b.score-a.score || (b.player.pmaCredits||0)-(a.player.pmaCredits||0))
+    .slice(0,limit)
+}
+
+function recommendationReason(player){
+  const missing=recommendedMissingSlots();
+  const totalMissing=Object.values(missing).reduce((a,b)=>a+b,0);
+  const credits=Math.max(0,Number(myTeam?.credits)||0);
+  const avg=Math.floor(credits/Math.max(1,totalMissing));
+
+  return `${missing[player.role]||0} slot ${player.role} ancora liberi · ${credits} crediti rimasti · ` +
+         `media sostenibile circa ${avg} cr per ogni posto ancora da occupare. ` +
+         `Il ranking pesa PMA 55%, titolarità 20%, affidabilità 15% e integrità 10%, ` +
+         `riducendo il punteggio quando il PMA è troppo alto rispetto alla liquidità residua.`;
+}
+
+function renderRecommendedCall(){
+  const body=document.getElementById("recommendedCallBody");
+  if(!body)return;
+
+  if(!myTeam){
+    body.innerHTML=`<div class="recommended-empty">Disponibile solo quando partecipi alla divisione selezionata.</div>`;
+    return
+  }
+  if(!players.length){
+    body.innerHTML=`<div class="recommended-empty">Database non disponibile.</div>`;
+    return
+  }
+
+  const candidates=recommendedCandidates(5);
+  if(!candidates.length){
+    body.innerHTML=`<div class="recommended-empty">Nessun giocatore compatibile con gli slot ancora liberi.</div>`;
+    return
+  }
+
+  const best=candidates[0].player;
+  body.innerHTML=`
+    <div class="recommended-best">
+      <div class="recommended-player">
+        <strong>${best.name}</strong>
+        <span>${best.club||"—"} · ${best.role}${getPlayerSlot(best)||""}</span>
+      </div>
+      <div class="recommended-metric">
+        <span>PMA</span>
+        <strong>${best.pmaCredits==null?"—":Math.round(best.pmaCredits)}</strong>
+      </div>
+      <div class="recommended-metric">
+        <span>Tit.</span>
+        <strong>${best.titolarita==null?"—":fmt(best.titolarita,1)}</strong>
+      </div>
+      <div class="recommended-metric">
+        <span>Aff.</span>
+        <strong>${best.affidabilita==null?"—":fmt(best.affidabilita,1)}</strong>
+      </div>
+      <div class="recommended-metric">
+        <span>Int.</span>
+        <strong>${best.integrita==null?"—":fmt(best.integrita,1)}</strong>
+      </div>
+    </div>
+    <div class="recommended-reason">${recommendationReason(best)}</div>
+  `;
+}
+
+/* -------- Abbinamento portieri -------- */
+function keeperTeams(){
+  return [...new Set(
+    players.filter(p=>p.role==="P" && p.club).map(p=>p.club)
+  )].sort((a,b)=>a.localeCompare(b,"it"))
+}
+
+function keeperClubStrength(club){
+  const keepers=players.filter(p=>p.role==="P" && p.club===club);
+  if(!keepers.length)return 0;
+
+  return Math.max(...keepers.map(p=>{
+    const pma=Math.max(0,Number(p.pmaCredits)||0);
+    const tit=Math.max(0,Math.min(5,Number(p.titolarita)||0));
+    const aff=Math.max(0,Math.min(5,Number(p.affidabilita)||0));
+    const integ=Math.max(0,Math.min(5,Number(p.integrita)||0));
+    return pma*.55 + tit*3.5 + aff*2.5 + integ*2
+  }))
+}
+
+function keeperPairScore(a,b){
+  if(!a||!b||a===b)return null;
+
+  const clubs=keeperTeams();
+  const vals=clubs.map(keeperClubStrength);
+  const max=Math.max(1,...vals);
+  const min=Math.min(...vals);
+  const sa=keeperClubStrength(a);
+  const sb=keeperClubStrength(b);
+
+  const qa=(sa-min)/(max-min||1);
+  const qb=(sb-min)/(max-min||1);
+  const average=(qa+qb)/2;
+  const balance=1-Math.abs(qa-qb);
+
+  const score=76 + average*11 + balance*8;
+  return Math.max(70,Math.min(94,Math.round(score)))
+}
+
+function keeperScoreClass(score){
+  if(score==null)return "keeper-score-empty";
+  if(score>=89)return "keeper-score-high";
+  if(score>=82)return "keeper-score-mid";
+  return "keeper-score-low"
+}
+
+function renderKeeperPairing(){
+  const select=document.getElementById("keeperPrimaryTeam");
+  const table=document.getElementById("keeperMatrix");
+  const bestBox=document.getElementById("keeperBestMatches");
+  if(!select||!table||!bestBox)return;
+
+  const clubs=keeperTeams();
+  if(!clubs.length){
+    select.innerHTML=`<option value="">Database portieri non disponibile</option>`;
+    bestBox.innerHTML="";
+    table.innerHTML="";
+    return
+  }
+
+  const previous=select.value;
+  select.innerHTML=clubs.map(c=>`<option value="${c}">${c}</option>`).join("");
+  if(clubs.includes(previous))select.value=previous;
+
+  const primary=select.value||clubs[0];
+
+  bestBox.innerHTML=clubs
+    .filter(c=>c!==primary)
+    .map(c=>({club:c,score:keeperPairScore(primary,c)}))
+    .sort((a,b)=>b.score-a.score)
+    .slice(0,4)
+    .map(x=>`
+      <div class="keeper-best-chip">
+        <strong>${x.club}</strong>
+        <span class="${keeperScoreClass(x.score)}">${x.score}</span>
+      </div>
+    `).join("");
+
+  let out=`<thead><tr><th>Squadra</th>`;
+  clubs.forEach(c=>out+=`<th>${c}</th>`);
+  out+=`</tr></thead><tbody>`;
+
+  clubs.forEach(row=>{
+    out+=`<tr><td class="keeper-row-head">${row}</td>`;
+    clubs.forEach(col=>{
+      const score=keeperPairScore(row,col);
+      out+=`<td class="${keeperScoreClass(score)}">${score==null?"—":score}</td>`
+    });
+    out+=`</tr>`
+  });
+
+  out+=`</tbody>`;
+  table.innerHTML=out
+}
+
+
 function selectPlayer(k){
   const p=getPlayer(k);if(!p)return;selectedKey=k;results.style.display="none";search.value=p.name;
   document.getElementById("emptyState").style.display="none";
@@ -7044,7 +7580,10 @@ function clearSelection(){
   selectedKey=null;search.value="";
   ["titCard","affCard","intCard"].forEach(id=>{
     const card=document.getElementById(id);
-    if(card){card.style.background="#12181c";card.style.borderColor="var(--line)"}
+    if(card){
+      card.style.removeProperty("background");
+      card.style.removeProperty("border-color")
+    }
   });
   document.getElementById("playerCard").style.display="none";
   document.getElementById("emptyState").style.display="block";
@@ -7053,6 +7592,8 @@ function clearSelection(){
   ["aPma","aPrice","aMax","aDiff"].forEach(id=>document.getElementById(id).textContent="—");
   document.getElementById("verdictBox").className="verdict";
   updateCompetitiveAnalysis()
+
+  renderRecommendedCall();
 }
 document.getElementById("priceInput").addEventListener("input",updateLiveAnalysis);
 function updateLiveAnalysis(){
@@ -7470,11 +8011,9 @@ function renderStatus(){
   }
 
   const empty=document.getElementById("emptyState");
-  if(!selectedKey){
+  if(!selectedKey && empty){
     empty.style.display="block";
-    empty.textContent=players.length
-      ?`${available} giocatori disponibili in ${league?.label||"questa asta"}. Cerca il prossimo calciatore chiamato.`
-      :"Caricamento automatico di database.xlsx oppure import manuale dalle ⚙ Impostazioni."
+    renderRecommendedCall()
   }
 }
 
@@ -7494,6 +8033,9 @@ function render(){
     updateCompetitiveAnalysis();
     updateLiveAnalysis()
   }
+
+  if(!selectedKey)renderRecommendedCall();
+  if(localStorage.getItem('fa_workspace_v2')==='keepers')renderKeeperPairing();
 }
 
 
