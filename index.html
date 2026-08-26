@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.13</title>
+<title>Fanta Agente 2.14</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -5130,6 +5130,56 @@ body.modal-open .topbar{
 </div>
 
 <script>
+
+const REMOTE_MANAGER_HISTORY_PATHS=["./backup/latest.json","./backups/latest.json"];
+let remoteManagerHistory=null;
+
+function normalizeManagerHistoryName(name){
+  return String(name||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().toLowerCase().replace(/\s+/g," ")
+}
+function remoteHistoryManagerByName(name){
+  if(!remoteManagerHistory?.managers?.length)return null;
+  const target=normalizeManagerHistoryName(name);
+  return remoteManagerHistory.managers.find(m=>normalizeManagerHistoryName(m.displayName||m.name)===target)||null
+}
+function mergeRemoteManagersIntoArchive(payload){
+  if(!payload||!Array.isArray(payload.managers)||!archive||!Array.isArray(archive.managers))return false;
+  let changed=false;
+  payload.managers.forEach(remote=>{
+    const displayName=String(remote.displayName||remote.name||"").trim();
+    if(!displayName)return;
+    const exists=archive.managers.some(local=>normalizeManagerHistoryName(local.displayName)===normalizeManagerHistoryName(displayName));
+    if(!exists){
+      archive.managers.push({
+        id:remote.id||`mgr-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
+        displayName,
+        isMe:normalizeManagerHistoryName(displayName)==="gabriele",
+        createdAt:new Date().toISOString()
+      });
+      changed=true
+    }
+  });
+  if(changed)saveArchive();
+  return changed
+}
+async function loadRemoteManagerHistory(){
+  let payload=null,loadedPath=null;
+  for(const path of REMOTE_MANAGER_HISTORY_PATHS){
+    try{
+      const res=await fetch(`${path}?t=${Date.now()}`,{cache:"no-store"});
+      if(!res.ok)continue;
+      const data=await res.json();
+      if(data&&Array.isArray(data.managers)){payload=data;loadedPath=path;break}
+    }catch(e){}
+  }
+  if(!payload)return false;
+  remoteManagerHistory=payload;
+  mergeRemoteManagersIntoArchive(payload);
+  window.faRemoteManagerHistoryPath=loadedPath;
+  try{renderHomeSetup()}catch(e){}
+  return true
+}
+
 const INITIAL_BUDGET=500;
 const ROLES=["P","D","C","A"];
 const ROSTER_SIZE={P:3,D:8,C:8,A:6};
@@ -5769,6 +5819,40 @@ function managerProfile(managerId){
   });
 
   const divisions=[...new Set(won.map(p=>p._leagueLabel||p.leagueLabel).filter(Boolean))];
+
+
+  const managerName=archive.managers.find(m=>m.id===managerId)?.displayName||"";
+  const remoteSeed=remoteHistoryManagerByName(managerName);
+  const remoteStats=remoteSeed?.stats||null;
+  const localHasHistory=won.length>0 || bidObservations.length>0;
+
+  if(!localHasHistory && remoteStats){
+    const remoteByRole={};
+    ROLES.forEach(role=>{
+      remoteByRole[role]={
+        samples:Number(remoteStats.roles?.[role]?.samples)||0,
+        ratio:Number(remoteStats.roles?.[role]?.ratio)||null
+      }
+    });
+    return {
+      managerId,
+      samples:Number(remoteStats.samples)||0,
+      ratioSamples:Number(remoteStats.ratioSamples)||0,
+      overallRatio:Number(remoteStats.overallRatio)||null,
+      byRole:remoteByRole,
+      topSlot:{samples:Number(remoteStats.topSlotSamples)||0,ratio:null},
+      highPressure:{samples:Number(remoteStats.highPressureSamples)||0,ratio:null},
+      bidBehavior:{
+        overall:{samples:Number(remoteStats.bidSamples)||0,ratio:Number(remoteStats.overallRatio)||null,runnerUpSamples:Number(remoteStats.runnerUpSamples)||0},
+        byRole:Object.fromEntries(ROLES.map(role=>[role,{samples:Number(remoteStats.roles?.[role]?.samples)||0,ratio:Number(remoteStats.roles?.[role]?.ratio)||null,runnerUpSamples:0}])),
+        topSlot:{samples:Number(remoteStats.topSlotSamples)||0,ratio:null,runnerUpSamples:0},
+        highPressure:{samples:Number(remoteStats.highPressureSamples)||0,ratio:null,runnerUpSamples:0}
+      },
+      bidSamples:Number(remoteStats.bidSamples)||0,
+      runnerUpSamples:Number(remoteStats.runnerUpSamples)||0,
+      divisions:[]
+    }
+  }
 
   return {
     managerId,
@@ -6410,6 +6494,11 @@ function renderHomeSetup(){
   if(!archive)return;
   const season=getCurrentSeason();
   const league=getCurrentLeague();
+  const faTeamCountSync=document.getElementById("leagueTeamCount");
+  if(faTeamCountSync && league){
+    faTeamCountSync.value=String(league.teamCount||league.participants?.length||9);
+  }
+
 
   const ss=document.getElementById("homeSeasonSelect");
   if(ss){
@@ -8688,6 +8777,14 @@ const initialWorkspace=localStorage.getItem("fa_workspace_v2")||"home";
 setWorkspace(initialWorkspace);
 autoLoadRemoteDatabase();
 checkRemoteBackup();
+
+window.addEventListener("DOMContentLoaded",()=>{
+  setTimeout(()=>{
+    try{renderHomeSetup()}catch(e){}
+    loadRemoteManagerHistory()
+  },0)
+});
+
 </script>
 
 <nav class="mobile-bottom-nav" aria-label="Navigazione mobile">
