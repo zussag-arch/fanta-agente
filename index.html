@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.22</title>
+<title>Fanta Agente 2.23</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -4913,6 +4913,210 @@ body.modal-open .topbar{
 
   .competitor-estimate strong{
     font-size:16px !important;
+  }
+}
+
+
+/* ===== v2.23 FIX REALE: override selettori mobile specifici ===== */
+@media(max-width:700px){
+
+  /* CONCORRENTI: override del vecchio #auctionView .competitor-grid display:block */
+  #auctionView #competitorRows.competitor-grid{
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:7px !important;
+    padding:0 !important;
+    overflow:visible !important;
+  }
+
+  #auctionView #competitorRows .competitor-card{
+    width:100% !important;
+    min-width:0 !important;
+    margin:0 !important;
+    padding:8px !important;
+    border-radius:11px !important;
+    box-sizing:border-box !important;
+  }
+
+  #auctionView #competitorRows .competitor-top{
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:flex-start !important;
+    gap:3px !important;
+  }
+
+  #auctionView #competitorRows .competitor-name{
+    width:100% !important;
+    font-size:11px !important;
+    line-height:1.1 !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+  }
+
+  #auctionView #competitorRows .comp-level{
+    font-size:7px !important;
+    padding:2px 5px !important;
+  }
+
+  #auctionView #competitorRows .competitor-estimate{
+    margin:5px 0 4px !important;
+    padding:7px !important;
+    border-radius:8px !important;
+  }
+
+  #auctionView #competitorRows .competitor-estimate-label{
+    font-size:6px !important;
+  }
+
+  #auctionView #competitorRows .competitor-estimate strong{
+    font-size:17px !important;
+    line-height:1 !important;
+    white-space:nowrap !important;
+  }
+
+  #auctionView #competitorRows .competitor-estimate small{
+    font-size:7px !important;
+  }
+
+  #auctionView #competitorRows .competitor-meta{
+    margin-top:3px !important;
+    font-size:7.5px !important;
+    line-height:1.2 !important;
+  }
+
+  #auctionView #competitorRows .competitor-live-meta,
+  #auctionView #competitorRows .competitor-history-meta{
+    display:-webkit-box !important;
+    -webkit-box-orient:vertical !important;
+    -webkit-line-clamp:2 !important;
+    overflow:hidden !important;
+  }
+
+  /* ROSE: override del vecchio min-width:760px */
+  #auctionView .footerbar .table-wrap{
+    width:100% !important;
+    max-width:100% !important;
+    overflow-x:hidden !important;
+  }
+
+  #auctionView .footerbar table{
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    table-layout:fixed !important;
+  }
+
+  #auctionView .footerbar th,
+  #auctionView .footerbar td{
+    min-width:0 !important;
+    padding:7px 2px !important;
+    box-sizing:border-box !important;
+  }
+
+  /* 26% squadra + 11% crediti + 4x15.75% = 100% */
+  #auctionView .footerbar th:nth-child(1),
+  #auctionView .footerbar td:nth-child(1){
+    width:26% !important;
+    padding-left:6px !important;
+    text-align:left !important;
+  }
+
+  #auctionView .footerbar th:nth-child(2),
+  #auctionView .footerbar td:nth-child(2){
+    width:11% !important;
+  }
+
+  #auctionView .footerbar th:nth-child(3),
+  #auctionView .footerbar td:nth-child(3),
+  #auctionView .footerbar th:nth-child(4),
+  #auctionView .footerbar td:nth-child(4),
+  #auctionView .footerbar th:nth-child(5),
+  #auctionView .footerbar td:nth-child(5),
+  #auctionView .footerbar th:nth-child(6),
+  #auctionView .footerbar td:nth-child(6){
+    width:15.75% !important;
+  }
+
+  #auctionView .footerbar .team-name{
+    display:block !important;
+    max-width:100% !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+    font-size:8px !important;
+  }
+
+  #auctionView .footerbar .credit{
+    font-size:9px !important;
+  }
+
+  #auctionView .footerbar .role-desktop,
+  #auctionView .footerbar .roster-head-desktop{
+    display:none !important;
+  }
+
+  #auctionView .footerbar .roster-head-mobile{
+    display:inline !important;
+    font-size:8px !important;
+  }
+
+  #auctionView .footerbar .role-mobile{
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:1px !important;
+    min-width:0 !important;
+    padding:0 !important;
+  }
+
+  #auctionView .footerbar .role-mobile strong{
+    font-size:7px !important;
+    line-height:1 !important;
+    white-space:nowrap !important;
+  }
+
+  #auctionView .footerbar .role-mobile span{
+    font-size:8px !important;
+    line-height:1 !important;
+  }
+
+  #auctionView .footerbar tbody tr{
+    height:40px !important;
+  }
+}
+
+@media(max-width:390px){
+  #auctionView #competitorRows.competitor-grid{
+    gap:6px !important;
+  }
+
+  #auctionView #competitorRows .competitor-card{
+    padding:7px !important;
+  }
+
+  #auctionView #competitorRows .competitor-name{
+    font-size:10px !important;
+  }
+
+  #auctionView #competitorRows .competitor-estimate strong{
+    font-size:16px !important;
+  }
+
+  #auctionView .footerbar th:nth-child(1),
+  #auctionView .footerbar td:nth-child(1){
+    width:25% !important;
+  }
+
+  #auctionView .footerbar th:nth-child(2),
+  #auctionView .footerbar td:nth-child(2){
+    width:10% !important;
+  }
+
+  #auctionView .footerbar th:nth-child(n+3),
+  #auctionView .footerbar td:nth-child(n+3){
+    width:16.25% !important;
   }
 }
 
