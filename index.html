@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.29</title>
+<title>Fanta Agente 2.30</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -5472,6 +5472,31 @@ body.modal-open .topbar{
   min-width:0 !important;
 }
 
+
+/* ===== v2.30 full settings + role-aware recommendation ===== */
+.settings-tab-label{display:none !important}
+.settings-tab-btn{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+.settings-tab-icon{
+  font-size:21px !important;
+  line-height:1 !important;
+}
+#settingsView .settings-page-panel > .setting-card{
+  width:100% !important;
+  box-sizing:border-box !important;
+}
+#settingsView .drawer-head{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+}
+@media(max-width:700px){
+  .settings-tab-icon{font-size:22px !important}
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -5504,7 +5529,7 @@ body.modal-open .topbar{
     <button id="homeTabBtn" class="app-tab active" onclick="setWorkspace('home')">FANTA AGENTE</button>
     <button id="auctionTabBtn" class="app-tab" onclick="setWorkspace('auction')">ASTA</button>
     <button id="keepersTabBtn" class="app-tab" onclick="setWorkspace('keepers')"><span>ABBINAMENTO</span><br><span>PORTIERI</span></button>
-    <button id="settingsTabBtn" class="app-tab settings-tab-btn" onclick="setWorkspace('settings')" aria-label="Impostazioni"><span class="settings-tab-icon">⚙</span><span class="settings-tab-label">IMPOSTAZIONI</span></button>
+    <button id="settingsTabBtn" class="app-tab settings-tab-btn" onclick="setWorkspace('settings')" aria-label="Impostazioni" title="Impostazioni"><span class="settings-tab-icon">⚙</span></button>
   </nav>
 
   <section id="homeView" class="workspace-view">
@@ -5652,7 +5677,7 @@ body.modal-open .topbar{
   <section id="settingsView" class="workspace-view" style="display:none">
     <div class="settings-page-shell">
       <section class="settings-page-panel">
-        
+
     <div style="display:flex;justify-content:space-between;align-items:center">
       <h2>Impostazioni</h2>
       
@@ -5672,7 +5697,119 @@ body.modal-open .topbar{
         </div>
         <div style="display:flex;align-items:end">
           <button class="secondary-btn wide-btn" onclick="createNewSeason()">＋ Nuova stagione</button>
-        
+        </div>
+      </div>
+
+      <div id="archiveStatus" class="status"></div>
+
+      <div id="remoteBackupStatus" class="status" style="margin-top:8px">
+        Controllo backup GitHub…
+      </div>
+
+      <div class="settings-actions">
+        <button class="secondary-btn" onclick="exportArchive()">⬇ Esporta archivio JSON</button>
+        <button class="secondary-btn" onclick="exportOpponentProfilesCsv()">⬇ Profili avversari CSV</button>
+        <button class="secondary-btn" onclick="triggerRestoreArchive()">⬆ Ripristina JSON</button>
+        <button class="secondary-btn" onclick="triggerMergeArchive()">⊕ Unisci JSON</button>
+        <input type="file" id="archiveFile" accept=".json,application/json" style="display:none">
+        <input type="file" id="mergeArchiveFile" accept=".json,application/json" style="display:none">
+      </div>
+    </div>
+
+
+    <div class="setting-card">
+      <div class="panel-title">Database</div>
+      <p class="status">
+        Il database viene cercato automaticamente nella cartella <strong>database</strong>
+        in base alla stagione attiva, ad esempio <strong>database/2026-27.xlsx</strong>.
+        L'import manuale resta disponibile come fallback.
+      </p>
+      <div id="dbRemoteStatus" class="status" style="margin-bottom:8px"></div>
+      <label class="file-label">
+        📥 Importa / aggiorna manualmente
+        <input type="file" id="databaseFile" accept=".xlsx,.xls">
+      </label>
+      <div id="dbStatus" class="status">Nessun database caricato.</div>
+    </div>
+
+    <div class="setting-card">
+      <div class="panel-title">Tetto strategico</div>
+
+      <p class="status">
+        Il <strong>tetto strategico</strong> è il prezzo massimo consigliato per il giocatore
+        selezionato. Non è un valore fisso per ruolo o slot: parte dal valore specifico del
+        giocatore e viene corretto in base a ciò che sta succedendo realmente durante l'asta.
+      </p>
+
+      <div class="ceiling-explain">
+        <div class="ceiling-step">
+          <strong>1. Base PMA</strong>
+          <span>
+            Il punto di partenza è il <strong>PMA % di FantaLab</strong>, convertito sul budget
+            iniziale di 500 crediti. Ad esempio, un PMA del 10% equivale a una base di 50 crediti.
+          </span>
+        </div>
+
+        <div class="ceiling-step">
+          <strong>2. Premio contestuale</strong>
+          <span>
+            Alla base PMA può essere applicato un premio percentuale se il mercato lo giustifica.
+            Il premio cresce quando aumenta la <strong>pressione domanda/offerta</strong>, quando
+            restano pochi giocatori equivalenti nello stesso slot, quando più avversari sono ancora
+            fortemente interessati e, in misura limitata, per i giocatori di prima fascia.
+            I PMA bassi hanno inoltre maggiore elasticità, perché pochi crediti di differenza
+            incidono proporzionalmente di più.
+          </span>
+        </div>
+
+        <div class="ceiling-step">
+          <strong>3. Limite del reparto</strong>
+          <span>
+            Il valore ottenuto viene confrontato con il budget strategico del reparto:
+            <strong>Portieri 10%</strong>, <strong>Difensori 20%</strong>,
+            <strong>Centrocampisti 30%</strong> e <strong>Attaccanti 40%</strong> del budget iniziale.
+            Questo limite non è rigido: viene reso più elastico per uno slot di prima fascia
+            o quando la pressione di mercato è alta. Dal limite viene sottratto quanto hai già
+            speso in quel reparto.
+          </span>
+        </div>
+
+        <div class="ceiling-step">
+          <strong>4. Limite finanziario</strong>
+          <span>
+            Infine Fanta Agente controlla che, dopo l'acquisto, restino abbastanza crediti per
+            completare tutti gli slot mancanti della rosa. La riserva viene stimata usando i
+            valori mediani PMA delle fasce ancora da acquistare, con un piccolo margine di
+            elasticità. Questo parametro serve soprattutto come <strong>freno di sicurezza</strong>,
+            non come valutazione del giocatore.
+          </span>
+        </div>
+
+        <div class="ceiling-formula">
+          <strong>Valore finale</strong>
+          <span>
+            Il tetto mostrato è il più basso tra:
+            <strong>PMA contestualizzato</strong>,
+            <strong>limite elastico del reparto</strong> e
+            <strong>limite finanziario</strong>.
+          </span>
+        </div>
+
+        <p class="status" style="margin-top:10px">
+          Il semaforo usa questo valore per dirti se hai ancora margine:
+          <strong>verde</strong> quando puoi salire,
+          <strong>giallo</strong> quando sei vicino al limite e
+          <strong>rosso</strong> quando il prezzo corrente ha raggiunto o superato il tetto.
+        </p>
+      </div>
+    </div>
+
+    <div class="setting-card">
+      <div class="panel-title">Asta</div>
+      <p class="status">Resetta soltanto gli acquisti della divisione attiva. Le altre aste e lo storico degli allenatori restano salvati.</p>
+      <button class="danger-btn" onclick="resetAuction()">Reset asta</button>
+    </div>
+  
       </section>
     </div>
   </section>
@@ -9107,10 +9244,21 @@ function recommendedScore(player){
   return quality*affordability*urgency*100
 }
 
+
+function recommendedActiveRole(){
+  if(typeof selectedRole!=="undefined" && ["P","D","C","A"].includes(selectedRole))return selectedRole;
+  if(typeof currentRole!=="undefined" && ["P","D","C","A"].includes(currentRole))return currentRole;
+  if(typeof activeRole!=="undefined" && ["P","D","C","A"].includes(activeRole))return activeRole;
+
+  const active=document.querySelector(".role-tab.active, .role-btn.active, [data-role].active");
+  const value=active?.dataset?.role || active?.textContent?.trim();
+  return ["P","D","C","A"].includes(value)?value:null
+}
+
 function recommendedCandidates(limit=5){
   if(!recommendedMyTeam())return [];
   return players
-    .filter(p=>!sold(p.key))
+    .filter(p=>!sold(p.key) && (!recommendedActiveRole() || p.role===recommendedActiveRole()))
     .map(player=>({player,score:recommendedScore(player)}))
     .filter(x=>Number.isFinite(x.score)&&x.score>-Infinity)
     .sort((a,b)=>b.score-a.score || (b.player.pmaCredits||0)-(a.player.pmaCredits||0))
