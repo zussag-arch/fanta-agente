@@ -1,271 +1,565 @@
 {
-  "schemaVersion": 2,
-  "createdAt": "2026-08-25T17:53:28.977Z",
-  "updatedAt": "2026-08-26T08:16:12.408Z",
-  "leagueSettings": {
-    "name": "Fanta Agente",
-    "initialBudget": 500,
-    "rosterSize": {
-      "P": 3,
-      "D": 8,
-      "C": 8,
-      "A": 6
-    },
-    "roleTargetPct": {
-      "P": 10,
-      "D": 20,
-      "C": 30,
-      "A": 40
-    }
-  },
+  "schemaVersion": 1,
+  "kind": "fanta-agente-manager-history",
+  "generatedAt": null,
   "managers": [
     {
-      "id": "m0",
+      "id": "mgr-gabriele",
       "displayName": "Gabriele",
-      "isMe": true,
-      "createdAt": "2026-08-25T17:53:28.977Z",
-      "defaultTeamName": "Arcamadò"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     },
     {
-      "id": "m1",
+      "id": "mgr-maxpasta",
       "displayName": "MaxPasta",
-      "isMe": false,
-      "createdAt": "2026-08-25T17:53:28.977Z",
-      "defaultTeamName": "Stoke Azzo"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     },
     {
-      "id": "m2",
+      "id": "mgr-brosky",
       "displayName": "Brosky",
-      "isMe": false,
-      "createdAt": "2026-08-25T17:53:28.977Z",
-      "defaultTeamName": "Dooger"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     },
     {
-      "id": "m3",
+      "id": "mgr-pacca",
       "displayName": "pacca",
-      "isMe": false,
-      "createdAt": "2026-08-25T17:53:28.977Z",
-      "defaultTeamName": "Hertha"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     },
     {
-      "id": "m4",
+      "id": "mgr-michael",
       "displayName": "Michael",
-      "isMe": false,
-      "createdAt": "2026-08-25T17:53:28.977Z",
-      "defaultTeamName": "Jumala"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     },
     {
-      "id": "m5",
-      "displayName": "Marco dalla Pietra",
-      "isMe": false,
-      "createdAt": "2026-08-25T17:53:28.977Z",
-      "defaultTeamName": "Gianni Morandi FC"
-    },
-    {
-      "id": "m6",
+      "id": "mgr-alessio",
       "displayName": "Alessio",
-      "isMe": false,
-      "createdAt": "2026-08-25T17:53:28.977Z",
-      "defaultTeamName": "Celtic"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     },
     {
-      "id": "m7",
+      "id": "mgr-marco-dalla-pietra",
+      "displayName": "Marco dalla Pietra",
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mgr-mariolino",
       "displayName": "Mariolino",
-      "isMe": false,
-      "createdAt": "2026-08-25T17:53:28.977Z",
-      "defaultTeamName": "Athleticul"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     },
     {
-      "id": "m8",
+      "id": "mgr-davidava",
       "displayName": "Davidava",
-      "isMe": false,
-      "createdAt": "2026-08-25T17:53:28.977Z",
-      "defaultTeamName": "Lekkami Milano"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     },
     {
-      "id": "m9",
+      "id": "mgr-giby",
       "displayName": "Giby",
-      "defaultTeamName": "Granchiavatori",
-      "isMe": false,
-      "createdAt": "2026-08-25T19:05:13.706Z"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     },
     {
-      "id": "m10",
+      "id": "mgr-linda-e-ste",
       "displayName": "Linda e ste",
-      "defaultTeamName": "AC Piacchia",
-      "isMe": false,
-      "createdAt": "2026-08-25T19:05:13.706Z"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     },
     {
-      "id": "m11",
+      "id": "mgr-bamby",
       "displayName": "Bamby",
-      "defaultTeamName": "Bamby Team",
-      "isMe": false,
-      "createdAt": "2026-08-25T19:05:13.706Z"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     },
     {
-      "id": "m12",
+      "id": "mgr-zilli",
       "displayName": "Zilli",
-      "defaultTeamName": "Sambuca Juniors",
-      "isMe": false,
-      "createdAt": "2026-08-25T19:05:13.706Z"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     },
     {
-      "id": "m13",
+      "id": "mgr-mauro",
       "displayName": "Mauro",
-      "defaultTeamName": "Gioia Team",
-      "isMe": false,
-      "createdAt": "2026-08-25T19:05:13.706Z"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     },
     {
-      "id": "m14",
+      "id": "mgr-gian-darsie",
       "displayName": "Gian Darsie",
-      "defaultTeamName": "Ginspiration",
-      "isMe": false,
-      "createdAt": "2026-08-25T19:05:13.706Z"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     },
     {
-      "id": "m15",
+      "id": "mgr-simogiorgia",
       "displayName": "Simogiorgia",
-      "defaultTeamName": "ACbelli",
-      "isMe": false,
-      "createdAt": "2026-08-25T19:05:13.706Z"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     },
     {
-      "id": "m16",
+      "id": "mgr-ketto",
       "displayName": "Ketto",
-      "defaultTeamName": "Hellas Madonna",
-      "isMe": false,
-      "createdAt": "2026-08-25T19:05:13.706Z"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     },
     {
-      "id": "m17",
+      "id": "mgr-camel-willy",
       "displayName": "camel willy",
-      "defaultTeamName": "grazieAl-CA fc",
-      "isMe": false,
-      "createdAt": "2026-08-25T19:05:13.706Z"
+      "stats": {
+        "samples": 0,
+        "ratioSamples": 0,
+        "overallRatio": 0,
+        "bidSamples": 0,
+        "runnerUpSamples": 0,
+        "topSlotSamples": 0,
+        "highPressureSamples": 0,
+        "roles": {
+          "P": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "D": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "C": {
+            "samples": 0,
+            "ratio": 0
+          },
+          "A": {
+            "samples": 0,
+            "ratio": 0
+          }
+        }
+      }
     }
-  ],
-  "currentSeasonId": "2026-27",
-  "currentLeagueId": "serie-a",
-  "seasons": [
-    {
-      "id": "2026-27",
-      "label": "2026/27",
-      "createdAt": "2026-08-25T17:53:28.977Z",
-      "currentLeagueId": "serie-a",
-      "leagues": [
-        {
-          "id": "serie-a",
-          "label": "League A",
-          "teamCount": 9,
-          "createdAt": "2026-08-25T18:25:00.357Z",
-          "participants": [
-            {
-              "managerId": "m0",
-              "teamName": "Arcamadò"
-            },
-            {
-              "managerId": "m1",
-              "teamName": "Stoke Azzo"
-            },
-            {
-              "managerId": "m2",
-              "teamName": "Dooger team"
-            },
-            {
-              "managerId": "m3",
-              "teamName": "Hertha Berlinguer"
-            },
-            {
-              "managerId": "m4",
-              "teamName": "Jumala FC"
-            },
-            {
-              "managerId": "m5",
-              "teamName": "Giannimorandisegnama FC"
-            },
-            {
-              "managerId": "m6",
-              "teamName": "Celtic Glasgow"
-            },
-            {
-              "managerId": "m7",
-              "teamName": "Athleticul"
-            },
-            {
-              "managerId": "m8",
-              "teamName": "SS Lekka Milano"
-            }
-          ],
-          "purchases": [],
-          "redo": [],
-          "database": {
-            "filename": null,
-            "importedAt": null,
-            "players": []
-          }
-        }
-      ]
-    },
-    {
-      "id": "202728",
-      "label": "2027/28",
-      "createdAt": "2026-08-25T18:58:29.092Z",
-      "currentLeagueId": "serie-a",
-      "leagues": [
-        {
-          "id": "serie-a",
-          "label": "League A",
-          "teamCount": 9,
-          "createdAt": "2026-08-25T18:58:29.092Z",
-          "participants": [],
-          "purchases": [],
-          "redo": [],
-          "database": {
-            "filename": null,
-            "importedAt": null,
-            "players": []
-          }
-        },
-        {
-          "id": "serieb",
-          "label": "League B",
-          "teamCount": 9,
-          "createdAt": "2026-08-25T18:59:32.847Z",
-          "participants": [],
-          "purchases": [],
-          "redo": [],
-          "database": {
-            "filename": null,
-            "importedAt": null,
-            "players": []
-          }
-        }
-      ]
-    },
-    {
-      "id": "202829",
-      "label": "2028/29",
-      "createdAt": "2026-08-25T18:58:36.341Z",
-      "currentLeagueId": "serie-a",
-      "leagues": [
-        {
-          "id": "serie-a",
-          "label": "League A",
-          "teamCount": 9,
-          "createdAt": "2026-08-25T18:58:36.341Z",
-          "participants": [],
-          "purchases": [],
-          "redo": [],
-          "database": {
-            "filename": null,
-            "importedAt": null,
-            "players": []
-          }
-        }
-      ]
-    }
-  ],
-  "exportedAt": "2026-08-26T08:16:12.408Z"
+  ]
 }
