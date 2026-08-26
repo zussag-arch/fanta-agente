@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.19</title>
+<title>Fanta Agente 2.20</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -4505,6 +4505,115 @@ body.modal-open .topbar{
   line-height:1.4;
 }
 
+
+/* ===== v2.20 asta: recommended click + roster mobile ===== */
+.recommended-clickable{
+  cursor:pointer;
+  border-radius:10px;
+}
+.recommended-clickable:active{
+  transform:scale(.992);
+}
+.recommended-clickable:focus-visible{
+  outline:2px solid #6e8290;
+  outline-offset:2px;
+}
+
+.role-mobile,
+.roster-head-mobile{
+  display:none;
+}
+
+@media(max-width:700px){
+  .footerbar .table-wrap{
+    overflow-x:auto !important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .footerbar table{
+    min-width:0 !important;
+    width:100% !important;
+    table-layout:fixed !important;
+  }
+
+  .footerbar th,
+  .footerbar td{
+    padding:8px 4px !important;
+  }
+
+  .footerbar th:first-child,
+  .footerbar td:first-child{
+    width:28% !important;
+  }
+
+  .footerbar th:nth-child(2),
+  .footerbar td:nth-child(2){
+    width:12% !important;
+  }
+
+  .footerbar th:nth-child(n+3),
+  .footerbar td:nth-child(n+3){
+    width:15% !important;
+  }
+
+  .roster-head-desktop,
+  .role-desktop{
+    display:none !important;
+  }
+
+  .roster-head-mobile{
+    display:inline !important;
+    font-size:10px;
+    font-weight:950;
+  }
+
+  .role-mobile{
+    display:flex !important;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    min-width:0;
+    white-space:nowrap;
+    font-size:10px;
+    font-weight:950;
+  }
+
+  .role-mobile strong{
+    color:#fff;
+    font-size:10px;
+    font-weight:950;
+  }
+
+  .role-mobile span{
+    font-size:10px;
+    font-weight:950;
+  }
+
+  .role-mobile.budget-under span{
+    color:#62d270;
+  }
+
+  .role-mobile.budget-target span{
+    color:#e5c64f;
+  }
+
+  .role-mobile.budget-over span{
+    color:#e66565;
+  }
+
+  .footerbar .team-name{
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:10px !important;
+  }
+
+  .footerbar .credit{
+    font-size:11px !important;
+  }
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -4895,11 +5004,10 @@ body.modal-open .topbar{
           <tr>
             <th>Squadra</th>
             <th>Crediti</th>
-            <th>Spesi</th>
-            <th>Portieri</th>
-            <th>Difensori</th>
-            <th>Centrocampisti</th>
-            <th>Attaccanti</th>
+            <th><span class="roster-head-desktop">Portieri</span><span class="roster-head-mobile">P</span></th>
+            <th><span class="roster-head-desktop">Difensori</span><span class="roster-head-mobile">D</span></th>
+            <th><span class="roster-head-desktop">Centrocampisti</span><span class="roster-head-mobile">C</span></th>
+            <th><span class="roster-head-desktop">Attaccanti</span><span class="roster-head-mobile">A</span></th>
           </tr>
         </thead>
         <tbody id="teamTable"></tbody>
@@ -8140,6 +8248,17 @@ function recommendationReason(player){
          `riducendo il punteggio quando il PMA è troppo alto rispetto alla liquidità residua.`;
 }
 
+function openRecommendedPlayer(key){
+  if(!key)return;
+  selectPlayer(key);
+  if(window.innerWidth<=700){
+    const card=document.getElementById("playerCard");
+    if(card){
+      setTimeout(()=>card.scrollIntoView({behavior:"smooth",block:"start"}),40)
+    }
+  }
+}
+
 function renderRecommendedCall(){
   const body=document.getElementById("recommendedCallBody");
   if(!body)return;
@@ -8161,7 +8280,9 @@ function renderRecommendedCall(){
 
   const best=candidates[0].player;
   body.innerHTML=`
-    <div class="recommended-best">
+    <div class="recommended-best recommended-clickable" role="button" tabindex="0"
+         onclick="openRecommendedPlayer('${best.key.replace(/'/g,"\\'")}')"
+         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRecommendedPlayer('${best.key.replace(/'/g,"\\'")}')}">
       <div class="recommended-player">
         <strong>${best.name}</strong>
         <span>${best.club||"—"} · ${best.role}${getPlayerSlot(best)||""}</span>
@@ -8737,15 +8858,42 @@ function resetAuction(){
 }
 
 function renderTeams(){
-  const tb=document.getElementById("teamTable");tb.innerHTML="";
+  const tb=document.getElementById("teamTable");
+  tb.innerHTML="";
+
   teams.forEach(t=>{
-    const tr=document.createElement("tr");if(isMyTeam(t))tr.className="me";
-    const roleCell=r=>`<div class="role-cell">
-      ${t.slots[r]} gioc. <small>${t.spent[r]} cr · ${fmt(t.spent[r]/INITIAL_BUDGET*100,1)}% ${roleDeltaHtml(t,r)}</small>
-    </div>`;
-    tr.innerHTML=`<td><span class="team-name">${isMyTeam(t)?"★ ":""}${t.name}</span></td>
-      <td><span class="credit">${t.credits}</span></td><td>${INITIAL_BUDGET-t.credits}</td>
-      <td>${roleCell("P")}</td><td>${roleCell("D")}</td><td>${roleCell("C")}</td><td>${roleCell("A")}</td>`;
+    const tr=document.createElement("tr");
+    if(isMyTeam(t))tr.className="me";
+
+    const roleCell=r=>{
+      const pct=t.spent[r]/INITIAL_BUDGET*100;
+      const target=ROLE_TARGET_PCT[r];
+
+      let budgetClass="budget-under";
+      if(Math.abs(pct-target)<0.05)budgetClass="budget-target";
+      else if(pct>target)budgetClass="budget-over";
+
+      return `<div class="role-cell">
+        <div class="role-desktop">
+          ${t.slots[r]} gioc.
+          <small>${t.spent[r]} cr · ${fmt(pct,1)}% ${roleDeltaHtml(t,r)}</small>
+        </div>
+        <div class="role-mobile ${budgetClass}">
+          <strong>${r} ${t.slots[r]}/${ROSTER_SIZE[r]}</strong>
+          <span>${fmt(pct,0)}%</span>
+        </div>
+      </div>`
+    };
+
+    tr.innerHTML=`
+      <td><span class="team-name">${isMyTeam(t)?"★ ":""}${t.name}</span></td>
+      <td><span class="credit">${t.credits}</span></td>
+      <td>${roleCell("P")}</td>
+      <td>${roleCell("D")}</td>
+      <td>${roleCell("C")}</td>
+      <td>${roleCell("A")}</td>
+    `;
+
     tb.appendChild(tr)
   })
 }
