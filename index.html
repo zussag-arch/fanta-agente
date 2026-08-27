@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanta Agente 2.33</title>
+<title>Fanta Agente 2.34</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -5504,7 +5504,7 @@ body.modal-open .topbar{
 }
 
 
-/* ===== v2.33 strategy profiles ===== */
+/* ===== v2.34 strategy profiles ===== */
 .strategy-config{
   margin-top:14px;
   padding-top:14px;
@@ -5574,6 +5574,165 @@ body.modal-open .topbar{
   .strategy-option span{font-size:8px}
 }
 
+
+/* ===== v2.34 price zones + discarded recommendations ===== */
+.verdict.state-orange{
+  background:#2d1f12;
+  border-color:#d97706;
+}
+.verdict.state-orange .verdict-main{color:#fb923c}
+
+.price-thresholds{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  margin-top:8px;
+}
+.price-threshold{
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:8px 9px;
+  background:#10171c;
+}
+.price-threshold span{
+  display:block;
+  font-size:8px;
+  font-weight:900;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.price-threshold strong{
+  display:block;
+  margin-top:3px;
+  font-size:17px;
+}
+.price-threshold small{
+  display:block;
+  margin-top:2px;
+  font-size:8px;
+  color:var(--muted);
+}
+.price-threshold.threshold-green{border-left:3px solid #22c55e}
+.price-threshold.threshold-yellow{border-left:3px solid #eab308}
+.price-threshold.threshold-orange{border-left:3px solid #f97316}
+.price-threshold.threshold-green strong{color:#4ade80}
+.price-threshold.threshold-yellow strong{color:#fde047}
+.price-threshold.threshold-orange strong{color:#fb923c}
+
+.recommended-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:7px;
+  margin-top:8px;
+}
+.recommended-discard-btn{
+  border-color:rgba(248,113,113,.45)!important;
+  color:#fecaca!important;
+}
+#discardedRoleCount{
+  display:inline-flex;
+  min-width:17px;
+  height:17px;
+  align-items:center;
+  justify-content:center;
+  margin-left:4px;
+  padding:0 4px;
+  border-radius:999px;
+  background:rgba(255,255,255,.11);
+  font-size:9px;
+}
+
+.discarded-overlay{
+  position:fixed;
+  inset:0;
+  z-index:1200;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(3,7,10,.78);
+  backdrop-filter:blur(7px);
+}
+.discarded-overlay.open{display:flex}
+.discarded-panel{
+  width:min(620px,100%);
+  max-height:min(76vh,720px);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:#10171c;
+  box-shadow:0 24px 70px rgba(0,0,0,.45);
+}
+.discarded-head,
+.discarded-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:13px 14px;
+}
+.discarded-head{border-bottom:1px solid var(--line)}
+.discarded-footer{border-top:1px solid var(--line)}
+.discarded-body{
+  overflow:auto;
+  padding:10px;
+}
+.discarded-empty{
+  padding:20px 12px;
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+}
+.discarded-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
+  align-items:center;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:#121b21;
+}
+.discarded-row + .discarded-row{margin-top:7px}
+.discarded-player strong{
+  display:block;
+  font-size:13px;
+}
+.discarded-player span{
+  display:block;
+  margin-top:3px;
+  font-size:10px;
+  color:var(--muted);
+}
+.discarded-sold{
+  font-size:9px;
+  font-weight:900;
+  color:#fca5a5;
+  text-transform:uppercase;
+}
+
+@media(max-width:700px){
+  .price-thresholds{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:5px;
+  }
+  .price-threshold{padding:7px 6px}
+  .price-threshold span{font-size:6.6px;line-height:1.1}
+  .price-threshold strong{font-size:14px}
+  .price-threshold small{font-size:6.5px;line-height:1.1}
+  .discarded-overlay{
+    align-items:flex-end;
+    padding:0;
+  }
+  .discarded-panel{
+    width:100%;
+    max-height:78vh;
+    border-radius:18px 18px 0 0;
+  }
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -5615,9 +5774,9 @@ body.modal-open .topbar{
       <section class="panel home-wide">
         <div class="panel-head">
           <div>
-            <div class="panel-title">Info stagione</div>
+            <div class="panel-title">Info asta</div>
             <div class="muted" style="font-size:11px;margin-top:4px">
-              Seleziona stagione, divisione e numero di squadre dell'asta che vuoi seguire.
+              Seleziona stagione, divisione, numero di squadre e strategia dell'asta che vuoi seguire.
             </div>
           </div>
         </div>
@@ -5895,10 +6054,11 @@ body.modal-open .topbar{
         </div>
 
         <p class="status" style="margin-top:10px">
-          Il semaforo usa questo valore per dirti se hai ancora margine:
-          <strong>verde</strong> quando puoi salire,
-          <strong>giallo</strong> quando sei vicino al limite e
-          <strong>rosso</strong> quando il prezzo corrente ha raggiunto o superato il tetto.
+          Il prezzo viene letto su quattro zone:
+          <strong>verde</strong> fino al Tetto consigliato,
+          <strong>giallo</strong> quando superi il vincolo più prudente ma resti entro il limite del reparto,
+          <strong>arancione</strong> oltre la Soglia di tensione del reparto ma ancora entro il Massimo PMA,
+          <strong>rosso</strong> oltre il valore massimo giustificato dal PMA contestualizzato.
         </p>
       </div>
     </div>
@@ -5954,7 +6114,10 @@ body.modal-open .topbar{
                 <div class="recommended-kicker">Prossima mossa</div>
                 <div class="recommended-title">Chiamata consigliata</div>
               </div>
-              <button type="button" class="secondary-btn recommended-refresh" onclick="renderRecommendedCall()">↻</button>
+              <button id="discardedHistoryButton" type="button" class="secondary-btn recommended-refresh"
+                      onclick="openDiscardedOverlay()" title="Mostra i giocatori scartati del ruolo selezionato">
+                Scartati <span id="discardedRoleCount">0</span>
+              </button>
             </div>
             <div id="recommendedCallBody" class="recommended-call-body">
               <div class="recommended-empty">Calcolo del suggerimento…</div>
@@ -6033,8 +6196,26 @@ body.modal-open .topbar{
         <div class="live-grid">
           <div class="metric"><span>PMA</span><strong id="aPma">—</strong></div>
           <div class="metric"><span>Prezzo corrente</span><strong id="aPrice">—</strong></div>
-          <div class="metric"><span>Tetto strategico</span><strong id="aMax">—</strong></div>
-          <div class="metric"><span>Margine residuo</span><strong id="aDiff">—</strong></div>
+          <div class="metric"><span>Tetto consigliato</span><strong id="aMax">—</strong></div>
+          <div class="metric"><span>Margine sul consiglio</span><strong id="aDiff">—</strong></div>
+        </div>
+
+        <div id="priceThresholds" class="price-thresholds">
+          <div class="price-threshold threshold-green">
+            <span>Tetto consigliato</span>
+            <strong id="thresholdRecommended">—</strong>
+            <small>zona sicura</small>
+          </div>
+          <div class="price-threshold threshold-yellow">
+            <span>Soglia di tensione</span>
+            <strong id="thresholdRole">—</strong>
+            <small>limite del reparto</small>
+          </div>
+          <div class="price-threshold threshold-orange">
+            <span>Massimo PMA</span>
+            <strong id="thresholdPma">—</strong>
+            <small>valore massimo giustificato</small>
+          </div>
         </div>
 
         <div class="my-budget-block">
@@ -6187,6 +6368,28 @@ body.modal-open .topbar{
         <button class="secondary-btn" onclick="skipRunnerUp()">Salta</button>
         <button class="primary-btn" onclick="saveRunnerUp()">Salva</button>
       </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="discardedOverlay" class="discarded-overlay" onclick="closeDiscardedOverlay(event)">
+  <div class="discarded-panel" onclick="event.stopPropagation()">
+    <div class="discarded-head">
+      <div>
+        <div class="recommended-kicker">Chiamata consigliata</div>
+        <div id="discardedOverlayTitle" class="panel-title">Giocatori scartati</div>
+      </div>
+      <button class="icon-btn" onclick="closeDiscardedOverlay()">✕</button>
+    </div>
+
+    <div id="discardedOverlayBody" class="discarded-body"></div>
+
+    <div class="discarded-footer">
+      <button id="restoreAllDiscardedBtn" class="secondary-btn" onclick="restoreAllDiscardedForRole()">
+        Riabilita tutti
+      </button>
+      <button class="primary-btn" onclick="closeDiscardedOverlay()">Chiudi</button>
     </div>
   </div>
 </div>
@@ -6774,16 +6977,50 @@ function makeLeague(id,label,teamCount,participants=[],database=null){
     purchases:[],
     redo:[],
     strategyProfile:DEFAULT_STRATEGY_PROFILE,
+    discardedRecommendations:[],
     database:database||{filename:null,importedAt:null,players:[]}
   }
 }
 
+function ensureStandardDivisions(season){
+  if(!season)return season;
+  season.leagues=Array.isArray(season.leagues)?season.leagues:[];
+
+  const hasA=season.leagues.some(l=>norm(l.id)==="leaguea" || norm(l.label)==="leaguea");
+  const hasB=season.leagues.some(l=>norm(l.id)==="leagueb" || norm(l.label)==="leagueb");
+
+  const databaseTemplate=season.leagues.find(l=>l.database)?.database || {filename:null,importedAt:null,players:[]};
+  const dbCopy=()=>({
+    filename:databaseTemplate?.filename||null,
+    importedAt:databaseTemplate?.importedAt||null,
+    players:Array.isArray(databaseTemplate?.players)?deepCopy(databaseTemplate.players):[]
+  });
+
+  if(!hasA){
+    season.leagues.unshift(makeLeague("league-a","League A",9,[],dbCopy()))
+  }
+  if(!hasB){
+    season.leagues.push(makeLeague("league-b","League B",9,[],dbCopy()))
+  }
+
+  if(!season.currentLeagueId || !season.leagues.some(l=>l.id===season.currentLeagueId)){
+    season.currentLeagueId=season.leagues[0]?.id||"league-a"
+  }
+
+  return season
+}
+
+
 function createDefaultArchive(){
   const managers=defaultManagers();
   const seasonId=defaultSeasonId();
-  const participants=managers.slice(0,9).map((m,i)=>({
+  const participantsA=managers.slice(0,9).map((m,i)=>({
     managerId:m.id,
     teamName:m.defaultTeamName||DEFAULT_TEAM_NAMES[i]||m.displayName
+  }));
+  const participantsB=managers.slice(9,18).map(m=>({
+    managerId:m.id,
+    teamName:m.defaultTeamName||m.displayName
   }));
 
   return {
@@ -6804,7 +7041,10 @@ function createDefaultArchive(){
       label:"2026/27",
       createdAt:new Date().toISOString(),
       currentLeagueId:"league-a",
-      leagues:[makeLeague("league-a","League A",9,participants)]
+      leagues:[
+        makeLeague("league-a","League A",9,participantsA),
+        makeLeague("league-b","League B",9,participantsB)
+      ]
     }]
   }
 }
@@ -6934,10 +7174,12 @@ function ensureArchiveShape(raw){
       l.purchases=Array.isArray(l.purchases)?l.purchases:[];
       l.redo=Array.isArray(l.redo)?l.redo:[];
       l.strategyProfile=STRATEGY_PROFILES[l.strategyProfile]?l.strategyProfile:DEFAULT_STRATEGY_PROFILE;
+      l.discardedRecommendations=Array.isArray(l.discardedRecommendations)?l.discardedRecommendations:[];
       l.database=l.database||{filename:null,importedAt:null,players:[]};
       l.database.players=Array.isArray(l.database.players)?l.database.players:[]
     });
 
+    ensureStandardDivisions(s);
     s.currentLeagueId=s.currentLeagueId||s.leagues[0].id
   });
 
@@ -7577,7 +7819,8 @@ function switchLeague(id){
   loadLeagueIntoRuntime(season.id,id);
   save();
   clearSelection();
-  render()
+  render();
+  autoLoadRemoteDatabase(true)
 }
 
 function renderParticipantEditor(){
@@ -7915,13 +8158,20 @@ function ensureArchiveSeasonForDatabase(entry){
       [],
       {filename:entry.filename,importedAt:null,players:[]}
     );
+    const secondLeague=makeLeague(
+      "league-b",
+      "League B",
+      9,
+      [],
+      {filename:entry.filename,importedAt:null,players:[]}
+    );
 
     season={
       id:entry.id,
       label:entry.label,
       createdAt:new Date().toISOString(),
       currentLeagueId:firstLeague.id,
-      leagues:[firstLeague]
+      leagues:[firstLeague,secondLeague]
     };
 
     archive.seasons.push(season);
@@ -7930,6 +8180,7 @@ function ensureArchiveSeasonForDatabase(entry){
     season.label=entry.label
   }
 
+  ensureStandardDivisions(season);
   return season
 }
 
@@ -9508,6 +9759,121 @@ function recommendedMyTeam(){
   return teams.find(t=>isMyTeam(t))||null
 }
 
+function discardedRecommendationKeys(){
+  const league=getCurrentLeague();
+  return new Set(Array.isArray(league?.discardedRecommendations)?league.discardedRecommendations:[])
+}
+
+function isRecommendationDiscarded(playerKey){
+  return discardedRecommendationKeys().has(playerKey)
+}
+
+function discardRecommendation(playerKey){
+  const league=getCurrentLeague();
+  if(!league || !playerKey)return;
+
+  league.discardedRecommendations=Array.isArray(league.discardedRecommendations)
+    ? league.discardedRecommendations
+    : [];
+
+  if(!league.discardedRecommendations.includes(playerKey)){
+    league.discardedRecommendations.push(playerKey)
+  }
+
+  save();
+  renderRecommendedCall();
+
+  if(document.getElementById("discardedOverlay")?.classList.contains("open")){
+    renderDiscardedOverlay()
+  }
+}
+
+function discardedForActiveRole(){
+  const role=recommendedActiveRole();
+  const keys=discardedRecommendationKeys();
+
+  return players
+    .filter(p=>p.role===role && keys.has(p.key))
+    .sort((a,b)=>(b.pmaCredits??-1)-(a.pmaCredits??-1) || a.name.localeCompare(b.name,"it"))
+}
+
+function renderDiscardedCount(){
+  const count=document.getElementById("discardedRoleCount");
+  if(!count)return;
+  count.textContent=String(discardedForActiveRole().filter(p=>!sold(p.key)).length)
+}
+
+function openDiscardedOverlay(){
+  renderDiscardedOverlay();
+  document.getElementById("discardedOverlay")?.classList.add("open")
+}
+
+function closeDiscardedOverlay(event){
+  const overlay=document.getElementById("discardedOverlay");
+  if(event && event.target!==overlay)return;
+  overlay?.classList.remove("open")
+}
+
+function renderDiscardedOverlay(){
+  const role=recommendedActiveRole();
+  const body=document.getElementById("discardedOverlayBody");
+  const title=document.getElementById("discardedOverlayTitle");
+  const allBtn=document.getElementById("restoreAllDiscardedBtn");
+  if(!body)return;
+
+  const rows=discardedForActiveRole();
+  if(title)title.textContent=`Scartati · ${roleLabel(role||"P")}`;
+
+  const restorable=rows.filter(p=>!sold(p.key));
+  if(allBtn)allBtn.disabled=!restorable.length;
+
+  if(!rows.length){
+    body.innerHTML=`<div class="discarded-empty">Nessun giocatore scartato per questo ruolo.</div>`;
+    return
+  }
+
+  body.innerHTML=rows.map(p=>{
+    const isSold=sold(p.key);
+    const encoded=encodeURIComponent(p.key);
+    return `
+      <div class="discarded-row">
+        <div class="discarded-player">
+          <strong>${p.name}</strong>
+          <span>${p.club||"—"} · ${p.role}${getPlayerSlot(p)||""} · PMA ${p.pmaCredits==null?"—":fmt(p.pmaCredits,0)+" cr"}</span>
+        </div>
+        ${isSold
+          ? `<span class="discarded-sold">già acquistato</span>`
+          : `<button class="secondary-btn" onclick="restoreDiscardedPlayer('${encoded}')">Riabilita</button>`
+        }
+      </div>
+    `
+  }).join("")
+}
+
+function restoreDiscardedPlayer(encodedKey){
+  const key=decodeURIComponent(encodedKey);
+  const league=getCurrentLeague();
+  if(!league)return;
+
+  league.discardedRecommendations=(league.discardedRecommendations||[]).filter(k=>k!==key);
+  save();
+  renderDiscardedOverlay();
+  renderRecommendedCall()
+}
+
+function restoreAllDiscardedForRole(){
+  const league=getCurrentLeague();
+  const role=recommendedActiveRole();
+  if(!league || !role)return;
+
+  const roleKeys=new Set(players.filter(p=>p.role===role).map(p=>p.key));
+  league.discardedRecommendations=(league.discardedRecommendations||[]).filter(k=>!roleKeys.has(k));
+  save();
+  renderDiscardedOverlay();
+  renderRecommendedCall()
+}
+
+
 function recommendedMissingSlots(){
   const team=recommendedMyTeam();
   if(!team)return {P:0,D:0,C:0,A:0};
@@ -9588,7 +9954,7 @@ function recommendedActiveRole(){
 function recommendedCandidates(limit=5){
   if(!recommendedMyTeam())return [];
   return players
-    .filter(p=>!sold(p.key) && (!recommendedActiveRole() || p.role===recommendedActiveRole()))
+    .filter(p=>!sold(p.key) && !isRecommendationDiscarded(p.key) && (!recommendedActiveRole() || p.role===recommendedActiveRole()))
     .map(player=>({player,score:recommendedScore(player)}))
     .filter(x=>Number.isFinite(x.score)&&x.score>-Infinity)
     .sort((a,b)=>b.score-a.score || (b.player.pmaCredits||0)-(a.player.pmaCredits||0))
@@ -9626,6 +9992,8 @@ function renderRecommendedCall(){
   const body=document.getElementById("recommendedCallBody");
   if(!body)return;
 
+  renderDiscardedCount();
+
   if(!recommendedMyTeam()){
     body.innerHTML=`<div class="recommended-empty">Disponibile solo quando partecipi alla divisione selezionata.</div>`;
     return
@@ -9635,13 +10003,28 @@ function renderRecommendedCall(){
     return
   }
 
+  const role=recommendedActiveRole();
   const candidates=recommendedCandidates(5);
+
   if(!candidates.length){
-    body.innerHTML=`<div class="recommended-empty">Nessun giocatore compatibile con gli slot ancora liberi.</div>`;
+    const discarded=discardedForActiveRole().filter(p=>!sold(p.key));
+    if(discarded.length){
+      body.innerHTML=`
+        <div class="recommended-empty">
+          Nessun giocatore consigliabile in ${roleLabel(role)}: ${discarded.length} candidato${discarded.length===1?"":"i"} scartato${discarded.length===1?"":"i"}.
+          <div class="recommended-actions">
+            <button class="secondary-btn" onclick="openDiscardedOverlay()">Apri storico scartati</button>
+          </div>
+        </div>`;
+    }else{
+      body.innerHTML=`<div class="recommended-empty">Nessun giocatore compatibile con gli slot ancora liberi.</div>`;
+    }
     return
   }
 
   const best=candidates[0].player;
+  const encoded=encodeURIComponent(best.key);
+
   body.innerHTML=`
     <div class="recommended-best recommended-clickable" role="button" tabindex="0"
          onclick="openRecommendedPlayer('${best.key.replace(/'/g,"\\'")}')"
@@ -9668,6 +10051,12 @@ function renderRecommendedCall(){
       </div>
     </div>
     <div class="recommended-reason">${recommendationReason(best)}</div>
+    <div class="recommended-actions">
+      <button class="secondary-btn recommended-discard-btn"
+              onclick="event.stopPropagation();discardRecommendation(decodeURIComponent('${encoded}'))">
+        Scarta consigliato
+      </button>
+    </div>
   `;
 }
 
@@ -9857,7 +10246,7 @@ function clearSelection(){
   document.getElementById("emptyState").style.display="block";
   document.getElementById("analysisRole").textContent="—";
   setVerdictState("","Seleziona un giocatore","Qui compariranno PMA, tetto strategico e margine residuo.");
-  ["aPma","aPrice","aMax","aDiff"].forEach(id=>document.getElementById(id).textContent="—");
+  ["aPma","aPrice","aMax","aDiff","thresholdRecommended","thresholdRole","thresholdPma"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent="—"});
   document.getElementById("verdictBox").className="verdict";
   updateCompetitiveAnalysis()
 
@@ -9868,22 +10257,30 @@ function updateLiveAnalysis(){
   const p=getPlayer(selectedKey);
   if(!p)return;
 
-  // Il consiglio è sempre calcolato per Arcamadò.
-  // Il menu squadra serve soltanto a registrare chi ha vinto il giocatore.
   const team=getMyTeam();
   const price=Number(document.getElementById("priceInput").value);
 
   document.getElementById("aPma").textContent=
     p.pmaCredits==null?"—":fmt(p.pmaCredits,1)+" cr";
 
+  const setThresholds=(recommended="—",role="—",pma="—")=>{
+    const a=document.getElementById("thresholdRecommended");
+    const b=document.getElementById("thresholdRole");
+    const c=document.getElementById("thresholdPma");
+    if(a)a.textContent=recommended;
+    if(b)b.textContent=role;
+    if(c)c.textContent=pma
+  };
+
   if(!team){
     document.getElementById("aMax").textContent="—";
     document.getElementById("aPrice").textContent=price>0?price+" cr":"—";
     document.getElementById("aDiff").textContent="—";
+    setThresholds();
     setVerdictState(
       "",
       "Modalità osservazione",
-      "Stai seguendo un'asta a cui non partecipi: registro acquisti e profili, ma non calcolo il tuo tetto strategico."
+      "Stai seguendo un'asta a cui non partecipi: registro acquisti e profili, ma non calcolo i tuoi limiti di spesa."
     );
     return
   }
@@ -9892,64 +10289,92 @@ function updateLiveAnalysis(){
 
   if(!ceiling){
     document.getElementById("aMax").textContent="—";
+    setThresholds();
     return
   }
 
-  document.getElementById("aMax").textContent=ceiling.maxBid+" cr";
+  const recommended=ceiling.maxBid;
+  const roleCap=ceiling.roleCap;
+  const pmaCap=ceiling.pmaCeiling;
+
+  document.getElementById("aMax").textContent=recommended+" cr";
+  setThresholds(
+    `${recommended} cr`,
+    roleCap==null?"—":`${roleCap} cr`,
+    pmaCap==null?"—":`${pmaCap} cr`
+  );
 
   const premiumText=ceiling.premiumPct==null
     ? ""
-    : `PMA ${fmt(p.pmaCredits,0)} + ${fmt(ceiling.premiumPct*100,0)}% = ${ceiling.pmaCeiling} cr`;
+    : `PMA ${fmt(p.pmaCredits,0)} + ${fmt(ceiling.premiumPct*100,0)}% = ${pmaCap} cr`;
+
+  const limitCause=
+    recommended===ceiling.financialCeiling ? "limite finanziario della rosa" :
+    recommended===roleCap ? "limite del reparto" :
+    recommended===pmaCap ? "massimo PMA" :
+    "vincolo più prudente";
 
   const limitsText=
-    `cap reparto ${ceiling.roleCap??"—"} · cap finanziario ${ceiling.financialCeiling}`;
+    `Tetto ${recommended} · reparto ${roleCap??"—"} · PMA max ${pmaCap??"—"} · finanziario ${ceiling.financialCeiling}`;
 
   if(!(price>0)){
     document.getElementById("aPrice").textContent="—";
     document.getElementById("aDiff").textContent="—";
+    document.getElementById("aDiff").className="";
 
     setVerdictState(
       "",
-      "Tetto strategico "+ceiling.maxBid+" cr",
-      `${premiumText}${premiumText?" · ":""}${limitsText}.`
+      `Tetto consigliato ${recommended} cr`,
+      `${limitsText}. Il tetto è determinato dal ${limitCause}.`
     );
     return
   }
 
   document.getElementById("aPrice").textContent=price+" cr";
 
-  const margin=ceiling.maxBid-price;
+  const margin=recommended-price;
   const marginEl=document.getElementById("aDiff");
   marginEl.textContent=`${margin>=0?"+":""}${fmt(margin,0)} cr`;
 
-  if(price>ceiling.maxBid){
+  // ROSSO: oltre il valore massimo giustificato dal PMA contestualizzato.
+  if(pmaCap!=null && price>pmaCap){
     marginEl.className="bad";
     setVerdictState(
       "red",
-      "⛔ STOP",
-      `Il tetto strategico è ${ceiling.maxBid} cr. ${premiumText}.`
+      "⛔ FUORI VALORE",
+      `Superato il Massimo PMA di ${pmaCap} cr. ${premiumText}.`
     );
     return
   }
 
-  const warningGap=Math.max(3,Math.round(ceiling.maxBid*0.10));
-  const warningStart=Math.max(1,ceiling.maxBid-warningGap);
+  // ARANCIONE: oltre il limite del reparto ma ancora entro il valore PMA.
+  if(roleCap!=null && price>roleCap){
+    marginEl.className="bad";
+    setVerdictState(
+      "orange",
+      "⚠ SOVRAINVESTIMENTO",
+      `Hai superato la Soglia di tensione del reparto (${roleCap} cr), ma sei ancora entro il Massimo PMA (${pmaCap??"—"} cr).`
+    );
+    return
+  }
 
-  if(price>=warningStart){
+  // GIALLO: oltre il tetto più prudente, senza aver ancora superato reparto/PMA.
+  if(price>recommended){
     marginEl.className="";
     setVerdictState(
       "yellow",
-      "— VICINO AL TETTO",
-      `Restano ${margin} cr di margine. ${premiumText}.`
+      "— ZONA DI TENSIONE",
+      `Superato il Tetto consigliato di ${recommended} cr (${limitCause}), ma gli altri limiti non sono ancora stati oltrepassati.`
     );
     return
   }
 
+  // VERDE: entro il tetto consigliato.
   marginEl.className="good";
   setVerdictState(
     "green",
-    "↑ PUOI SALIRE",
-    `Hai ancora ${margin} cr di margine. ${premiumText}.`
+    "↑ ZONA CONSIGLIATA",
+    `Sei entro il Tetto consigliato di ${recommended} cr. ${limitsText}.`
   )
 }
 
@@ -10366,7 +10791,14 @@ document.addEventListener("keydown",e=>{
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();search.focus();search.select()}
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();undoLastPurchase()}
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();restoreLastPurchase()}
-  if(e.key==="Escape"){results.style.display="none";if(selectedKey)clearSelection()}
+  if(e.key==="Escape"){
+    results.style.display="none";
+    if(document.getElementById("discardedOverlay")?.classList.contains("open")){
+      closeDiscardedOverlay();
+      return
+    }
+    if(selectedKey)clearSelection()
+  }
 });
 
 function sanitizeNumericInput(el){
